@@ -1,19 +1,46 @@
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { FunctionComponent } from 'react';
+import { ApplicationProvider, IconRegistry } from '@ui-kitten/components';
+import * as eva from '@eva-design/eva';
+import { Routes } from './src/Routes';
+import { View } from 'react-native';
+import { EvaIconsPack } from '@ui-kitten/eva-icons';
+// import OneSignalHandler from './src/OneSignalHandler';
+import Toast from 'react-native-toast-message';
 
-export default function App() {
+// import { Notifications } from 'expo';
+
+// Notifications.addListener((data: unknown) => {
+//   /* do nothing */
+//   console.log('Got Notification');
+//   console.log(data);
+// });
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// const OneSignal = (window as any).OneSignal;
+// OneSignal.push(function () {
+//   OneSignal.init({
+//     appId: '5443b5c0-86a3-4df0-8ee1-a7d891336158',
+//     notifyButton: {
+//       enable: true,
+//     },
+//     allowLocalhostAsSecureOrigin: true,
+//   });
+//   OneSignal.showNativePrompt();
+// });
+
+const App: FunctionComponent = () => {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
+    <View
+      style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+    >
+      {/* <OneSignalHandler /> */}
+      <IconRegistry icons={EvaIconsPack} />
+      <ApplicationProvider {...eva} theme={eva.light}>
+        <Routes />
+        <Toast ref={(ref) => Toast.setRef(ref)} />
+      </ApplicationProvider>
     </View>
   );
-}
+};
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+export default App;

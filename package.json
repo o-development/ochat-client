@@ -3,34 +3,60 @@
   "scripts": {
     "android": "react-native run-android",
     "ios": "react-native run-ios",
-    "web": "expo start --web",
+    "web": "env BROWSER=firefox expo start --web",
     "start": "react-native start",
-    "test": "jest"
+    "test": "jest",
+    "postinstall": "./scripts/fix.sh"
   },
   "dependencies": {
+    "@eva-design/eva": "^2.0.0",
+    "@react-native-community/async-storage": "^1.12.1",
+    "@ui-kitten/components": "^5.0.0",
+    "@ui-kitten/eva-icons": "^5.0.0",
     "expo": "~40.0.0",
-    "expo-updates": "~0.4.0",
     "expo-splash-screen": "~0.8.0",
+    "expo-updates": "~0.4.0",
+    "query-string": "^6.13.7",
     "react": "16.13.1",
     "react-dom": "16.13.1",
     "react-native": "~0.63.4",
     "react-native-gesture-handler": "~1.8.0",
-    "react-native-reanimated": "~1.13.0",
+    "react-native-gifted-chat": "^0.16.3",
+    "react-native-reanimated": "^1.7.0",
     "react-native-screens": "~2.15.0",
-    "react-native-unimodules": "~0.12.0",
-    "react-native-web": "~0.13.12"
+    "react-native-svg": "^12.1.0",
+    "react-native-toast-message": "^1.4.2",
+    "react-native-unimodules": "^0.9.1",
+    "react-native-web": "~0.13.12",
+    "react-router-dom": "^5.2.0",
+    "react-router-native": "^5.2.0",
+    "socket.io-client": "^3.0.4",
+    "use-async-effect": "^2.2.2",
+    "uuid": "^3.4.0"
   },
   "devDependencies": {
     "@babel/core": "~7.9.0",
+    "@expo/webpack-config": "^0.12.52",
     "@types/react": "~16.9.35",
     "@types/react-dom": "~16.9.8",
     "@types/react-native": "~0.63.2",
+    "@types/react-router-dom": "^5.1.6",
+    "@types/react-router-native": "^5.1.0",
+    "@types/uuid": "^8.3.0",
+    "@typescript-eslint/eslint-plugin": "^4.11.0",
+    "@typescript-eslint/parser": "^4.11.0",
     "babel-preset-expo": "~8.3.0",
+    "eslint": "^7.16.0",
+    "eslint-config-prettier": "^7.1.0",
+    "eslint-plugin-prettier": "^3.3.0",
+    "eslint-plugin-react": "^7.21.5",
     "jest-expo": "~40.0.0",
+    "prettier": "^2.2.1",
     "typescript": "~4.0.0"
   },
   "jest": {
     "preset": "react-native"
   },
-  "private": true
+  "private": true,
+  "name": "ochat-client"
 }
