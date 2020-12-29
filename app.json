@@ -1,9 +1,10 @@
 {
-  "name": "ochat-client",
-  "displayName": "ochat-client",
+  "name": "liqid-chat",
+  "displayName": "Liqid Chat",
   "expo": {
-    "name": "ochat-client",
-    "slug": "ochat-client",
+    "name": "Liqid Chat",
+    "owner": "otherJackson",
+    "slug": "liqid-chat",
     "version": "1.0.0",
     "assetBundlePatterns": [
       "**/*"

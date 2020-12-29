@@ -6,7 +6,6 @@ import TextInput from '../../common/TextInput';
 import ChipInput from '../../common/ChipInput';
 import SettingsMenuTemplate from '../common/SettingsMenuTemplate';
 import { IChat, IChatParticipant, IChatType } from '../chatReducer';
-import MuteOptions from './MuteOptions';
 import IProfile, { AuthContext } from '../../auth/authReducer';
 import { v4 } from 'uuid';
 import FullPageSpinner from '../../common/FullPageSpinner';
@@ -202,7 +201,7 @@ const NewChatPane: FunctionComponent<{
       onCloseButton={onChatModificationClosed}
       mobileRender={mobileRender}
     >
-      {modifyingChat ? <MuteOptions /> : undefined}
+      {/* {modifyingChat ? <MuteOptions /> : undefined} */}
       <View>
         <Text category="h3" style={{ marginVertical: 16 }}>
           Chat Administrator Options

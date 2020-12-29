@@ -99,7 +99,7 @@ const ChatPane: FunctionComponent<{
   const loggedInUser = authState.profile.webId;
 
   const onLoadEarlier = async () => {
-    if (chatData) {
+    if (chatData && chatData.messages[chatData.messages.length - 1]) {
       const previousPage = chatData.messages[chatData.messages.length - 1].page;
       const result = await authFetch(
         `/message/${encodeURIComponent(
@@ -223,10 +223,12 @@ const ChatPane: FunctionComponent<{
         loadEarlier={true}
         infiniteScroll={true}
         onLoadEarlier={onLoadEarlier}
-        renderMessageText={(props) => <Text>{props.currentMessage?.text}</Text>}
+        renderMessageText={(props) => (
+          <Text style={{ color: '#FFF' }}>{props.currentMessage?.text}</Text>
+        )}
         renderTime={({ currentMessage, timeFormat }) => {
           return (
-            <Text category="c1">
+            <Text category="c1" style={{ color: '#FFF' }}>
               {dayjs(currentMessage?.createdAt).locale('en').format(timeFormat)}
             </Text>
           );
