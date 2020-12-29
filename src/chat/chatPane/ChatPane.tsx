@@ -223,10 +223,12 @@ const ChatPane: FunctionComponent<{
         loadEarlier={true}
         infiniteScroll={true}
         onLoadEarlier={onLoadEarlier}
-        renderMessageText={(props) => <Text>{props.currentMessage?.text}</Text>}
+        renderMessageText={(props) => (
+          <Text style={{ color: '#FFF' }}>{props.currentMessage?.text}</Text>
+        )}
         renderTime={({ currentMessage, timeFormat }) => {
           return (
-            <Text category="c1">
+            <Text category="c1" style={{ color: '#FFF' }}>
               {dayjs(currentMessage?.createdAt).locale('en').format(timeFormat)}
             </Text>
           );

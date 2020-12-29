@@ -5,7 +5,7 @@ import BigButton from '../common/BigButton';
 import OnboardPageLayout from '../onboard/OnboardPageLayout';
 import TextInput from '../common/TextInput';
 import { useHistory } from '../router';
-import { API_URL, MOBILE_URL, WEB_URL } from '../const.json';
+import { API_URL, MOBILE_URL, WEB_URL } from '@env';
 
 const LoginSolid: FunctionComponent = () => {
   const history = useHistory();

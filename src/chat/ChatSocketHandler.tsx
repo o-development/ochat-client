@@ -7,7 +7,7 @@ import React, {
 import useAsyncEffect from 'use-async-effect';
 import { ChatActionType, ChatContext, IChat, IMessage } from './chatReducer';
 import { io } from 'socket.io-client';
-import { API_WS_URL } from '../const.json';
+import { API_WS_URL } from '@env';
 import errorToast from '../util/errorToast';
 
 const ChatSocketHandler: FunctionComponent = () => {

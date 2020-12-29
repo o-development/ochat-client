@@ -3,7 +3,7 @@ import { Route, Router, Switch, BackButton, useHistory } from './router';
 import OnboardFlow from './onboard/OnboardFlow';
 import ChatApp from './chat/ChatApp';
 import { Linking } from 'react-native';
-import { MOBILE_URL } from './const.json';
+import { MOBILE_URL } from '@env';
 import Home from './home/Home';
 import AuthHandler from './auth/AuthHandler';
 

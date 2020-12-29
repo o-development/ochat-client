@@ -1,8 +1,0 @@
-{
-  "API_URL":"http://localhost:9000",
-  "API_WS_URL": "ws://localhost:9000",
-  "API_URL_BACKUP":"https://api.chat.o.team",
-  "WEB_URL":"http://localhost:19006",
-  "MOBILE_URL":"ochat://chat",
-  "ONE_SIGNAL_APP_ID":"917d2ddd-024a-4ef4-b28b-02d2a34a52d1"
-}
