@@ -1,8 +1,8 @@
 {
-  "name": "ochat-client",
-  "displayName": "ochat-client",
+  "name": "liqid-chat",
+  "displayName": "Liqid Chat",
   "expo": {
-    "name": "ochat-client",
+    "name": "Liqid Chat",
     "slug": "ochat-client",
     "version": "1.0.0",
     "assetBundlePatterns": [
