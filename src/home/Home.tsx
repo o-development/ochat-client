@@ -44,8 +44,9 @@ const Home: FunctionComponent = () => {
         <Image
           source={require('../../assets/splash.png')}
           style={{
-            width: 300,
-            height: 150,
+            width: 564,
+            height: 108,
+            marginBottom: 25,
           }}
         />
         {!isMobile && (

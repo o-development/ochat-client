@@ -8,7 +8,6 @@ import useAsyncEffect from 'use-async-effect';
 import { ChatActionType, ChatContext, IChat, IMessage } from './chatReducer';
 import { io } from 'socket.io-client';
 import { API_WS_URL } from '@env';
-import errorToast from '../util/errorToast';
 
 const ChatSocketHandler: FunctionComponent = () => {
   const [, chatDispatch] = useContext(ChatContext);
@@ -20,10 +19,6 @@ const ChatSocketHandler: FunctionComponent = () => {
 
       const socket = io(API_WS_URL, {
         withCredentials: true,
-      });
-
-      socket.on('disconnect', () => {
-        errorToast('Disconnected from Server');
       });
 
       socket.on('connect', () => {

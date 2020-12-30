@@ -126,8 +126,7 @@ const NewChatPane: FunctionComponent<{
   ) => {
     return (
       <UserProfileListItem
-        name={item.name}
-        image={item.image}
+        profile={item}
         accessoryRight={(props) => (
           <Button
             {...props}

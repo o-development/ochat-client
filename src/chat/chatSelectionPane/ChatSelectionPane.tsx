@@ -123,6 +123,7 @@ const ChatSelectionPane: FunctionComponent<{
           style={{
             flexDirection: 'row',
             justifyContent: 'space-between',
+            alignItems: 'center',
             marginBottom: 4,
             padding: 4,
           }}
@@ -130,8 +131,8 @@ const ChatSelectionPane: FunctionComponent<{
           <Image
             source={require('../../../assets/splash.png')}
             style={{
-              width: 80,
-              height: 40,
+              width: 155,
+              height: 30,
             }}
           />
           <BigButton
@@ -189,8 +190,7 @@ const ChatSelectionPane: FunctionComponent<{
               const profile = listData.item as IProfile;
               return (
                 <UserProfileListItem
-                  name={profile.name}
-                  image={profile.image}
+                  profile={profile}
                   onPress={() => console.log('Profile Press')}
                   avatarSize="medium"
                 />
