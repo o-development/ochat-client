@@ -14,14 +14,20 @@ import authFetch from '../../util/authFetch';
 import UserProfileListItem from '../common/UserProfileListItem';
 import BigButton from '../../common/BigButton';
 import { useHistory } from '../../router';
-import { notificationToast } from '../../util/errorToast';
+import errorToast, { notificationToast } from '../../util/errorToast';
+import {
+  addParticipantToParticipantList,
+  removeParticipantFromParticipantList,
+} from './modifyParticipants';
 
-const NewChatPane: FunctionComponent<{
+const ChatSettings: FunctionComponent<{
   modifyingChat?: IChat;
+  initialChatData?: Partial<IChat>;
   onChatModificationClosed?: () => void;
   mobileRender?: boolean;
 }> = ({
   modifyingChat,
+  initialChatData = {},
   mobileRender,
   onChatModificationClosed = () => {
     /* nothing */
@@ -40,7 +46,9 @@ const NewChatPane: FunctionComponent<{
   const [editedChat, setEditedChat] = useState<Partial<IChat>>(
     modifyingChat || {
       name: '',
-      uri: `${authState.profile.defaultStorageLocation}${v4()}/index.ttl`,
+      uri: `${authState.profile.defaultStorageLocation}${
+        initialChatData.name ? encodeURIComponent(initialChatData.name) : v4()
+      }/index.ttl`,
       type: IChatType.LongChat,
       images: [],
       participants: [
@@ -52,6 +60,7 @@ const NewChatPane: FunctionComponent<{
         },
       ],
       isPublic: false,
+      ...initialChatData,
     },
   );
   const [editChatDifference, setEditChatDifference] = useState<Partial<IChat>>(
@@ -59,16 +68,10 @@ const NewChatPane: FunctionComponent<{
   );
 
   const addParticipant = (participant: IChatParticipant) => {
-    editedChat.participants = editedChat.participants || [];
-    const duplicateIndex = editedChat.participants.findIndex(
-      (p) => p.webId === participant.webId,
+    editedChat.participants = addParticipantToParticipantList(
+      editedChat.participants || [],
+      participant,
     );
-    if (duplicateIndex !== -1) {
-      // If the participant is already present
-      editedChat.participants[duplicateIndex].isAdmin = participant.isAdmin;
-    } else {
-      editedChat.participants.push(participant);
-    }
     setEditedChat({
       ...editedChat,
     });
@@ -79,18 +82,15 @@ const NewChatPane: FunctionComponent<{
   };
 
   function removeParticipant(participant: IChatParticipant) {
-    if (!editedChat.participants) {
-      editedChat.participants = [];
-    }
     if (participant.webId === authState.profile?.webId) {
       if (!confirm('Are you sure you want to remove yourself?')) {
         return;
       }
     }
-    const participantIndex = editedChat.participants.findIndex(
-      (p) => p.webId === participant.webId,
+    editedChat.participants = removeParticipantFromParticipantList(
+      editedChat.participants || [],
+      participant,
     );
-    editedChat.participants.splice(participantIndex, 1);
     setEditedChat({ ...editedChat, participants: editedChat.participants });
     setEditChatDifference({
       ...editChatDifference,
@@ -183,7 +183,21 @@ const NewChatPane: FunctionComponent<{
             'content-type': 'application/json',
           },
         },
-        { expectedStatus: 201 },
+        {
+          expectedStatus: 201,
+          errorHandlers: {
+            409: async (response: Response) => {
+              try {
+                const body = await response.json();
+                history.push(
+                  `/chat?id=${encodeURIComponent(body.metadata.uri)}`,
+                );
+              } catch (err) {
+                errorToast(err.message);
+              }
+            },
+          },
+        },
       );
       if (response.status === 201) {
         const submittedChat = (await response.json()) as IChat;
@@ -284,4 +298,4 @@ const NewChatPane: FunctionComponent<{
   );
 };
 
-export default NewChatPane;
+export default ChatSettings;

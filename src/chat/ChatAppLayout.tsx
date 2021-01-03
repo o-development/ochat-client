@@ -11,9 +11,9 @@ import ChatPane from './chatPane/ChatPane';
 import ChatSelectionPane from './chatSelectionPane/ChatSelectionPane';
 import NoChatSelectedPane from './chatSelectionPane/NoChatSelectedPane';
 import queryString from 'query-string';
-import NewChatPane from './newChatPane/NewChatPane';
+import NewChatPane from './chatSettings/NewChatPane';
 import Settings from './settings/Settings';
-import LinkChatPane from './newChatPane/LinkChatPane';
+import LinkChatPane from './chatSettings/LinkChatPane';
 import { AuthContext } from '../auth/authReducer';
 import FullPageSpinner from '../common/FullPageSpinner';
 

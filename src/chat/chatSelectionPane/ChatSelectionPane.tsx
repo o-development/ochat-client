@@ -10,9 +10,10 @@ import useAsyncEffect from 'use-async-effect';
 import authFetch from '../../util/authFetch';
 import { ChatContext, ChatActionType } from '../chatReducer';
 import FullPageSpinner from '../../common/FullPageSpinner';
-import IProfile from '../../auth/authReducer';
+import IProfile, { AuthContext } from '../../auth/authReducer';
 import UserProfileListItem from '../common/UserProfileListItem';
 import ChatListItem from '../common/ChatListItem';
+import getNewChatPaneUri from '../chatSettings/getNewChatPaneUri';
 
 const ChatSelectionPane: FunctionComponent<{
   mobileRender?: boolean;
@@ -23,6 +24,7 @@ const ChatSelectionPane: FunctionComponent<{
   const [chatState, chatDispatch] = useContext(ChatContext);
   const chats = chatState.chats;
 
+  const [authState] = useContext(AuthContext);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [chatSearchResults, setChatSearchResults] = useState<IChat[]>([]);
   const [profileSearchResults, setProfileSearchResults] = useState<IProfile[]>(
@@ -55,6 +57,10 @@ const ChatSelectionPane: FunctionComponent<{
     }
   });
 
+  if (!authState.profile) {
+    return <FullPageSpinner />;
+  }
+
   const handleSearchTermChange = async (newTerm: string) => {
     setSearchTerm(newTerm);
     if (newTerm) {
@@ -86,9 +92,7 @@ const ChatSelectionPane: FunctionComponent<{
             return false;
           }
           return chat.participants.some(
-            (participant) =>
-              participant.webId ===
-              'https://jackson.solidcommunity.net/profile/card#me',
+            (participant) => participant.webId === authState.profile?.webId,
           );
         }) as IChat[]).sort((a, b) => {
         if (!a.lastMessage && !b.lastMessage) {
@@ -191,7 +195,21 @@ const ChatSelectionPane: FunctionComponent<{
               return (
                 <UserProfileListItem
                   profile={profile}
-                  onPress={() => console.log('Profile Press')}
+                  onPress={() =>
+                    history.push(
+                      getNewChatPaneUri({
+                        name:
+                          profile.webId ===
+                          (authState.profile as IProfile).webId
+                            ? 'Personal Chat'
+                            : `${profile.name || 'User'} & ${
+                                authState.profile?.name || 'User'
+                              }`,
+                        participants: [profile.webId],
+                        administrators: [(authState.profile as IProfile).webId],
+                      }),
+                    )
+                  }
                   avatarSize="medium"
                 />
               );

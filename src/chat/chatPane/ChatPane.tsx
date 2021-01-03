@@ -20,7 +20,7 @@ import {
 } from 'react-native-gifted-chat';
 import { Dimensions, ViewStyle } from 'react-native';
 import dayjs from 'dayjs';
-import NewChatPane from '../newChatPane/NewChatPane';
+import ChatSettings from '../chatSettings/ChatSettings';
 import { ChatActionType, ChatContext, IMessage } from '../chatReducer';
 import FullPageSpinner from '../../common/FullPageSpinner';
 import useAsyncEffect from 'use-async-effect';
@@ -125,7 +125,7 @@ const ChatPane: FunctionComponent<{
 
   if (isEditing) {
     return (
-      <NewChatPane
+      <ChatSettings
         onChatModificationClosed={() => setIsEditing(false)}
         mobileRender={mobileRender}
         modifyingChat={chatData.chat}
