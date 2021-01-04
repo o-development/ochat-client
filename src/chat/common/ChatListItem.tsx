@@ -16,7 +16,6 @@ interface ChatListItemProps extends ListItemProps {
 // eslint-disable-next-line react/display-name
 const ChatListItem: FunctionComponent<ChatListItemProps> = memo(
   ({ chat, isSelected, onPress, ...props }) => {
-    console.log('ChatListItemRerender');
     const { highlightColor } = getThemeVars();
     const [authState] = useContext(AuthContext);
     return (

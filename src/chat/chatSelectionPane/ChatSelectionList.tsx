@@ -18,8 +18,6 @@ const ChatSelectionList: FunctionComponent<ChatSelectionListProps> = memo(
   ({ currentlySelected, onLoadMoreResults, chatList }) => {
     const { backgroundColor1 } = getThemeVars();
 
-    console.log('ChatSelectionListRerender');
-
     return (
       <List<IChat | IProfile>
         data={chatList}

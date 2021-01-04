@@ -15,7 +15,6 @@ const ChatSelectionItem: FunctionComponent<
   ListRenderItemInfo<IChat | IProfile> & ChatSelectionItemProps
   // eslint-disable-next-line react/display-name
 > = memo((listData) => {
-  console.log('ChatSelectionItemRerender');
   const history = useHistory();
   const [authState] = useContext(AuthContext);
 
