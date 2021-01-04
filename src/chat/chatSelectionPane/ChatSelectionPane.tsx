@@ -33,6 +33,7 @@ const ChatSelectionPane: FunctionComponent<{
   const [searchResultsLoading, setSearchResultsLoading] = useState<boolean>(
     false,
   );
+  const [loadingMoreChats, setLoadingMoreChats] = useState(false);
 
   useAsyncEffect(async () => {
     if (!chatState.performedActions['initialChatListFetch']) {
@@ -52,6 +53,7 @@ const ChatSelectionPane: FunctionComponent<{
           type: ChatActionType.UPDATE_CHAT,
           chats: resultBody.chats,
           performedAction: 'initialChatListFetch',
+          lastChatPageLoaded: 0,
         });
       }
     }
@@ -82,6 +84,34 @@ const ChatSelectionPane: FunctionComponent<{
       }
       setSearchResultsLoading(false);
     }
+  };
+
+  const loadMoreResults = async (): Promise<void> => {
+    if (chatState.allChatsLoaded || loadingMoreChats) {
+      return;
+    }
+    setLoadingMoreChats(true);
+    const result = await authFetch(
+      `/chat/search?page=${chatState.lastChatPageLoaded + 1}`,
+      {
+        method: 'post',
+      },
+      { expectedStatus: 200 },
+    );
+    if (result.status === 200) {
+      const resultBody: {
+        chats: IChat[];
+        profiles?: IProfile[];
+      } = await result.json();
+      chatDispatch({
+        type: ChatActionType.UPDATE_CHAT,
+        chats: resultBody.chats,
+        performedAction: 'initialChatListFetch',
+        lastChatPageLoaded: chatState.lastChatPageLoaded + 1,
+        allChatsLoaded: resultBody.chats.length === 0,
+      });
+    }
+    setLoadingMoreChats(false);
   };
 
   const chatList: (IChat | IProfile)[] = !searchTerm
@@ -178,11 +208,14 @@ const ChatSelectionPane: FunctionComponent<{
           data={chatList}
           ItemSeparatorComponent={Divider}
           style={{ backgroundColor: backgroundColor1 }}
+          onEndReachedThreshold={0.01}
+          onEndReached={loadMoreResults}
           renderItem={(listData: { item: IChat | IProfile }) => {
             if ((listData.item as IChat).uri) {
               const chat = listData.item as IChat;
               return (
                 <ChatListItem
+                  style={{ height: 72 }}
                   chat={chat}
                   isSelected={!!chat.uri && chat.uri === currentlySelected}
                   onPress={() =>

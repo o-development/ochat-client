@@ -8,7 +8,6 @@ import {
   Icon,
   Text,
 } from '@ui-kitten/components';
-import BigButton from '../../common/BigButton';
 import { useHistory } from '../../router';
 import getThemeVars from '../../common/getThemeVars';
 import {
@@ -17,8 +16,10 @@ import {
   Bubble,
   InputToolbar,
   Composer,
+  SendProps,
+  Send,
 } from 'react-native-gifted-chat';
-import { Dimensions, ViewStyle } from 'react-native';
+import { useWindowDimensions, ViewStyle } from 'react-native';
 import dayjs from 'dayjs';
 import ChatSettings from '../chatSettings/ChatSettings';
 import { ChatActionType, ChatContext, IMessage } from '../chatReducer';
@@ -27,6 +28,8 @@ import useAsyncEffect from 'use-async-effect';
 import authFetch from '../../util/authFetch';
 import { v4 } from 'uuid';
 import { AuthContext } from '../../auth/authReducer';
+import getParticipantForMessageSender from '../common/getParticipantForMessageSender';
+import { IChat } from '../chatReducer';
 
 const ChatPane: FunctionComponent<{
   chatUri: string;
@@ -48,13 +51,18 @@ const ChatPane: FunctionComponent<{
 
   const [authState] = useContext(AuthContext);
 
-  const shouldSquishBubbles = Dimensions.get('window').width < 700;
+  const [isLoadingEarlier, setIsLoadingEarlier] = useState(false);
+
+  const shouldSquishBubbles = useWindowDimensions().width < 700;
 
   useAsyncEffect(async () => {
     await Promise.all([
       (async () => {
         // Fetch Chat
-        if (!chatData) {
+        if (
+          !chatData &&
+          !chatState.performedActions[`initialChatFetch:${chatUri}`]
+        ) {
           const result = await authFetch(
             `/chat/${encodeURIComponent(chatUri)}`,
             undefined,
@@ -67,6 +75,13 @@ const ChatPane: FunctionComponent<{
             chatDispatch({
               type: ChatActionType.UPDATE_CHAT,
               chats: [resultBody],
+              performedAction: `initialChatFetch:${chatUri}`,
+            });
+          } else {
+            chatDispatch({
+              type: ChatActionType.UPDATE_CHAT,
+              chats: [],
+              performedAction: `initialChatFetch:${chatUri}`,
             });
           }
         }
@@ -74,6 +89,7 @@ const ChatPane: FunctionComponent<{
       (async () => {
         // Fetch Messages
         if (!chatState.performedActions[`initialChatMessageFetch:${chatUri}`]) {
+          setIsLoadingEarlier(true);
           const result = await authFetch(
             `/message/${encodeURIComponent(chatUri)}`,
             undefined,
@@ -87,7 +103,15 @@ const ChatPane: FunctionComponent<{
               message: resultBody as IMessage[],
               performedAction: `initialChatMessageFetch:${chatUri}`,
             });
+          } else {
+            chatDispatch({
+              type: ChatActionType.ADD_MESSAGE,
+              chatId: chatUri,
+              message: [],
+              performedAction: `initialChatMessageFetch:${chatUri}`,
+            });
           }
+          setIsLoadingEarlier(false);
         }
       })(),
     ]);
@@ -100,11 +124,16 @@ const ChatPane: FunctionComponent<{
 
   const onLoadEarlier = async () => {
     if (chatData) {
-      const previousPage = chatData.messages[chatData.messages.length - 1].page;
+      setIsLoadingEarlier(true);
+      const previousPage = chatData.messages[chatData.messages.length - 1]
+        ? chatData.messages[chatData.messages.length - 1].page
+        : undefined;
       const result = await authFetch(
-        `/message/${encodeURIComponent(
-          chatUri,
-        )}?previous_page_id=${encodeURIComponent(previousPage)}`,
+        `/message/${encodeURIComponent(chatUri)}${
+          previousPage
+            ? `?previous_page_id=${encodeURIComponent(previousPage)}`
+            : ''
+        }`,
         undefined,
         { expectedStatus: 200 },
       );
@@ -114,8 +143,10 @@ const ChatPane: FunctionComponent<{
           type: ChatActionType.ADD_MESSAGE,
           chatId: chatUri,
           message: resultBody as IMessage[],
+          allMessagesLoaded: (resultBody as IMessage[]).length === 0,
         });
       }
+      setIsLoadingEarlier(false);
     }
   };
 
@@ -134,15 +165,33 @@ const ChatPane: FunctionComponent<{
   }
 
   const giftedChatMessages: IGiftedChatMessage[] = chatData.messages.map(
-    (message): IGiftedChatMessage => ({
-      _id: message.id,
-      text: message.content,
-      createdAt: new Date(message.timeCreated),
-      user: {
-        _id: message.maker,
-      },
-    }),
+    (message): IGiftedChatMessage => {
+      const participant = getParticipantForMessageSender(
+        message,
+        chatData.chat as IChat,
+      );
+      return {
+        _id: message.id,
+        text: message.content,
+        createdAt: new Date(message.timeCreated),
+        user: {
+          _id: message.maker,
+          name: participant.name,
+          avatar: participant.image,
+        },
+      };
+    },
   );
+
+  if (chatData.allMessagesLoaded) {
+    giftedChatMessages.push({
+      _id: 'beginningMessage',
+      text: 'Beginning of the Chat',
+      system: true,
+      createdAt: giftedChatMessages[giftedChatMessages.length - 1].createdAt,
+      user: { _id: 'system' },
+    });
+  }
 
   async function handleOnSend(newGiftedChatMessages: IGiftedChatMessage[]) {
     const messages = newGiftedChatMessages.map((newGiftedChatMessage) => ({
@@ -160,6 +209,7 @@ const ChatPane: FunctionComponent<{
       chatId: chatUri,
       message: messages,
     });
+    // Don't await this because it will mess up the auto refocus
     await Promise.all(
       messages.map(async (message) => {
         const result = await authFetch(
@@ -193,10 +243,11 @@ const ChatPane: FunctionComponent<{
         alignment="center"
         title={chatData.chat.name}
         accessoryRight={() => (
-          <BigButton
-            title="Chat Settings"
-            appearance="ghost"
+          <TopNavigationAction
             onPress={() => setIsEditing(true)}
+            icon={(props) => (
+              <Icon {...props} name="settings-2-outline" fill={themeColor} />
+            )}
           />
         )}
         accessoryLeft={
@@ -219,16 +270,22 @@ const ChatPane: FunctionComponent<{
         user={{
           _id: loggedInUser,
         }}
+        isLoadingEarlier={isLoadingEarlier}
         inverted={true}
-        loadEarlier={true}
+        loadEarlier={!chatData.allMessagesLoaded}
         infiniteScroll={true}
         onLoadEarlier={onLoadEarlier}
         renderMessageText={(props) => (
-          <Text style={{ color: '#FFF' }}>{props.currentMessage?.text}</Text>
+          <Text style={{ color: props.position === 'left' ? '#000' : '#FFF' }}>
+            {props.currentMessage?.text}
+          </Text>
         )}
-        renderTime={({ currentMessage, timeFormat }) => {
+        renderTime={({ currentMessage, timeFormat, position }) => {
           return (
-            <Text category="c1" style={{ color: '#FFF' }}>
+            <Text
+              category="c1"
+              style={{ color: position === 'left' ? '#000' : '#FFF' }}
+            >
               {dayjs(currentMessage?.createdAt).locale('en').format(timeFormat)}
             </Text>
           );
@@ -275,9 +332,46 @@ const ChatPane: FunctionComponent<{
         renderComposer={(props) => (
           <Composer
             {...props}
-            textInputStyle={[props.textInputStyle, { color: basicTextColor }]}
+            textInputAutoFocus={true}
+            textInputProps={{
+              returnKeyType: 'next',
+              onSubmitEditing: () => {
+                const { onSend, text } = props as SendProps<IGiftedChatMessage>;
+                if (text && onSend) {
+                  onSend({ text: text.trim() }, true);
+                }
+              },
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
+              ref: (ref) => {
+                ref && ref.focus();
+              },
+            }}
+            multiline={false}
+            textInputStyle={[
+              props.textInputStyle,
+              {
+                color: basicTextColor,
+                marginVertical: 4,
+                paddingVertical: 4,
+              },
+            ]}
           />
         )}
+        renderSend={(props) => {
+          return (
+            <Send
+              {...props}
+              containerStyle={{ padding: 4, justifyContent: 'center' }}
+            >
+              <Icon
+                style={{ width: 32, height: 32 }}
+                name="arrow-circle-right"
+                fill={themeColor}
+              />
+            </Send>
+          );
+        }}
       />
     </Layout>
   );

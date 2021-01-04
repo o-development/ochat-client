@@ -215,7 +215,7 @@ const ChatSettings: FunctionComponent<{
       onCloseButton={onChatModificationClosed}
       mobileRender={mobileRender}
     >
-      {modifyingChat ? <MuteOptions /> : undefined}
+      {/* {modifyingChat ? <MuteOptions /> : undefined} */}
       <View>
         <Text category="h3" style={{ marginVertical: 16 }}>
           Chat Administrator Options

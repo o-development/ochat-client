@@ -1,5 +1,6 @@
 import { ListItem, ListItemProps } from '@ui-kitten/components';
 import React, { FunctionComponent, useContext } from 'react';
+import { StyleSheet } from 'react-native';
 import getThemeVars from '../../common/getThemeVars';
 import { IChat } from '../chatReducer';
 import getParticipantForMessageSender from './getParticipantForMessageSender';
@@ -16,13 +17,18 @@ const ChatListItem: FunctionComponent<ChatListItemProps> = ({
   chat,
   isSelected,
   onPress,
+  ...props
 }) => {
   const { highlightColor } = getThemeVars();
   const [authState] = useContext(AuthContext);
   return (
     <ListItem
+      {...props}
       title={chat.name}
-      style={isSelected ? { backgroundColor: highlightColor } : {}}
+      style={StyleSheet.flatten([
+        isSelected ? { backgroundColor: highlightColor } : {},
+        props.style,
+      ])}
       onPress={onPress}
       description={
         chat.lastMessage

@@ -4,7 +4,6 @@ import BigButton from '../../common/BigButton';
 import OnboardPageLayout from '../OnboardPageLayout';
 import { useHistory } from '../../router';
 import useAsyncEffect from 'use-async-effect';
-import FullPageSpinner from '../../common/FullPageSpinner';
 
 const PushNotifications: FunctionComponent = () => {
   const history = useHistory();
@@ -23,7 +22,7 @@ const PushNotifications: FunctionComponent = () => {
   };
 
   if (!areNotificationsOn) {
-    return <FullPageSpinner />;
+    return <></>;
   }
 
   return (

@@ -31,7 +31,11 @@ const Settings: FunctionComponent<{
   }
 
   return (
-    <SettingsMenuTemplate title="Settings" mobileRender={mobileRender}>
+    <SettingsMenuTemplate
+      title="Settings"
+      mobileRender={mobileRender}
+      backButton={true}
+    >
       <Toggle style={{ marginVertical: 16 }}>Notifications</Toggle>
       <BigButton
         appearance="ghost"

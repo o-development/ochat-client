@@ -6,7 +6,7 @@ import React, {
   useState,
 } from 'react';
 import { useHistory, useLocation } from '../router';
-import { Dimensions, View } from 'react-native';
+import { useWindowDimensions, View } from 'react-native';
 import ChatPane from './chatPane/ChatPane';
 import ChatSelectionPane from './chatSelectionPane/ChatSelectionPane';
 import NoChatSelectedPane from './chatSelectionPane/NoChatSelectedPane';
@@ -22,7 +22,7 @@ const ChatAppLayout: FunctionComponent = () => {
   const history = useHistory();
   const queryId = queryString.parse(search).id;
   const id = Array.isArray(queryId) ? queryId[0] : queryId || undefined;
-  const isMobile = Dimensions.get('window').width < 500;
+  const isMobile = useWindowDimensions().width < 500;
 
   const [authState] = useContext(AuthContext);
   const [isWaitingForAuth, setIsWaitingForAuth] = useState(true);
@@ -39,11 +39,11 @@ const ChatAppLayout: FunctionComponent = () => {
 
   let mainComponent: ReactElement;
   if (pathname === '/chat/new') {
-    mainComponent = <NewChatPane mobileRender={isMobile} />;
+    mainComponent = <NewChatPane />;
   } else if (pathname === '/chat/link') {
     mainComponent = <LinkChatPane mobileRender={isMobile} />;
   } else if (pathname === '/chat/settings') {
-    mainComponent = <Settings />;
+    mainComponent = <Settings mobileRender={isMobile} />;
   } else if (id) {
     mainComponent = <ChatPane chatUri={id} mobileRender={isMobile} />;
   } else {

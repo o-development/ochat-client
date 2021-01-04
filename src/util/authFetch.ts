@@ -4,9 +4,6 @@ import { API_URL } from '@env';
 import errorToast from './errorToast';
 import getErrorBody from './getErrorBody';
 
-console.log('HERE IS API URL');
-console.log(API_URL);
-
 const defaultErrorHandler = async (
   response: Response,
   fallbackMessage: string,

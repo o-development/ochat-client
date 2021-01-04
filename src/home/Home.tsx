@@ -6,15 +6,13 @@ import React, {
   useState,
 } from 'react';
 import { Layout } from '@ui-kitten/components';
-import { Image, View } from 'react-native';
+import { Image, useWindowDimensions, View } from 'react-native';
 import LoginSolid from './LoginSolid';
-
-import { Dimensions } from 'react-native';
 import { AuthContext } from '../auth/authReducer';
 import { useHistory } from '../router';
 
 const Home: FunctionComponent = () => {
-  const isMobile = Dimensions.get('window').width < 800;
+  const isMobile = useWindowDimensions().width < 800;
 
   const history = useHistory();
   const [authState] = useContext(AuthContext);
@@ -35,19 +33,29 @@ const Home: FunctionComponent = () => {
       style={{
         flexDirection: isMobile ? 'column' : 'row',
         flex: 1,
-        alignItems: 'center',
+        alignItems: 'stretch',
         justifyContent: 'space-around',
         width: '100%',
       }}
     >
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          paddingLeft: 25,
+          paddingRight: 25,
+        }}
+      >
         <Image
           source={require('../../assets/splash.png')}
           style={{
-            width: 564,
+            maxWidth: 564,
+            width: '100%',
             height: 108,
             marginBottom: 25,
           }}
+          resizeMode="contain"
         />
         {!isMobile && (
           <View style={{ flexDirection: 'row' }}>

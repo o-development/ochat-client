@@ -32,7 +32,7 @@ const CreateAccount: FunctionComponent = () => {
   });
   return (
     <OnboardPageLayout
-      title="Logging In..."
+      title=""
       middleContent={
         <View>
           {errorMessage ? <Text>Error: {errorMessage}</Text> : undefined}

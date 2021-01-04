@@ -6,6 +6,7 @@ import { View } from 'react-native';
 import { EvaIconsPack } from '@ui-kitten/eva-icons';
 // import OneSignalHandler from './src/OneSignalHandler';
 import Toast from 'react-native-toast-message';
+import injectWebCss from './src/util/injectWebCss';
 
 // import { Notifications } from 'expo';
 
@@ -27,6 +28,7 @@ import Toast from 'react-native-toast-message';
 //   });
 //   OneSignal.showNativePrompt();
 // });
+injectWebCss();
 
 const App: FunctionComponent = () => {
   return (
