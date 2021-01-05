@@ -12,6 +12,8 @@ const LoginSolid: FunctionComponent = () => {
 
   const initiateLogin = (issuer: string) => {
     const callbackUrl = Platform.OS === 'web' ? WEB_URL : MOBILE_URL;
+    console.log('INITIATE LOGIN');
+    console.log(API_URL);
     Linking.openURL(
       `${API_URL}/auth/login?redirect=${callbackUrl}/onboard/callback&issuer=${issuer}`,
     );

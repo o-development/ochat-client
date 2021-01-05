@@ -3,7 +3,7 @@
   "displayName": "Liqid Chat",
   "expo": {
     "name": "Liqid Chat",
-    "slug": "Liqid Chat",
+    "slug": "LiqidChat",
     "version": "1.0.0",
     "assetBundlePatterns": [
       "**/*"

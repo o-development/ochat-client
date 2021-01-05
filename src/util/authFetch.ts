@@ -4,6 +4,9 @@ import { API_URL } from '@env';
 import errorToast from './errorToast';
 import getErrorBody from './getErrorBody';
 
+console.log('API_URL');
+console.log(API_URL);
+
 const defaultErrorHandler = async (
   response: Response,
   fallbackMessage: string,
@@ -41,6 +44,7 @@ export default async function authFetch(
     expectedStatus?: number;
   },
 ): Promise<Response> {
+  console.log(API_URL);
   const authkey = await AsyncStorage.getItem('authkey');
   try {
     let response: Response;
