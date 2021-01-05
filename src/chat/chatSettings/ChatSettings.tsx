@@ -6,7 +6,6 @@ import TextInput from '../../common/TextInput';
 import ChipInput from '../../common/ChipInput';
 import SettingsMenuTemplate from '../common/SettingsMenuTemplate';
 import { IChat, IChatParticipant, IChatType } from '../chatReducer';
-import MuteOptions from './MuteOptions';
 import IProfile, { AuthContext } from '../../auth/authReducer';
 import { v4 } from 'uuid';
 import FullPageSpinner from '../../common/FullPageSpinner';
@@ -35,37 +34,53 @@ const ChatSettings: FunctionComponent<{
 }) => {
   const history = useHistory();
   const [authState] = useContext(AuthContext);
-  if (!authState.profile) {
-    return <FullPageSpinner />;
-  }
   const [loading, setLoading] = useState(false);
   const [
     userGaveInputToChatLocation,
     setUserGaveInputToChatLocation,
   ] = useState(!!modifyingChat);
-  const [editedChat, setEditedChat] = useState<Partial<IChat>>(
-    modifyingChat || {
+  const [editedChat, setEditedChat] = useState<Partial<IChat>>(() => {
+    if (modifyingChat) {
+      return modifyingChat;
+    } else if (authState.profile) {
+      return {
+        name: '',
+        uri: `${authState.profile.defaultStorageLocation}${
+          initialChatData.name ? encodeURIComponent(initialChatData.name) : v4()
+        }/index.ttl`,
+        type: IChatType.LongChat,
+        images: [],
+        participants: [
+          {
+            webId: authState.profile.webId,
+            name: authState.profile.name,
+            image: authState.profile.image,
+            isAdmin: true,
+          },
+        ],
+        isPublic: false,
+        ...initialChatData,
+      };
+    }
+    return {
       name: '',
-      uri: `${authState.profile.defaultStorageLocation}${
+      uri: `https://pod.example/chats/${
         initialChatData.name ? encodeURIComponent(initialChatData.name) : v4()
       }/index.ttl`,
       type: IChatType.LongChat,
       images: [],
-      participants: [
-        {
-          webId: authState.profile.webId,
-          name: authState.profile.name,
-          image: authState.profile.image,
-          isAdmin: true,
-        },
-      ],
+      participants: [],
       isPublic: false,
       ...initialChatData,
-    },
-  );
+    };
+  });
   const [editChatDifference, setEditChatDifference] = useState<Partial<IChat>>(
     {},
   );
+
+  if (!authState.profile) {
+    return <FullPageSpinner />;
+  }
 
   const addParticipant = (participant: IChatParticipant) => {
     editedChat.participants = addParticipantToParticipantList(
@@ -126,6 +141,7 @@ const ChatSettings: FunctionComponent<{
   ) => {
     return (
       <UserProfileListItem
+        key={item.webId}
         profile={item}
         accessoryRight={(props) => (
           <Button
@@ -146,6 +162,7 @@ const ChatSettings: FunctionComponent<{
   ) => {
     return (
       <UserProfileListItem
+        key={item.webId}
         name={`Add ${item.name} as ${
           item.isAdmin ? `an administrator` : `a participant`
         }`}
@@ -216,11 +233,7 @@ const ChatSettings: FunctionComponent<{
       mobileRender={mobileRender}
     >
       {/* {modifyingChat ? <MuteOptions /> : undefined} */}
-      <View>
-        <Text category="h3" style={{ marginVertical: 16 }}>
-          Chat Administrator Options
-        </Text>
-
+      <View style={{ zIndex: 1 }}>
         <TextInput
           placeholder="Chat with Friends"
           label="Chat Name"

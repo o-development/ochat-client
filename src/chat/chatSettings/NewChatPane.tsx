@@ -53,7 +53,11 @@ async function getParticipantFromWebId(
   return undefined;
 }
 
-const NewChatPane: FunctionComponent = () => {
+export interface NewChatPaneProps {
+  mobileRender: boolean;
+}
+
+const NewChatPane: FunctionComponent<NewChatPaneProps> = ({ mobileRender }) => {
   const location = useLocation();
   const [loading, setLoading] = useState(true);
   const [initialData, setInitialData] = useState<Partial<IChat>>({});
@@ -102,7 +106,9 @@ const NewChatPane: FunctionComponent = () => {
   if (loading) {
     return <FullPageSpinner />;
   }
-  return <ChatSettings initialChatData={initialData} />;
+  return (
+    <ChatSettings initialChatData={initialData} mobileRender={mobileRender} />
+  );
 };
 
 export default NewChatPane;

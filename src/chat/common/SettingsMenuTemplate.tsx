@@ -9,7 +9,9 @@ import {
 } from '@ui-kitten/components';
 import { useHistory } from '../../router';
 import getThemeVars from '../../common/getThemeVars';
-import { ScrollView, View } from 'react-native';
+import { View } from 'react-native';
+import { KeyboardAvoidingScrollView } from 'react-native-keyboard-avoiding-scroll-view';
+import { ScrollView } from 'react-native-gesture-handler';
 
 const SettingsMenuTemplate: FunctionComponent<{
   title: string;
@@ -31,7 +33,7 @@ const SettingsMenuTemplate: FunctionComponent<{
   const history = useHistory();
 
   return (
-    <Layout style={{ flex: 1 }}>
+    <Layout style={{ flex: 1, zIndex: 1 }}>
       <TopNavigation
         alignment="center"
         title={title}
@@ -39,6 +41,13 @@ const SettingsMenuTemplate: FunctionComponent<{
           closeButton
             ? () => (
                 <TopNavigationAction
+                  style={{
+                    height: 40,
+                    width: 32,
+                    margin: 0,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}
                   onPress={() => onCloseButton()}
                   icon={(props) => (
                     <Icon {...props} name="close-outline" fill={themeColor} />
@@ -51,6 +60,13 @@ const SettingsMenuTemplate: FunctionComponent<{
           mobileRender && backButton
             ? () => (
                 <TopNavigationAction
+                  style={{
+                    height: 40,
+                    width: 32,
+                    margin: 0,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}
                   onPress={() => history.push('/chat')}
                   icon={(props) => (
                     <Icon
@@ -65,15 +81,16 @@ const SettingsMenuTemplate: FunctionComponent<{
         }
       />
       <Divider />
-      <ScrollView
+      <KeyboardAvoidingScrollView
         contentContainerStyle={{
           padding: 16,
-          flex: 1,
           alignItems: 'center',
         }}
       >
-        <View style={{ maxWidth: 500, width: '100%' }}>{children}</View>
-      </ScrollView>
+        <View style={{ maxWidth: 500, width: '100%', zIndex: 1 }}>
+          {children}
+        </View>
+      </KeyboardAvoidingScrollView>
     </Layout>
   );
 };

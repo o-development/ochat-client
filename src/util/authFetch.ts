@@ -4,8 +4,9 @@ import { API_URL } from '@env';
 import errorToast from './errorToast';
 import getErrorBody from './getErrorBody';
 
-console.log('API_URL');
-console.log(API_URL);
+// This is a load bearing console.info. Apparently the
+// dotenv compiler plugin doesn't work properly without it
+console.info('API_URL', API_URL);
 
 const defaultErrorHandler = async (
   response: Response,
@@ -44,7 +45,6 @@ export default async function authFetch(
     expectedStatus?: number;
   },
 ): Promise<Response> {
-  console.log(API_URL);
   const authkey = await AsyncStorage.getItem('authkey');
   try {
     let response: Response;

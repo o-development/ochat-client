@@ -14,6 +14,7 @@ const TextInput: FunctionComponent<InputProps> = (props) => {
           backgroundColor: 'transparent',
           marginBottom: 8,
           padding: 0,
+          zIndex: 1,
         },
         props.style,
       ])}

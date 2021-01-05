@@ -1,6 +1,6 @@
 import React, { PropsWithChildren, ReactElement, useState } from 'react';
 import { StyleProp, View, ViewStyle } from 'react-native';
-import { Divider, Icon, Input, List, Text } from '@ui-kitten/components';
+import { Divider, Icon, Input, Text } from '@ui-kitten/components';
 import { StyleSheet } from 'react-native';
 
 import getThemeVars from './getThemeVars';
@@ -29,7 +29,7 @@ export default function ChipInput<T>(
     onRemoved,
     placeholder,
   } = props;
-  const { themeColor } = getThemeVars();
+  const { themeColor, backgroundColor1 } = getThemeVars();
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState<T[]>([]);
   return (
@@ -53,23 +53,39 @@ export default function ChipInput<T>(
           borderWidth: 1,
           paddingVertical: 7,
           paddingHorizontal: 8,
+          zIndex: 1,
         }}
       >
-        {value && value.length > 0 ? (
-          <>
-            <List<T>
-              data={value}
-              renderItem={({ item }) =>
-                renderChip(item, () => {
-                  if (onRemoved) {
-                    onRemoved(item);
+        {searchResults.length > 0 ? (
+          <View
+            style={{
+              position: 'absolute',
+              bottom: '100%',
+              width: '100%',
+              borderColor: themeColor,
+              borderRadius: 4,
+              borderWidth: 1,
+              margin: -1,
+              paddingHorizontal: 8,
+              backgroundColor: backgroundColor1,
+              zIndex: 10,
+              elevation: 10,
+            }}
+          >
+            {searchResults.map((item, index) => (
+              <>
+                {index !== 0 ? <Divider key={index} /> : undefined}
+                {renderSearchResult(item, () => {
+                  setSearchTerm('');
+                  setSearchResults([]);
+                  if (onAdded) {
+                    onAdded(item);
                   }
-                })
-              }
-              ItemSeparatorComponent={Divider}
-            />
+                })}
+              </>
+            ))}
             <Divider />
-          </>
+          </View>
         ) : undefined}
         <View>
           <Input
@@ -88,25 +104,22 @@ export default function ChipInput<T>(
               }
             }}
           />
-          {searchResults.length > 0 ? (
-            <>
-              <Divider />
-              <List<T>
-                data={searchResults}
-                renderItem={({ item }) =>
-                  renderSearchResult(item, () => {
-                    setSearchTerm('');
-                    setSearchResults([]);
-                    if (onAdded) {
-                      onAdded(item);
-                    }
-                  })
-                }
-                ItemSeparatorComponent={Divider}
-              />
-            </>
-          ) : undefined}
         </View>
+        {value && value.length > 0 ? (
+          <>
+            <Divider />
+            {value.map((item, index) => (
+              <>
+                {index !== 0 ? <Divider key={index} /> : undefined}
+                {renderChip(item, () => {
+                  if (onRemoved) {
+                    onRemoved(item);
+                  }
+                })}
+              </>
+            ))}
+          </>
+        ) : undefined}
       </View>
     </View>
   );

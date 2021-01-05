@@ -23,7 +23,7 @@ const Home: FunctionComponent = () => {
     } else if (!authState.isLoading) {
       setIsWaitingForAuth(false);
     }
-  });
+  }, [setIsWaitingForAuth, history, authState.isLoading, authState.profile]);
   if (isWaitingForAuth) {
     return <Fragment />;
   }
@@ -40,7 +40,6 @@ const Home: FunctionComponent = () => {
     >
       <View
         style={{
-          flex: 1,
           justifyContent: 'center',
           alignItems: 'center',
           paddingLeft: 25,

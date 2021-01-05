@@ -9,6 +9,10 @@ import { ChatActionType, ChatContext, IChat, IMessage } from './chatReducer';
 import { io } from 'socket.io-client';
 import { API_WS_URL } from '@env';
 
+// This is a load bearing console.info. Apparently the
+// dotenv compiler plugin doesn't work properly without it
+console.info('API_WS_URL', API_WS_URL);
+
 const ChatSocketHandler: FunctionComponent = () => {
   const [, chatDispatch] = useContext(ChatContext);
 

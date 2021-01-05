@@ -4,6 +4,7 @@
   "expo": {
     "name": "Liqid Chat",
     "slug": "LiqidChat",
+    "scheme": "liqidchat",
     "version": "1.0.0",
     "assetBundlePatterns": [
       "**/*"

@@ -32,14 +32,14 @@ const ChatAppLayout: FunctionComponent = () => {
     } else if (!authState.isLoading) {
       history.push('/');
     }
-  });
+  }, [setIsWaitingForAuth, authState.isLoading, authState.profile, history]);
   if (isWaitingForAuth) {
     return <FullPageSpinner />;
   }
 
   let mainComponent: ReactElement;
   if (pathname === '/chat/new') {
-    mainComponent = <NewChatPane />;
+    mainComponent = <NewChatPane mobileRender={isMobile} />;
   } else if (pathname === '/chat/link') {
     mainComponent = <LinkChatPane mobileRender={isMobile} />;
   } else if (pathname === '/chat/settings') {
