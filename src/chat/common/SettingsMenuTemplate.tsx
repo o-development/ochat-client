@@ -9,8 +9,8 @@ import {
 } from '@ui-kitten/components';
 import { useHistory } from '../../router';
 import getThemeVars from '../../common/getThemeVars';
-import { View } from 'react-native';
-import { KeyboardAvoidingScrollView } from 'react-native-keyboard-avoiding-scroll-view';
+import { KeyboardAvoidingView, View } from 'react-native';
+// import { KeyboardAvoidingScrollView } from 'react-native-keyboard-avoiding-scroll-view';
 import { ScrollView } from 'react-native-gesture-handler';
 
 const SettingsMenuTemplate: FunctionComponent<{
@@ -81,16 +81,18 @@ const SettingsMenuTemplate: FunctionComponent<{
         }
       />
       <Divider />
-      <KeyboardAvoidingScrollView
+      <ScrollView
         contentContainerStyle={{
           padding: 16,
           alignItems: 'center',
         }}
       >
-        <View style={{ maxWidth: 500, width: '100%', zIndex: 1 }}>
+        <KeyboardAvoidingView
+          style={{ maxWidth: 500, width: '100%', zIndex: 1 }}
+        >
           {children}
-        </View>
-      </KeyboardAvoidingScrollView>
+        </KeyboardAvoidingView>
+      </ScrollView>
     </Layout>
   );
 };

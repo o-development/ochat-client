@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, useContext } from 'react';
 import { Text } from '@ui-kitten/components';
 import { View } from 'react-native';
 import { parse } from 'url';
@@ -10,6 +10,8 @@ import TextInput from '../common/TextInput';
 import { useHistory } from '../router';
 import { API_URL, MOBILE_URL, WEB_URL } from '@env';
 import AsyncStorage from '@react-native-community/async-storage';
+import { AuthActionType, AuthContext } from '../auth/authReducer';
+import authFetch from '../util/authFetch';
 
 // This is a load bearing console.info. Apparently the
 // dotenv compiler plugin doesn't work properly without it
@@ -20,6 +22,8 @@ console.info('WEB_URL', WEB_URL);
 const LoginSolid: FunctionComponent = () => {
   const history = useHistory();
 
+  const [, authDispatch] = useContext(AuthContext);
+
   const initiateLogin = async (issuer: string) => {
     const callbackUrl = makeUrl('onboard/callback');
     console.log('Opening Redirect');
@@ -28,6 +32,7 @@ const LoginSolid: FunctionComponent = () => {
       `${API_URL}/auth/login?redirect=${callbackUrl}&issuer=${issuer}`,
       callbackUrl,
     );
+    console.log('AFTER REDIRECT', result.type);
     if (result.type === 'success') {
       const url = result.url;
       const parsedUrl = parse(url, true);
@@ -37,7 +42,19 @@ const LoginSolid: FunctionComponent = () => {
       if (key) {
         await AsyncStorage.setItem('authkey', key);
       }
-      history.push('/onboard/person_index_request');
+      const response = await authFetch(`/profile/authenticated`, undefined, {
+        expectedStatus: 200,
+        errorHandlers: {
+          '404': async () => {
+            history.push('/onboard/person_index_request');
+          },
+        },
+      });
+      if (response.status === 200) {
+        const profile = await response.json();
+        authDispatch({ type: AuthActionType.LOGGED_IN, profile });
+        history.push('/chat');
+      }
     }
   };
 

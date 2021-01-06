@@ -18,6 +18,7 @@ const Home: FunctionComponent = () => {
   const [authState] = useContext(AuthContext);
   const [isWaitingForAuth, setIsWaitingForAuth] = useState(true);
   useEffect(() => {
+    console.log('IN HOME');
     if (authState.profile) {
       history.push('/chat');
     } else if (!authState.isLoading) {

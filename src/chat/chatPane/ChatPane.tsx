@@ -123,7 +123,7 @@ const ChatPane: FunctionComponent<{
   const loggedInUser = authState.profile.webId;
 
   const onLoadEarlier = async () => {
-    if (chatData) {
+    if (chatData && chatData.messages) {
       setIsLoadingEarlier(true);
       const previousPage = chatData.messages[chatData.messages.length - 1]
         ? chatData.messages[chatData.messages.length - 1].page
@@ -296,7 +296,7 @@ const ChatPane: FunctionComponent<{
             maxWidth: shouldSquishBubbles ? undefined : '55%',
           };
           const commonContainerStyle: ViewStyle = {
-            marginVertical: 4,
+            marginVertical: 1,
           };
           return (
             <Bubble
@@ -332,7 +332,6 @@ const ChatPane: FunctionComponent<{
         renderComposer={(props) => (
           <Composer
             {...props}
-            textInputAutoFocus={true}
             textInputProps={{
               returnKeyType: 'next',
               onSubmitEditing: () => {
@@ -341,11 +340,7 @@ const ChatPane: FunctionComponent<{
                   onSend({ text: text.trim() }, true);
                 }
               },
-              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-ignore
-              ref: (ref) => {
-                ref && ref.focus();
-              },
+              blurOnSubmit: false,
             }}
             multiline={false}
             textInputStyle={[

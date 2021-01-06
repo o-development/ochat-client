@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { FunctionComponent } from 'react';
-import { Button, Icon, Text, Toggle } from '@ui-kitten/components';
+import { Button, Icon, Toggle } from '@ui-kitten/components';
 import { View } from 'react-native';
 import TextInput from '../../common/TextInput';
 import ChipInput from '../../common/ChipInput';

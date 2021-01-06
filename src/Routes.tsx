@@ -8,19 +8,17 @@ import { DeepLinking } from 'react-router-native';
 
 export const Routes: FunctionComponent = () => {
   return (
-    <>
+    <Router>
       <DeepLinking />
-      <Router>
-        <BackButton>
-          <AuthHandler>
-            <Switch>
-              <Route path="/onboard" component={OnboardFlow} />
-              <Route path="/chat" component={ChatApp} />
-              <Route path="/" component={Home} />
-            </Switch>
-          </AuthHandler>
-        </BackButton>
-      </Router>
-    </>
+      <BackButton>
+        <AuthHandler>
+          <Switch>
+            <Route path="/onboard" component={OnboardFlow} />
+            <Route path="/chat" component={ChatApp} />
+            <Route path="/" component={Home} />
+          </Switch>
+        </AuthHandler>
+      </BackButton>
+    </Router>
   );
 };
