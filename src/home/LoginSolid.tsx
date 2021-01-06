@@ -8,7 +8,7 @@ import BigButton from '../common/BigButton';
 import OnboardPageLayout from '../onboard/OnboardPageLayout';
 import TextInput from '../common/TextInput';
 import { useHistory } from '../router';
-import { API_URL, MOBILE_URL, WEB_URL } from '@env';
+import { API_URL } from '@env';
 import AsyncStorage from '@react-native-community/async-storage';
 import { AuthActionType, AuthContext } from '../auth/authReducer';
 import authFetch from '../util/authFetch';
@@ -16,8 +16,6 @@ import authFetch from '../util/authFetch';
 // This is a load bearing console.info. Apparently the
 // dotenv compiler plugin doesn't work properly without it
 console.info('API_URL', API_URL);
-console.info('MOBILE_URL', MOBILE_URL);
-console.info('WEB_URL', WEB_URL);
 
 const LoginSolid: FunctionComponent = () => {
   const history = useHistory();

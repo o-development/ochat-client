@@ -5,11 +5,12 @@ import ChatApp from './chat/ChatApp';
 import Home from './home/Home';
 import AuthHandler from './auth/AuthHandler';
 import { DeepLinking } from 'react-router-native';
+import { Platform } from 'react-native';
 
 export const Routes: FunctionComponent = () => {
   return (
     <Router>
-      <DeepLinking />
+      {Platform.OS !== 'web' ? <DeepLinking /> : undefined}
       <BackButton>
         <AuthHandler>
           <Switch>
