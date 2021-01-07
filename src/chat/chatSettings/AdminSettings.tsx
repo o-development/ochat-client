@@ -4,7 +4,6 @@ import { Button, Icon, Toggle } from '@ui-kitten/components';
 import { View } from 'react-native';
 import TextInput from '../../common/TextInput';
 import ChipInput from '../../common/ChipInput';
-import SettingsMenuTemplate from '../common/SettingsMenuTemplate';
 import { IChat, IChatParticipant, IChatType } from '../chatReducer';
 import IProfile, { AuthContext } from '../../auth/authReducer';
 import { v4 } from 'uuid';
@@ -19,19 +18,11 @@ import {
   removeParticipantFromParticipantList,
 } from './modifyParticipants';
 
-const ChatSettings: FunctionComponent<{
+const AdminSettings: FunctionComponent<{
   modifyingChat?: IChat;
   initialChatData?: Partial<IChat>;
-  onChatModificationClosed?: () => void;
   mobileRender?: boolean;
-}> = ({
-  modifyingChat,
-  initialChatData = {},
-  mobileRender,
-  onChatModificationClosed = () => {
-    /* nothing */
-  },
-}) => {
+}> = ({ modifyingChat, initialChatData = {} }) => {
   const history = useHistory();
   const [authState] = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
@@ -225,90 +216,81 @@ const ChatSettings: FunctionComponent<{
   };
 
   return (
-    <SettingsMenuTemplate
-      title={modifyingChat ? `Update ${modifyingChat.name}` : 'New Chat'}
-      closeButton={modifyingChat != undefined}
-      backButton={modifyingChat == undefined}
-      onCloseButton={onChatModificationClosed}
-      mobileRender={mobileRender}
-    >
-      {/* {modifyingChat ? <MuteOptions /> : undefined} */}
-      <View style={{ zIndex: 1 }}>
-        <TextInput
-          placeholder="Chat with Friends"
-          label="Chat Name"
-          value={editedChat.name}
-          onChangeText={(text) => {
-            const updateObj: Partial<IChat> = { ...editedChat, name: text };
-            if (!userGaveInputToChatLocation && !modifyingChat) {
-              updateObj.uri = `${
-                authState.profile?.defaultStorageLocation
-              }${encodeURIComponent(text)}/index.ttl`;
-            }
-            setEditedChat(updateObj);
-            setEditChatDifference({
-              ...editChatDifference,
-              name: updateObj.name,
-            });
-          }}
-        />
-        <TextInput
-          placeholder="https://pod.example/chats/"
-          label="Chat Location"
-          value={editedChat.uri}
-          disabled={!!modifyingChat}
-          onChangeText={(text) => {
-            setUserGaveInputToChatLocation(true);
-            setEditedChat({ ...editedChat, uri: text });
-          }}
-        />
-        <ChipInput<IChatParticipant>
-          value={editedChat.participants?.filter(
-            (participant) => participant.isAdmin,
-          )}
-          search={(text) => searchParticipant(text, true)}
-          renderChip={renderParticipantChip}
-          renderSearchResult={renderParticipantSearchResult}
-          onAdded={addParticipant}
-          onRemoved={removeParticipant}
-          label="Chat Administrators"
-          placeholder="Search names and WebIds to add administrators"
-        />
-        <ChipInput<IChatParticipant>
-          value={editedChat.participants?.filter(
-            (participant) => !participant.isAdmin,
-          )}
-          search={(text) => searchParticipant(text, false)}
-          renderChip={renderParticipantChip}
-          renderSearchResult={renderParticipantSearchResult}
-          onAdded={addParticipant}
-          onRemoved={removeParticipant}
-          label="Chat Participants"
-          placeholder="Search names and WebIds to add participants"
-        />
-        <Toggle
-          checked={editedChat.isPublic}
-          style={{ alignSelf: 'flex-start', marginVertical: 16 }}
-          onChange={(isChecked) => {
-            setEditedChat({ ...editedChat, isPublic: isChecked });
-            setEditChatDifference({
-              ...editChatDifference,
-              isPublic: isChecked,
-            });
-          }}
-        >
-          Public Chat?
-        </Toggle>
-        <BigButton
-          loading={loading}
-          containerStyle={{ marginBottom: 16 }}
-          appearance="primary"
-          title={modifyingChat ? 'Update Chat' : 'Create Chat'}
-          onPress={updateChat}
-        />
-      </View>
-    </SettingsMenuTemplate>
+    <View style={{ zIndex: 1 }}>
+      <TextInput
+        placeholder="Chat with Friends"
+        label="Chat Name"
+        value={editedChat.name}
+        onChangeText={(text) => {
+          const updateObj: Partial<IChat> = { ...editedChat, name: text };
+          if (!userGaveInputToChatLocation && !modifyingChat) {
+            updateObj.uri = `${
+              authState.profile?.defaultStorageLocation
+            }${encodeURIComponent(text)}/index.ttl`;
+          }
+          setEditedChat(updateObj);
+          setEditChatDifference({
+            ...editChatDifference,
+            name: updateObj.name,
+          });
+        }}
+      />
+      <TextInput
+        placeholder="https://pod.example/chats/"
+        label="Chat Location"
+        value={editedChat.uri}
+        disabled={!!modifyingChat}
+        onChangeText={(text) => {
+          setUserGaveInputToChatLocation(true);
+          setEditedChat({ ...editedChat, uri: text });
+        }}
+      />
+      <ChipInput<IChatParticipant>
+        value={editedChat.participants?.filter(
+          (participant) => participant.isAdmin,
+        )}
+        search={(text) => searchParticipant(text, true)}
+        renderChip={renderParticipantChip}
+        renderSearchResult={renderParticipantSearchResult}
+        onAdded={addParticipant}
+        onRemoved={removeParticipant}
+        label="Chat Administrators"
+        placeholder="Search names and WebIds to add administrators"
+      />
+      <ChipInput<IChatParticipant>
+        value={editedChat.participants?.filter(
+          (participant) => !participant.isAdmin,
+        )}
+        search={(text) => searchParticipant(text, false)}
+        renderChip={renderParticipantChip}
+        renderSearchResult={renderParticipantSearchResult}
+        onAdded={addParticipant}
+        onRemoved={removeParticipant}
+        label="Chat Participants"
+        placeholder="Search names and WebIds to add participants"
+      />
+      <Toggle
+        checked={editedChat.isPublic}
+        style={{ alignSelf: 'flex-start', marginVertical: 16 }}
+        onChange={(isChecked) => {
+          setEditedChat({ ...editedChat, isPublic: isChecked });
+          setEditChatDifference({
+            ...editChatDifference,
+            isPublic: isChecked,
+          });
+        }}
+      >
+        Public Chat?
+      </Toggle>
+      <BigButton
+        loading={loading}
+        containerStyle={{ marginBottom: 16 }}
+        appearance="primary"
+        title={modifyingChat ? 'Update Chat' : 'Create Chat'}
+        onPress={updateChat}
+      />
+    </View>
   );
 };
 
-export default ChatSettings;
+export default AdminSettings;

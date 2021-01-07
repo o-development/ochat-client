@@ -41,6 +41,7 @@ const Home: FunctionComponent = () => {
     >
       <View
         style={{
+          flex: isMobile ? undefined : 1,
           justifyContent: 'center',
           alignItems: 'center',
           paddingLeft: 25,

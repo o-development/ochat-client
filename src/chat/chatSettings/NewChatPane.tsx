@@ -4,10 +4,11 @@ import { parse as parseQs, ParsedQs } from 'qs';
 import useAsyncEffect from 'use-async-effect';
 import FullPageSpinner from '../../common/FullPageSpinner';
 import { IChat, IChatParticipant } from '../chatReducer';
-import ChatSettings from './ChatSettings';
 import authFetch from '../../util/authFetch';
 import IProfile from '../../auth/authReducer';
 import { addParticipantToParticipantList } from './modifyParticipants';
+import AdminSettings from './AdminSettings';
+import SettingsMenuTemplate from '../common/SettingsMenuTemplate';
 
 function getStringArrayFromParsedQs(
   input: undefined | string | string[] | ParsedQs | ParsedQs[],
@@ -107,7 +108,17 @@ const NewChatPane: FunctionComponent<NewChatPaneProps> = ({ mobileRender }) => {
     return <FullPageSpinner />;
   }
   return (
-    <ChatSettings initialChatData={initialData} mobileRender={mobileRender} />
+    <SettingsMenuTemplate
+      title={'New Chat'}
+      closeButton={false}
+      backButton={true}
+      mobileRender={mobileRender}
+    >
+      <AdminSettings
+        initialChatData={initialData}
+        mobileRender={mobileRender}
+      />
+    </SettingsMenuTemplate>
   );
 };
 

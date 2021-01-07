@@ -21,7 +21,6 @@ import {
 } from 'react-native-gifted-chat';
 import { useWindowDimensions, ViewStyle } from 'react-native';
 import dayjs from 'dayjs';
-import ChatSettings from '../chatSettings/ChatSettings';
 import { ChatActionType, ChatContext, IMessage } from '../chatReducer';
 import FullPageSpinner from '../../common/FullPageSpinner';
 import useAsyncEffect from 'use-async-effect';
@@ -30,6 +29,7 @@ import { v4 } from 'uuid';
 import { AuthContext } from '../../auth/authReducer';
 import getParticipantForMessageSender from '../common/getParticipantForMessageSender';
 import { IChat } from '../chatReducer';
+import ChatSettingsPane from '../chatSettings/ChatSettingsPane';
 
 const ChatPane: FunctionComponent<{
   chatUri: string;
@@ -156,7 +156,7 @@ const ChatPane: FunctionComponent<{
 
   if (isEditing) {
     return (
-      <ChatSettings
+      <ChatSettingsPane
         onChatModificationClosed={() => setIsEditing(false)}
         mobileRender={mobileRender}
         modifyingChat={chatData.chat}

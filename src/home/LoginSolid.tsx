@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useContext } from 'react';
+import React, { FunctionComponent, useContext, useState } from 'react';
 import { Text } from '@ui-kitten/components';
 import { View } from 'react-native';
 import { parse } from 'url';
@@ -12,6 +12,7 @@ import { API_URL } from '@env';
 import AsyncStorage from '@react-native-community/async-storage';
 import { AuthActionType, AuthContext } from '../auth/authReducer';
 import authFetch from '../util/authFetch';
+import FullPageSpinner from '../common/FullPageSpinner';
 
 // This is a load bearing console.info. Apparently the
 // dotenv compiler plugin doesn't work properly without it
@@ -21,8 +22,10 @@ const LoginSolid: FunctionComponent = () => {
   const history = useHistory();
 
   const [, authDispatch] = useContext(AuthContext);
+  const [loading, setLoading] = useState(false);
 
   const initiateLogin = async (issuer: string) => {
+    setLoading(true);
     const callbackUrl = makeUrl('onboard/callback');
     console.log('Opening Redirect');
     console.log(callbackUrl);
@@ -54,7 +57,12 @@ const LoginSolid: FunctionComponent = () => {
         history.push('/chat');
       }
     }
+    setLoading(false);
   };
+
+  if (loading) {
+    return <FullPageSpinner />;
+  }
 
   return (
     <OnboardPageLayout
