@@ -8,7 +8,6 @@ interface UserProfileListItem extends ListItemProps {
   profile?: Partial<IProfile>;
   name?: string;
   image?: string;
-  avatarSize?: number | 'small' | 'medium' | 'large' | 'xlarge';
 }
 
 // eslint-disable-next-line react/display-name

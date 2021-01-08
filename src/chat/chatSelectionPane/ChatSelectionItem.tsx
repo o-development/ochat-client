@@ -3,7 +3,7 @@ import { ListRenderItemInfo } from 'react-native';
 import IProfile, { AuthContext } from '../../auth/authReducer';
 import { useHistory } from '../../router';
 import { IChat } from '../chatReducer';
-import getNewChatPaneUri from '../chatSettings/getNewChatPaneUri';
+import { getNewChatPaneUriFromProfile } from '../chatSettings/getNewChatPaneUri';
 import ChatListItem from '../common/ChatListItem';
 import UserProfileListItem from '../common/UserProfileListItem';
 
@@ -28,18 +28,9 @@ const ChatSelectionItem: FunctionComponent<
   const profile = listData.item as IProfile;
   const onUserProfileItemPress = useCallback(() => {
     history.push(
-      getNewChatPaneUri({
-        name:
-          profile.webId === (authState.profile as IProfile).webId
-            ? 'Personal Chat'
-            : `${profile.name || 'User'} & ${
-                authState.profile?.name || 'User'
-              }`,
-        participants: [profile.webId],
-        administrators: [(authState.profile as IProfile).webId],
-      }),
+      getNewChatPaneUriFromProfile(profile, authState.profile as IProfile),
     );
-  }, [history, profile.name, profile.webId, authState.profile]);
+  }, [history, profile, authState.profile]);
 
   if (isChat) {
     const chat = listData.item as IChat;
@@ -54,11 +45,7 @@ const ChatSelectionItem: FunctionComponent<
   } else {
     const profile = listData.item as IProfile;
     return (
-      <UserProfileListItem
-        profile={profile}
-        onPress={onUserProfileItemPress}
-        avatarSize="medium"
-      />
+      <UserProfileListItem profile={profile} onPress={onUserProfileItemPress} />
     );
   }
 });

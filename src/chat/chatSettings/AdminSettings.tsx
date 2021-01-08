@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { FunctionComponent } from 'react';
-import { Button, Icon, Toggle } from '@ui-kitten/components';
-import { View } from 'react-native';
+import { Button, Icon, Toggle, Text } from '@ui-kitten/components';
+import { Linking, Platform, View } from 'react-native';
 import TextInput from '../../common/TextInput';
 import ChipInput from '../../common/ChipInput';
 import { IChat, IChatParticipant, IChatType } from '../chatReducer';
@@ -17,6 +17,7 @@ import {
   addParticipantToParticipantList,
   removeParticipantFromParticipantList,
 } from './modifyParticipants';
+import getThemeVars from '../../common/getThemeVars';
 
 const AdminSettings: FunctionComponent<{
   modifyingChat?: IChat;
@@ -24,6 +25,7 @@ const AdminSettings: FunctionComponent<{
   mobileRender?: boolean;
 }> = ({ modifyingChat, initialChatData = {} }) => {
   const history = useHistory();
+  const { themeColor } = getThemeVars();
   const [authState] = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
   const [
@@ -88,11 +90,6 @@ const AdminSettings: FunctionComponent<{
   };
 
   function removeParticipant(participant: IChatParticipant) {
-    if (participant.webId === authState.profile?.webId) {
-      if (!confirm('Are you sure you want to remove yourself?')) {
-        return;
-      }
-    }
     editedChat.participants = removeParticipantFromParticipantList(
       editedChat.participants || [],
       participant,
@@ -142,7 +139,6 @@ const AdminSettings: FunctionComponent<{
             accessoryLeft={(props) => <Icon {...props} name="close-outline" />}
           />
         )}
-        avatarSize={24}
       />
     );
   };
@@ -159,7 +155,6 @@ const AdminSettings: FunctionComponent<{
         }`}
         image={item.image}
         onPress={() => onAdd(item)}
-        avatarSize={24}
       />
     );
   };
@@ -235,16 +230,49 @@ const AdminSettings: FunctionComponent<{
           });
         }}
       />
-      <TextInput
-        placeholder="https://pod.example/chats/"
-        label="Chat Location"
-        value={editedChat.uri}
-        disabled={!!modifyingChat}
-        onChangeText={(text) => {
-          setUserGaveInputToChatLocation(true);
-          setEditedChat({ ...editedChat, uri: text });
+      {!modifyingChat ? (
+        <TextInput
+          placeholder="https://pod.example/chats/"
+          label="Chat Location"
+          value={editedChat.uri}
+          disabled={!!modifyingChat}
+          onChangeText={(text) => {
+            setUserGaveInputToChatLocation(true);
+            setEditedChat({ ...editedChat, uri: text });
+          }}
+        />
+      ) : (
+        <View style={{ marginBottom: 12 }}>
+          <Text category="label" appearance="hint">
+            Chat Location
+          </Text>
+          <Text
+            onPress={() => {
+              if (editedChat.uri) {
+                Platform.OS !== 'web'
+                  ? Linking.openURL(editedChat.uri)
+                  : window.open(editedChat.uri, '_blank');
+              }
+            }}
+            style={{ textDecorationLine: 'underline', color: themeColor }}
+          >
+            {editedChat.uri}
+          </Text>
+        </View>
+      )}
+      <Toggle
+        checked={editedChat.isPublic}
+        style={{ alignSelf: 'flex-start', marginVertical: 16 }}
+        onChange={(isChecked) => {
+          setEditedChat({ ...editedChat, isPublic: isChecked });
+          setEditChatDifference({
+            ...editChatDifference,
+            isPublic: isChecked,
+          });
         }}
-      />
+      >
+        Public Chat?
+      </Toggle>
       <ChipInput<IChatParticipant>
         value={editedChat.participants?.filter(
           (participant) => participant.isAdmin,
@@ -269,19 +297,6 @@ const AdminSettings: FunctionComponent<{
         label="Chat Participants"
         placeholder="Search names and WebIds to add participants"
       />
-      <Toggle
-        checked={editedChat.isPublic}
-        style={{ alignSelf: 'flex-start', marginVertical: 16 }}
-        onChange={(isChecked) => {
-          setEditedChat({ ...editedChat, isPublic: isChecked });
-          setEditChatDifference({
-            ...editChatDifference,
-            isPublic: isChecked,
-          });
-        }}
-      >
-        Public Chat?
-      </Toggle>
       <BigButton
         loading={loading}
         containerStyle={{ marginBottom: 16 }}

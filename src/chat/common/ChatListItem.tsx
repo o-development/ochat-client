@@ -38,7 +38,11 @@ const ChatListItem: FunctionComponent<ChatListItemProps> = memo(
           <GroupImage
             images={chat.participants
               .filter((p) => !!p.image)
-              .filter((p) => p.webId !== authState.profile?.webId)
+              .filter(
+                (p) =>
+                  chat.participants.length < 2 ||
+                  p.webId !== authState.profile?.webId,
+              )
               .map((p) => p.image as string)}
           />
         )}

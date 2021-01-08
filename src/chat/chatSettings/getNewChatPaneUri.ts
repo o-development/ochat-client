@@ -1,3 +1,19 @@
+import IProfile from '../../auth/authReducer';
+
+export function getNewChatPaneUriFromProfile(
+  profile: { name?: string; webId: string },
+  curUserProfile?: IProfile,
+): string {
+  return getNewChatPaneUri({
+    name:
+      profile.webId === curUserProfile?.webId
+        ? 'Personal Chat'
+        : `${profile.name || 'User'} & ${curUserProfile?.name || 'User'}`,
+    participants: [profile.webId],
+    administrators: curUserProfile?.webId ? [curUserProfile.webId] : [],
+  });
+}
+
 export default function getNewChatPaneUri(
   initialChatDetails: Partial<{
     name: string;
