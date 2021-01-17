@@ -19,7 +19,9 @@ export async function initPushNotificationProcess(): Promise<void> {
     return;
   }
   if (Platform.OS === 'web') {
-    await navigator.serviceWorker.register('notification-service-worker.js');
+    console.log(
+      await navigator.serviceWorker.register('/notification-service-worker.js'),
+    );
   }
 }
 
