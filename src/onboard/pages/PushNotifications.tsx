@@ -5,7 +5,10 @@ import OnboardPageLayout from '../OnboardPageLayout';
 import { useHistory } from '../../router';
 import useAsyncEffect from 'use-async-effect';
 import FullPageSpinner from '../../common/FullPageSpinner';
-import { requestNotificationPermission } from '../../util/notificationUtils';
+import {
+  areNotificationsEnabled,
+  requestNotificationPermission,
+} from '../../util/notificationUtils';
 
 const PushNotifications: FunctionComponent = () => {
   const history = useHistory();
@@ -15,9 +18,11 @@ const PushNotifications: FunctionComponent = () => {
   const [loading, setLoading] = useState(true);
 
   useAsyncEffect(async () => {
-    // TODO check if push notifications are enabled
-    // goToNext();
-    setLoading(false);
+    if (await areNotificationsEnabled()) {
+      goToNext();
+    } else {
+      setLoading(false);
+    }
   });
 
   const triggerPushNotifications = async () => {
