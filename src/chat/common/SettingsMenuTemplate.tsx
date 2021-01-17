@@ -9,8 +9,7 @@ import {
 } from '@ui-kitten/components';
 import { useHistory } from '../../router';
 import getThemeVars from '../../common/getThemeVars';
-import { KeyboardAvoidingView, View } from 'react-native';
-// import { KeyboardAvoidingScrollView } from 'react-native-keyboard-avoiding-scroll-view';
+import { KeyboardAvoidingView } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 
 const SettingsMenuTemplate: FunctionComponent<{

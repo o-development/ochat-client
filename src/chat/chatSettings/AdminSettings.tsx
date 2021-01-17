@@ -1,15 +1,13 @@
 import React, { useContext, useState } from 'react';
 import { FunctionComponent } from 'react';
-import { Button, Icon, Toggle, Text } from '@ui-kitten/components';
+import { Toggle, Text } from '@ui-kitten/components';
 import { Linking, Platform, View } from 'react-native';
 import TextInput from '../../common/TextInput';
-import ChipInput from '../../common/ChipInput';
 import { IChat, IChatParticipant, IChatType } from '../chatReducer';
-import IProfile, { AuthContext } from '../../auth/authReducer';
+import { AuthContext } from '../../auth/authReducer';
 import { v4 } from 'uuid';
 import FullPageSpinner from '../../common/FullPageSpinner';
 import authFetch from '../../util/authFetch';
-import UserProfileListItem from '../common/UserProfileListItem';
 import BigButton from '../../common/BigButton';
 import { useHistory } from '../../router';
 import errorToast, { notificationToast } from '../../util/errorToast';
@@ -18,6 +16,7 @@ import {
   removeParticipantFromParticipantList,
 } from './modifyParticipants';
 import getThemeVars from '../../common/getThemeVars';
+import ProfileSelector from './ProfileSelector';
 
 const AdminSettings: FunctionComponent<{
   modifyingChat?: IChat;
@@ -100,64 +99,6 @@ const AdminSettings: FunctionComponent<{
       participants: editedChat.participants,
     });
   }
-
-  async function searchParticipant(
-    searchTerm: string,
-    isAdmin: boolean,
-  ): Promise<IChatParticipant[]> {
-    const result = await authFetch(
-      `/profile/search?term=${encodeURIComponent(searchTerm)}`,
-      { method: 'post' },
-      { expectedStatus: 200 },
-    );
-    if (result.status === 200) {
-      const profiles = (await result.json()) as IProfile[];
-      return profiles.map((profile) => ({
-        webId: profile.webId,
-        image: profile.image,
-        name: profile.name,
-        isAdmin,
-      }));
-    } else {
-      return [];
-    }
-  }
-
-  const renderParticipantChip = (
-    item: IChatParticipant,
-    onRemove: (item: IChatParticipant) => void,
-  ) => {
-    return (
-      <UserProfileListItem
-        key={item.webId}
-        profile={item}
-        accessoryRight={(props) => (
-          <Button
-            {...props}
-            appearance="ghost"
-            onPress={() => onRemove(item)}
-            accessoryLeft={(props) => <Icon {...props} name="close-outline" />}
-          />
-        )}
-      />
-    );
-  };
-
-  const renderParticipantSearchResult = (
-    item: IChatParticipant,
-    onAdd: (item: IChatParticipant) => void,
-  ) => {
-    return (
-      <UserProfileListItem
-        key={item.webId}
-        name={`Add ${item.name} as ${
-          item.isAdmin ? `an administrator` : `a participant`
-        }`}
-        image={item.image}
-        onPress={() => onAdd(item)}
-      />
-    );
-  };
 
   const updateChat = async () => {
     setLoading(true);
@@ -273,29 +214,23 @@ const AdminSettings: FunctionComponent<{
       >
         Public Chat?
       </Toggle>
-      <ChipInput<IChatParticipant>
+      <ProfileSelector
         value={editedChat.participants?.filter(
           (participant) => participant.isAdmin,
         )}
-        search={(text) => searchParticipant(text, true)}
-        renderChip={renderParticipantChip}
-        renderSearchResult={renderParticipantSearchResult}
+        isAdmin={true}
         onAdded={addParticipant}
         onRemoved={removeParticipant}
         label="Chat Administrators"
-        placeholder="Search names and WebIds to add administrators"
       />
-      <ChipInput<IChatParticipant>
+      <ProfileSelector
         value={editedChat.participants?.filter(
           (participant) => !participant.isAdmin,
         )}
-        search={(text) => searchParticipant(text, false)}
-        renderChip={renderParticipantChip}
-        renderSearchResult={renderParticipantSearchResult}
+        isAdmin={false}
         onAdded={addParticipant}
         onRemoved={removeParticipant}
         label="Chat Participants"
-        placeholder="Search names and WebIds to add participants"
       />
       <BigButton
         loading={loading}

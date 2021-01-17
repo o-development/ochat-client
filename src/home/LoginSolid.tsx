@@ -27,13 +27,10 @@ const LoginSolid: FunctionComponent = () => {
   const initiateLogin = async (issuer: string) => {
     setLoading(true);
     const callbackUrl = makeUrl('onboard/callback');
-    console.log('Opening Redirect');
-    console.log(callbackUrl);
     const result = await openAuthSessionAsync(
       `${API_URL}/auth/login?redirect=${callbackUrl}&issuer=${issuer}`,
       callbackUrl,
     );
-    console.log('AFTER REDIRECT', result.type);
     if (result.type === 'success') {
       const url = result.url;
       const parsedUrl = parse(url, true);

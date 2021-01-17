@@ -9,8 +9,6 @@ const CreateAccount: FunctionComponent = () => {
   const [errorMessage, setErrorMessage] = useState('');
   useAsyncEffect(async () => {
     const result = maybeCompleteAuthSession();
-    console.log('IN HERERE');
-    console.log(result);
     if (result.type === 'failed') {
       setErrorMessage(result.message);
     }

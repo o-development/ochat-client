@@ -1,5 +1,4 @@
 import React, {
-  Fragment,
   FunctionComponent,
   useContext,
   useEffect,
@@ -18,7 +17,6 @@ const Home: FunctionComponent = () => {
   const [authState] = useContext(AuthContext);
   const [isWaitingForAuth, setIsWaitingForAuth] = useState(true);
   useEffect(() => {
-    console.log('IN HOME');
     if (authState.profile) {
       history.push('/chat');
     } else if (!authState.isLoading) {
@@ -26,7 +24,17 @@ const Home: FunctionComponent = () => {
     }
   }, [setIsWaitingForAuth, history, authState.isLoading, authState.profile]);
   if (isWaitingForAuth) {
-    return <Fragment />;
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <Image
+          source={require('../../assets/splash.png')}
+          style={{
+            width: 205,
+            height: 40,
+          }}
+        />
+      </View>
+    );
   }
 
   return (

@@ -2,11 +2,12 @@ import React, { FunctionComponent } from 'react';
 import { ApplicationProvider, IconRegistry } from '@ui-kitten/components';
 import * as eva from '@eva-design/eva';
 import { Routes } from './src/Routes';
-import { StatusBar, View } from 'react-native';
+import { View } from 'react-native';
 import { EvaIconsPack } from '@ui-kitten/eva-icons';
 // import OneSignalHandler from './src/OneSignalHandler';
 import Toast from 'react-native-toast-message';
 import injectWebCss from './src/util/injectWebCss';
+import { getStatusBarHeight } from 'react-native-status-bar-height';
 
 // import { Notifications } from 'expo';
 
@@ -51,7 +52,7 @@ const App: FunctionComponent = () => {
             left: 0,
             right: 0,
             bottom: 0,
-            paddingTop: StatusBar.currentHeight,
+            paddingTop: getStatusBarHeight(),
           }}
         >
           <Routes />
