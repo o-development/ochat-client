@@ -1,6 +1,7 @@
 import { Platform } from 'react-native';
 import { PUSH_SERVER_PUBLIC_KEY } from '@env';
 import errorToast from './errorToast';
+import authFetch from './authFetch';
 
 // This is a load bearing console.info. Apparently the
 // dotenv compiler plugin doesn't work properly without it
@@ -40,8 +41,20 @@ export async function requestNotificationPermission(): Promise<boolean> {
       userVisibleOnly: true,
       applicationServerKey: PUSH_SERVER_PUBLIC_KEY,
     });
-    console.log(JSON.stringify(pushSubscription));
-    return true;
+    const result = await authFetch(
+      '/notification/web-subscription',
+      {
+        method: 'post',
+        body: JSON.stringify(pushSubscription),
+        headers: {
+          'content-type': 'application/json',
+        },
+      },
+      { expectedStatus: 201 },
+    );
+    if (result.status === 201) {
+      return true;
+    }
   }
   return false;
 
