@@ -6,6 +6,7 @@ import Home from './home/Home';
 import AuthHandler from './auth/AuthHandler';
 import { DeepLinking } from 'react-router-native';
 import { Platform } from 'react-native';
+import NotificationInitializer from './NotificationInitializer';
 
 export const Routes: FunctionComponent = () => {
   return (
@@ -18,6 +19,7 @@ export const Routes: FunctionComponent = () => {
             <Route path="/chat" component={ChatApp} />
             <Route path="/" component={Home} />
           </Switch>
+          <NotificationInitializer />
         </AuthHandler>
       </BackButton>
     </Router>

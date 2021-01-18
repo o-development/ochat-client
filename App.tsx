@@ -7,16 +7,10 @@ import { EvaIconsPack } from '@ui-kitten/eva-icons';
 import Toast from 'react-native-toast-message';
 import injectWebCss from './src/util/injectWebCss';
 import { getStatusBarHeight } from 'react-native-status-bar-height';
-import useAsyncEffect from 'use-async-effect';
-import { initPushNotificationProcess } from './src/util/notificationUtils';
 
 injectWebCss();
 
 const App: FunctionComponent = () => {
-  useAsyncEffect(async () => {
-    await initPushNotificationProcess();
-  });
-
   return (
     <View
       style={{
