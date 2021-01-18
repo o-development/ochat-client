@@ -1,8 +1,8 @@
 /* eslint-env serviceworker */
 
-console.log('[Service Worker] Registered');
+console.info('[Service Worker] Registered');
 function receivePushNotification(event) {
-  console.log('[Service Worker] Push Received.');
+  console.info('[Service Worker] Push Received.');
   const { image, tag, url, title, text } = event.data.json();
   const options = {
     data: { url },

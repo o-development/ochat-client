@@ -26,7 +26,7 @@ const ChatSocketHandler: FunctionComponent = () => {
       });
 
       socket.on('connect', () => {
-        console.log('connected to socket.io');
+        console.info('connected to socket.io');
       });
 
       socket.on('message', (chatId: string, messages: IMessage[]) => {

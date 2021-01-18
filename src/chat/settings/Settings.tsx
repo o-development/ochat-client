@@ -51,7 +51,6 @@ const Settings: FunctionComponent<{
         style={{ marginVertical: 16 }}
         checked={notificationToggle}
         onChange={async (val) => {
-          console.log(val);
           if (val) {
             setNotificationToggle(await requestNotificationPermission());
           } else {
