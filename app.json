@@ -9,6 +9,7 @@
     "assetBundlePatterns": [
       "**/*"
     ],
+    "icon": "./assets/logo.png",
     "web": {
       "favicon": "./assets/favicon.png",
       "build": {
