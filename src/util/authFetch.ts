@@ -1,4 +1,4 @@
-import * as SecureStore from 'expo-secure-store';
+import * as ClientStorage from '../util/clientStorage';
 
 import { API_URL } from '@env';
 import errorToast from './errorToast';
@@ -45,7 +45,7 @@ export default async function authFetch(
     expectedStatus?: number;
   },
 ): Promise<Response> {
-  const authkey = await SecureStore.getItemAsync('authkey');
+  const authkey = await ClientStorage.getItem('authkey');
   try {
     let response: Response;
     if (authkey) {
