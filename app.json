@@ -3,10 +3,19 @@
   "displayName": "Liqid Chat",
   "expo": {
     "name": "Liqid Chat",
-    "slug": "ochat-client",
+    "slug": "LiqidChat",
+    "scheme": "liqidchat",
     "version": "1.0.0",
     "assetBundlePatterns": [
       "**/*"
-    ]
+    ],
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "build": {
+        "babel": {
+          "include": ["react-router-native"]
+        }
+      }
+    }
   }
 }

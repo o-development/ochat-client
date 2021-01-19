@@ -5,24 +5,32 @@ import OnboardPageLayout from '../OnboardPageLayout';
 import { useHistory } from '../../router';
 import useAsyncEffect from 'use-async-effect';
 import FullPageSpinner from '../../common/FullPageSpinner';
+import {
+  areNotificationsEnabled,
+  requestNotificationPermission,
+} from '../../util/notificationUtils';
 
 const PushNotifications: FunctionComponent = () => {
   const history = useHistory();
   const goToNext = () => {
     history.push('/chat');
   };
-  const [areNotificationsOn] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useAsyncEffect(async () => {
-    // TODO check if push notifications are enabled
-    goToNext();
+    if (await areNotificationsEnabled()) {
+      goToNext();
+    } else {
+      setLoading(false);
+    }
   });
 
-  const triggerPushNotifications = () => {
-    // TODO trigger push notifications
+  const triggerPushNotifications = async () => {
+    await requestNotificationPermission();
+    goToNext();
   };
 
-  if (!areNotificationsOn) {
+  if (loading) {
     return <FullPageSpinner />;
   }
 
@@ -37,7 +45,7 @@ const PushNotifications: FunctionComponent = () => {
           <BigButton
             title="Enable Notifications"
             containerStyle={{ marginBottom: 8 }}
-            onPress={() => triggerPushNotifications}
+            onPress={triggerPushNotifications}
           />
           <BigButton
             appearance="ghost"

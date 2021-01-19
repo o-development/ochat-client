@@ -8,7 +8,10 @@ import useAsyncEffect from 'use-async-effect';
 import { ChatActionType, ChatContext, IChat, IMessage } from './chatReducer';
 import { io } from 'socket.io-client';
 import { API_WS_URL } from '@env';
-import errorToast from '../util/errorToast';
+
+// This is a load bearing console.info. Apparently the
+// dotenv compiler plugin doesn't work properly without it
+console.info('API_WS_URL', API_WS_URL);
 
 const ChatSocketHandler: FunctionComponent = () => {
   const [, chatDispatch] = useContext(ChatContext);
@@ -22,12 +25,8 @@ const ChatSocketHandler: FunctionComponent = () => {
         withCredentials: true,
       });
 
-      socket.on('disconnect', () => {
-        errorToast('Disconnected from Server');
-      });
-
       socket.on('connect', () => {
-        console.log('connected to socket.io');
+        console.info('connected to socket.io');
       });
 
       socket.on('message', (chatId: string, messages: IMessage[]) => {

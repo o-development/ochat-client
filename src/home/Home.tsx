@@ -1,20 +1,17 @@
 import React, {
-  Fragment,
   FunctionComponent,
   useContext,
   useEffect,
   useState,
 } from 'react';
 import { Layout } from '@ui-kitten/components';
-import { Image, View } from 'react-native';
+import { Image, useWindowDimensions, View } from 'react-native';
 import LoginSolid from './LoginSolid';
-
-import { Dimensions } from 'react-native';
 import { AuthContext } from '../auth/authReducer';
 import { useHistory } from '../router';
 
 const Home: FunctionComponent = () => {
-  const isMobile = Dimensions.get('window').width < 800;
+  const isMobile = useWindowDimensions().width < 800;
 
   const history = useHistory();
   const [authState] = useContext(AuthContext);
@@ -25,9 +22,19 @@ const Home: FunctionComponent = () => {
     } else if (!authState.isLoading) {
       setIsWaitingForAuth(false);
     }
-  });
+  }, [setIsWaitingForAuth, history, authState.isLoading, authState.profile]);
   if (isWaitingForAuth) {
-    return <Fragment />;
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <Image
+          source={require('../../assets/splash.png')}
+          style={{
+            width: 205,
+            height: 40,
+          }}
+        />
+      </View>
+    );
   }
 
   return (
@@ -35,18 +42,29 @@ const Home: FunctionComponent = () => {
       style={{
         flexDirection: isMobile ? 'column' : 'row',
         flex: 1,
-        alignItems: 'center',
+        alignItems: 'stretch',
         justifyContent: 'space-around',
         width: '100%',
       }}
     >
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <View
+        style={{
+          flex: isMobile ? undefined : 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          paddingLeft: 25,
+          paddingRight: 25,
+        }}
+      >
         <Image
           source={require('../../assets/splash.png')}
           style={{
-            width: 300,
-            height: 150,
+            maxWidth: 564,
+            width: '100%',
+            height: 108,
+            marginBottom: 25,
           }}
+          resizeMode="contain"
         />
         {!isMobile && (
           <View style={{ flexDirection: 'row' }}>

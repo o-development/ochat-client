@@ -5,7 +5,6 @@ import OnboardPageLayout from '../OnboardPageLayout';
 import authFetch from '../../util/authFetch';
 import { useHistory } from '../../router';
 import useAsyncEffect from 'use-async-effect';
-import FullPageSpinner from '../../common/FullPageSpinner';
 import IProfile, { AuthActionType, AuthContext } from '../../auth/authReducer';
 
 const PersonIndexRequest: FunctionComponent = () => {
@@ -48,7 +47,7 @@ const PersonIndexRequest: FunctionComponent = () => {
   };
 
   if (!isNotIndexed) {
-    return <FullPageSpinner />;
+    return <></>;
   }
 
   return (

@@ -3,11 +3,14 @@
   "scripts": {
     "android": "react-native run-android",
     "ios": "react-native run-ios",
-    "web": "env BROWSER=firefox expo start --web",
+    "web": "env BROWSER=firefox expo start --web --https",
+    "web-chrome": "env BROWSER=chrome expo start --web --https",
     "build:web": "expo build:web",
     "start": "react-native start",
     "test": "jest",
-    "postinstall": "./scripts/fix.sh"
+    "postinstall": "./scripts/fix.sh",
+    "expo": "expo start",
+    "clear-cache": "expo r -c"
   },
   "dependencies": {
     "@eva-design/eva": "^2.0.0",
@@ -15,8 +18,12 @@
     "@ui-kitten/components": "^5.0.0",
     "@ui-kitten/eva-icons": "^5.0.0",
     "expo": "~40.0.0",
+    "expo-notifications": "^0.8.2",
+    "expo-permissions": "^8.1.0",
     "expo-splash-screen": "~0.8.0",
     "expo-updates": "~0.4.0",
+    "expo-web-browser": "^8.6.0",
+    "qs": "^6.9.4",
     "query-string": "^6.13.7",
     "react": "16.13.1",
     "react-dom": "16.13.1",
@@ -24,10 +31,12 @@
     "react-native-dotenv": "^2.4.3",
     "react-native-gesture-handler": "~1.8.0",
     "react-native-gifted-chat": "^0.16.3",
+    "react-native-keyboard-avoiding-scroll-view": "^1.0.1",
     "react-native-reanimated": "^1.7.0",
     "react-native-screens": "~2.15.0",
+    "react-native-status-bar-height": "^2.6.0",
     "react-native-svg": "^12.1.0",
-    "react-native-toast-message": "^1.4.2",
+    "react-native-toast-message": "jaxoncreed/react-native-toast-message#master",
     "react-native-unimodules": "^0.9.1",
     "react-native-web": "~0.13.12",
     "react-router-dom": "^5.2.0",
@@ -39,6 +48,7 @@
   "devDependencies": {
     "@babel/core": "~7.9.0",
     "@expo/webpack-config": "^0.12.52",
+    "@types/qs": "^6.9.5",
     "@types/react": "~16.9.35",
     "@types/react-dom": "~16.9.8",
     "@types/react-native": "~0.63.2",
@@ -53,6 +63,7 @@
     "eslint-config-prettier": "^7.1.0",
     "eslint-plugin-prettier": "^3.3.0",
     "eslint-plugin-react": "^7.21.5",
+    "eslint-plugin-react-hooks": "^4.2.0",
     "expo-cli": "^4.0.17",
     "jest-expo": "~40.0.0",
     "prettier": "^2.2.1",
@@ -62,5 +73,6 @@
     "preset": "react-native"
   },
   "private": true,
-  "name": "ochat-client"
+  "name": "ochat-client",
+  "version": "1.0.0"
 }

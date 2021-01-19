@@ -1,22 +1,17 @@
 import React, { FunctionComponent } from 'react';
-import { Route, Router, Switch, BackButton, useHistory } from './router';
+import { Route, Router, Switch, BackButton } from './router';
 import OnboardFlow from './onboard/OnboardFlow';
 import ChatApp from './chat/ChatApp';
-import { Linking } from 'react-native';
-import { MOBILE_URL } from '@env';
 import Home from './home/Home';
 import AuthHandler from './auth/AuthHandler';
+import { DeepLinking } from 'react-router-native';
+import { Platform } from 'react-native';
+import NotificationInitializer from './NotificationInitializer';
 
 export const Routes: FunctionComponent = () => {
-  const history = useHistory();
-  Linking.addEventListener('url', (link) => {
-    if (link) {
-      history.push(link.url.replace(MOBILE_URL, ''));
-    }
-  });
-
   return (
     <Router>
+      {Platform.OS !== 'web' ? <DeepLinking /> : undefined}
       <BackButton>
         <AuthHandler>
           <Switch>
@@ -24,6 +19,7 @@ export const Routes: FunctionComponent = () => {
             <Route path="/chat" component={ChatApp} />
             <Route path="/" component={Home} />
           </Switch>
+          <NotificationInitializer />
         </AuthHandler>
       </BackButton>
     </Router>

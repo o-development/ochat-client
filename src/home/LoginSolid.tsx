@@ -1,21 +1,65 @@
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, useContext, useState } from 'react';
 import { Text } from '@ui-kitten/components';
-import { Linking, Platform, View } from 'react-native';
+import { View } from 'react-native';
+import { parse } from 'url';
+import { openAuthSessionAsync } from 'expo-web-browser';
+import { makeUrl } from 'expo-linking';
 import BigButton from '../common/BigButton';
 import OnboardPageLayout from '../onboard/OnboardPageLayout';
 import TextInput from '../common/TextInput';
 import { useHistory } from '../router';
-import { API_URL, MOBILE_URL, WEB_URL } from '@env';
+import { API_URL } from '@env';
+import AsyncStorage from '@react-native-community/async-storage';
+import { AuthActionType, AuthContext } from '../auth/authReducer';
+import authFetch from '../util/authFetch';
+import FullPageSpinner from '../common/FullPageSpinner';
+
+// This is a load bearing console.info. Apparently the
+// dotenv compiler plugin doesn't work properly without it
+console.info('API_URL', API_URL);
 
 const LoginSolid: FunctionComponent = () => {
   const history = useHistory();
 
-  const initiateLogin = (issuer: string) => {
-    const callbackUrl = Platform.OS === 'web' ? WEB_URL : MOBILE_URL;
-    Linking.openURL(
-      `${API_URL}/auth/login?redirect=${callbackUrl}/onboard/callback&issuer=${issuer}`,
+  const [, authDispatch] = useContext(AuthContext);
+  const [loading, setLoading] = useState(false);
+
+  const initiateLogin = async (issuer: string) => {
+    setLoading(true);
+    const callbackUrl = makeUrl('onboard/callback');
+    const result = await openAuthSessionAsync(
+      `${API_URL}/auth/login?redirect=${callbackUrl}&issuer=${issuer}`,
+      callbackUrl,
     );
+    if (result.type === 'success') {
+      const url = result.url;
+      const parsedUrl = parse(url, true);
+      const key = Array.isArray(parsedUrl.query.key)
+        ? parsedUrl.query.key[0]
+        : parsedUrl.query.key;
+      if (key) {
+        await AsyncStorage.setItem('authkey', key);
+      }
+      const response = await authFetch(`/profile/authenticated`, undefined, {
+        expectedStatus: 200,
+        errorHandlers: {
+          '404': async () => {
+            history.push('/onboard/person_index_request');
+          },
+        },
+      });
+      if (response.status === 200) {
+        const profile = await response.json();
+        authDispatch({ type: AuthActionType.LOGGED_IN, profile });
+        history.push('/chat');
+      }
+    }
+    setLoading(false);
   };
+
+  if (loading) {
+    return <FullPageSpinner />;
+  }
 
   return (
     <OnboardPageLayout

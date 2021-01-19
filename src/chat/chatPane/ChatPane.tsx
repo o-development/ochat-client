@@ -6,118 +6,30 @@ import {
   Divider,
   TopNavigationAction,
   Icon,
-  Text,
 } from '@ui-kitten/components';
-import BigButton from '../../common/BigButton';
 import { useHistory } from '../../router';
 import getThemeVars from '../../common/getThemeVars';
-import {
-  GiftedChat,
-  IMessage as IGiftedChatMessage,
-  Bubble,
-  InputToolbar,
-  Composer,
-} from 'react-native-gifted-chat';
-import { Dimensions, ViewStyle } from 'react-native';
-import dayjs from 'dayjs';
-import NewChatPane from '../newChatPane/NewChatPane';
-import { ChatActionType, ChatContext, IMessage } from '../chatReducer';
+import { ChatContext } from '../chatReducer';
 import FullPageSpinner from '../../common/FullPageSpinner';
-import useAsyncEffect from 'use-async-effect';
-import authFetch from '../../util/authFetch';
-import { v4 } from 'uuid';
-import { AuthContext } from '../../auth/authReducer';
+import ChatSettingsPane from '../chatSettings/ChatSettingsPane';
+import ChatComponent from './ChatComponent';
+import { useWindowDimensions, View } from 'react-native';
+import ChatDetails from '../chatSettings/ChatDetails';
+import { ScrollView } from 'react-native-gesture-handler';
 
 const ChatPane: FunctionComponent<{
   chatUri: string;
   mobileRender?: boolean;
 }> = ({ chatUri, mobileRender }) => {
   const history = useHistory();
-  const {
-    themeColor,
-    backgroundColor4,
-    dividerColor,
-    backgroundColor1,
-    basicTextColor,
-  } = getThemeVars();
+  const { themeColor, dividerColor } = getThemeVars();
 
   const [isEditing, setIsEditing] = useState(false);
 
-  const [chatState, chatDispatch] = useContext(ChatContext);
+  const [chatState] = useContext(ChatContext);
   const chatData = chatState.chats[chatUri];
 
-  const [authState] = useContext(AuthContext);
-
-  const shouldSquishBubbles = Dimensions.get('window').width < 700;
-
-  useAsyncEffect(async () => {
-    await Promise.all([
-      (async () => {
-        // Fetch Chat
-        if (!chatData) {
-          const result = await authFetch(
-            `/chat/${encodeURIComponent(chatUri)}`,
-            undefined,
-            {
-              expectedStatus: 200,
-            },
-          );
-          if (result.status === 200) {
-            const resultBody = await result.json();
-            chatDispatch({
-              type: ChatActionType.UPDATE_CHAT,
-              chats: [resultBody],
-            });
-          }
-        }
-      })(),
-      (async () => {
-        // Fetch Messages
-        if (!chatState.performedActions[`initialChatMessageFetch:${chatUri}`]) {
-          const result = await authFetch(
-            `/message/${encodeURIComponent(chatUri)}`,
-            undefined,
-            { expectedStatus: 200 },
-          );
-          if (result.status === 200) {
-            const resultBody = await result.json();
-            chatDispatch({
-              type: ChatActionType.ADD_MESSAGE,
-              chatId: chatUri,
-              message: resultBody as IMessage[],
-              performedAction: `initialChatMessageFetch:${chatUri}`,
-            });
-          }
-        }
-      })(),
-    ]);
-  });
-
-  if (!authState.profile) {
-    return <FullPageSpinner />;
-  }
-  const loggedInUser = authState.profile.webId;
-
-  const onLoadEarlier = async () => {
-    if (chatData) {
-      const previousPage = chatData.messages[chatData.messages.length - 1].page;
-      const result = await authFetch(
-        `/message/${encodeURIComponent(
-          chatUri,
-        )}?previous_page_id=${encodeURIComponent(previousPage)}`,
-        undefined,
-        { expectedStatus: 200 },
-      );
-      if (result.status === 200) {
-        const resultBody = await result.json();
-        chatDispatch({
-          type: ChatActionType.ADD_MESSAGE,
-          chatId: chatUri,
-          message: resultBody as IMessage[],
-        });
-      }
-    }
-  };
+  const isWide = useWindowDimensions().width > 1000;
 
   if (!chatData || !chatData.chat) {
     return <FullPageSpinner />;
@@ -125,65 +37,11 @@ const ChatPane: FunctionComponent<{
 
   if (isEditing) {
     return (
-      <NewChatPane
+      <ChatSettingsPane
         onChatModificationClosed={() => setIsEditing(false)}
         mobileRender={mobileRender}
         modifyingChat={chatData.chat}
       />
-    );
-  }
-
-  const giftedChatMessages: IGiftedChatMessage[] = chatData.messages.map(
-    (message): IGiftedChatMessage => ({
-      _id: message.id,
-      text: message.content,
-      createdAt: new Date(message.timeCreated),
-      user: {
-        _id: message.maker,
-      },
-    }),
-  );
-
-  async function handleOnSend(newGiftedChatMessages: IGiftedChatMessage[]) {
-    const messages = newGiftedChatMessages.map((newGiftedChatMessage) => ({
-      id: v4(),
-      page:
-        chatData?.messages[0] && chatData.messages[0].page
-          ? chatData.messages[0].page
-          : '',
-      maker: loggedInUser,
-      content: newGiftedChatMessage.text,
-      timeCreated: new Date(newGiftedChatMessage.createdAt).toISOString(),
-    }));
-    chatDispatch({
-      type: ChatActionType.ADD_MESSAGE,
-      chatId: chatUri,
-      message: messages,
-    });
-    await Promise.all(
-      messages.map(async (message) => {
-        const result = await authFetch(
-          `/message/${encodeURIComponent(chatUri)}`,
-          {
-            method: 'POST',
-            body: JSON.stringify(message),
-            headers: {
-              'content-type': 'application/json',
-            },
-          },
-          {
-            expectedStatus: 201,
-          },
-        );
-        if (result.status === 201) {
-          const resultBody = await result.json();
-          chatDispatch({
-            type: ChatActionType.ADD_MESSAGE,
-            chatId: chatUri,
-            message: resultBody,
-          });
-        }
-      }),
     );
   }
 
@@ -193,10 +51,11 @@ const ChatPane: FunctionComponent<{
         alignment="center"
         title={chatData.chat.name}
         accessoryRight={() => (
-          <BigButton
-            title="Chat Settings"
-            appearance="ghost"
+          <TopNavigationAction
             onPress={() => setIsEditing(true)}
+            icon={(props) => (
+              <Icon {...props} name="settings-2-outline" fill={themeColor} />
+            )}
           />
         )}
         accessoryLeft={
@@ -213,72 +72,21 @@ const ChatPane: FunctionComponent<{
         }
       />
       <Divider />
-      <GiftedChat
-        messages={giftedChatMessages}
-        onSend={handleOnSend}
-        user={{
-          _id: loggedInUser,
-        }}
-        inverted={true}
-        loadEarlier={true}
-        infiniteScroll={true}
-        onLoadEarlier={onLoadEarlier}
-        renderMessageText={(props) => (
-          <Text style={{ color: '#FFF' }}>{props.currentMessage?.text}</Text>
-        )}
-        renderTime={({ currentMessage, timeFormat }) => {
-          return (
-            <Text category="c1" style={{ color: '#FFF' }}>
-              {dayjs(currentMessage?.createdAt).locale('en').format(timeFormat)}
-            </Text>
-          );
-        }}
-        renderBubble={(props) => {
-          const commonWrapperStyle: ViewStyle = {
-            padding: 10,
-            maxWidth: shouldSquishBubbles ? undefined : '55%',
-          };
-          const commonContainerStyle: ViewStyle = {
-            marginVertical: 4,
-          };
-          return (
-            <Bubble
-              {...props}
-              containerStyle={{
-                left: commonContainerStyle,
-                right: commonContainerStyle,
-              }}
-              wrapperStyle={{
-                left: {
-                  backgroundColor: backgroundColor4,
-                  ...commonWrapperStyle,
-                },
-                right: { backgroundColor: themeColor, ...commonWrapperStyle },
-              }}
-            />
-          );
-        }}
-        renderInputToolbar={(props) => {
-          return (
-            <InputToolbar
-              {...props}
-              containerStyle={[
-                props.containerStyle,
-                {
-                  borderTopColor: dividerColor,
-                  backgroundColor: backgroundColor1,
-                },
-              ]}
-            />
-          );
-        }}
-        renderComposer={(props) => (
-          <Composer
-            {...props}
-            textInputStyle={[props.textInputStyle, { color: basicTextColor }]}
-          />
-        )}
-      />
+      <View style={{ flex: 1, flexDirection: 'row' }}>
+        <ChatComponent chatUri={chatUri} />
+        {isWide ? (
+          <ScrollView
+            style={{
+              maxWidth: 300,
+              padding: 12,
+              borderLeftColor: dividerColor,
+              borderLeftWidth: 1,
+            }}
+          >
+            <ChatDetails chat={chatData.chat} />
+          </ScrollView>
+        ) : undefined}
+      </View>
     </Layout>
   );
 };

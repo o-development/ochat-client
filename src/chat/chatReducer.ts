@@ -38,11 +38,14 @@ export interface IChat {
 export interface IChatData {
   chat?: IChat;
   messages: IMessage[];
+  allMessagesLoaded: boolean;
 }
 
 export interface IChatState {
   chats: Record<string, IChatData>;
+  allChatsLoaded: boolean;
   performedActions: Record<string, boolean>;
+  lastChatPageLoaded: number;
 }
 
 /**
@@ -61,12 +64,15 @@ export interface IBaseChatAction {
 export interface IUpdateChatAction extends IBaseChatAction {
   type: ChatActionType.UPDATE_CHAT;
   chats: IChat[];
+  allChatsLoaded?: boolean;
+  lastChatPageLoaded?: number;
 }
 
 export interface IAddMessageAction extends IBaseChatAction {
   type: ChatActionType.ADD_MESSAGE;
   chatId: string;
   message: IMessage | IMessage[];
+  allMessagesLoaded?: boolean;
 }
 
 export type IChatAction = IUpdateChatAction | IAddMessageAction;
@@ -86,7 +92,10 @@ export const chatReducer: Reducer<IChatState, IChatAction> = (
       const newChatMap: Record<string, IChatData> = state.chats;
       action.chats.forEach((newChat) => {
         newChatMap[newChat.uri] = {
-          ...(state.chats[newChat.uri] || { messages: [] }),
+          ...(state.chats[newChat.uri] || {
+            messages: [],
+            allMessagesLoaded: false,
+          }),
           chat: {
             ...(state.chats[newChat.uri]?.chat || {}),
             ...newChat,
@@ -96,6 +105,11 @@ export const chatReducer: Reducer<IChatState, IChatAction> = (
       return {
         ...state,
         chats: newChatMap,
+        allChatsLoaded: action.allChatsLoaded || false,
+        lastChatPageLoaded:
+          action.lastChatPageLoaded == undefined
+            ? state.lastChatPageLoaded
+            : action.lastChatPageLoaded,
       };
       break;
     case ChatActionType.ADD_MESSAGE:
@@ -103,7 +117,7 @@ export const chatReducer: Reducer<IChatState, IChatAction> = (
         ? action.message
         : [action.message];
       if (!state.chats[action.chatId]) {
-        state.chats[action.chatId] = { messages: [] };
+        state.chats[action.chatId] = { messages: [], allMessagesLoaded: false };
       }
       const currentMessages = state.chats[action.chatId].messages;
       newMessages.forEach((newMessage) => {
@@ -133,6 +147,7 @@ export const chatReducer: Reducer<IChatState, IChatAction> = (
                 return 0;
               }
             }),
+            allMessagesLoaded: action.allMessagesLoaded || false,
           },
         },
       };
@@ -147,7 +162,9 @@ export const chatReducer: Reducer<IChatState, IChatAction> = (
  */
 export const initialChatState: IChatState = {
   chats: {},
+  allChatsLoaded: false,
   performedActions: {},
+  lastChatPageLoaded: -1,
 };
 
 /**
