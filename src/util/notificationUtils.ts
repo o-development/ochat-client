@@ -3,7 +3,7 @@ import * as Notifications from 'expo-notifications';
 import { PUSH_SERVER_PUBLIC_KEY } from '@env';
 import errorToast from './errorToast';
 import authFetch from './authFetch';
-import AsyncStorage from '@react-native-community/async-storage';
+import * as SecureStore from 'expo-secure-store';
 import { v4 } from 'uuid';
 
 // This is a load bearing console.info. Apparently the
@@ -47,10 +47,10 @@ export interface IMobileNotificationSubscription
  * Initializes the environment for push notifications when the application mounts
  */
 export async function initPushNotificationProcess(): Promise<void> {
-  let clientId = await AsyncStorage.getItem('clientId');
+  let clientId = await SecureStore.getItemAsync('clientId');
   if (!clientId) {
     clientId = v4();
-    await AsyncStorage.setItem('clientId', clientId);
+    await SecureStore.setItemAsync('clientId', clientId);
   }
   if (Platform.OS === 'web') {
     await navigator.serviceWorker.register('/notification-service-worker.js');
@@ -133,7 +133,7 @@ export async function registerNotificationSubscription(): Promise<boolean> {
   } else {
     return false;
   }
-  const clientId = await AsyncStorage.getItem('clientId');
+  const clientId = await SecureStore.getItemAsync('clientId');
   if (!clientId) {
     return false;
   }
@@ -192,7 +192,7 @@ export async function isNotificationAccessGranted(): Promise<boolean> {
  * @returns true if the subscription is registered
  */
 export async function isSubscriptionRegistered(): Promise<boolean> {
-  const clientId = await AsyncStorage.getItem('clientId');
+  const clientId = await SecureStore.getItemAsync('clientId');
   if (!clientId) {
     return false;
   }
@@ -233,7 +233,7 @@ export async function areNotificationsEnabled(): Promise<boolean> {
  * @returns true if notifications were successfully disabled
  */
 export async function disableNotifications(): Promise<boolean> {
-  const clientId = await AsyncStorage.getItem('clientId');
+  const clientId = await SecureStore.getItemAsync('clientId');
   if (!clientId) {
     return false;
   }

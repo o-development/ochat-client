@@ -5,7 +5,7 @@ import { useHistory } from '../../router';
 import BigButton from '../../common/BigButton';
 import SettingsMenuTemplate from '../common/SettingsMenuTemplate';
 import authFetch from '../../util/authFetch';
-import AsyncStorage from '@react-native-community/async-storage';
+import * as SecureStore from 'expo-secure-store';
 import { AuthActionType, AuthContext } from '../../auth/authReducer';
 import useAsyncEffect from 'use-async-effect';
 import {
@@ -41,7 +41,7 @@ const Settings: FunctionComponent<{
           history.push('/');
         }
       }),
-      AsyncStorage.removeItem('authkey'),
+      SecureStore.deleteItemAsync('authkey'),
     ]);
   }
 

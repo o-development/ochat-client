@@ -1,4 +1,4 @@
-import AsyncStorage from '@react-native-community/async-storage';
+import * as SecureStore from 'expo-secure-store';
 
 import { API_URL } from '@env';
 import errorToast from './errorToast';
@@ -45,7 +45,7 @@ export default async function authFetch(
     expectedStatus?: number;
   },
 ): Promise<Response> {
-  const authkey = await AsyncStorage.getItem('authkey');
+  const authkey = await SecureStore.getItemAsync('authkey');
   try {
     let response: Response;
     if (authkey) {

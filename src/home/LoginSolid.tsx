@@ -9,7 +9,7 @@ import OnboardPageLayout from '../onboard/OnboardPageLayout';
 import TextInput from '../common/TextInput';
 import { useHistory } from '../router';
 import { API_URL } from '@env';
-import AsyncStorage from '@react-native-community/async-storage';
+import * as SecureStore from 'expo-secure-store';
 import { AuthActionType, AuthContext } from '../auth/authReducer';
 import authFetch from '../util/authFetch';
 import FullPageSpinner from '../common/FullPageSpinner';
@@ -38,7 +38,7 @@ const LoginSolid: FunctionComponent = () => {
         ? parsedUrl.query.key[0]
         : parsedUrl.query.key;
       if (key) {
-        await AsyncStorage.setItem('authkey', key);
+        await SecureStore.setItemAsync('authkey', key);
       }
       const response = await authFetch(`/profile/authenticated`, undefined, {
         expectedStatus: 200,
