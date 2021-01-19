@@ -7,7 +7,7 @@ import useAsyncEffect from 'use-async-effect';
 import FullPageSpinner from '../../common/FullPageSpinner';
 import {
   areNotificationsEnabled,
-  requestNotificationPermission,
+  enableNotifications,
 } from '../../util/notificationUtils';
 
 const PushNotifications: FunctionComponent = () => {
@@ -26,7 +26,7 @@ const PushNotifications: FunctionComponent = () => {
   });
 
   const triggerPushNotifications = async () => {
-    await requestNotificationPermission();
+    await enableNotifications();
     goToNext();
   };
 

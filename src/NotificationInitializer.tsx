@@ -6,17 +6,23 @@ import React, {
 } from 'react';
 import useAsyncEffect from 'use-async-effect';
 import { AuthContext } from './auth/authReducer';
-import { useHistory } from './router';
-import { initPushNotificationProcess } from './util/notificationUtils';
+import {
+  initPushNotificationOnLogin,
+  initPushNotificationProcess,
+} from './util/notificationUtils';
 
 const NotificationInitializer: FunctionComponent = () => {
-  const [initialized, setInitialized] = useState(false);
   const [authState] = useContext(AuthContext);
-  const history = useHistory();
+  const [initialized, setInitialized] = useState(false);
+  const [initializedOnLogin, setInitializedOnLogin] = useState(false);
   useAsyncEffect(async () => {
-    if (authState.profile?.webId && !initialized) {
-      await initPushNotificationProcess({ history });
+    if (!initialized) {
+      await initPushNotificationProcess();
       setInitialized(true);
+    }
+    if (!initializedOnLogin && authState.profile?.webId) {
+      await initPushNotificationOnLogin();
+      setInitializedOnLogin(true);
     }
   });
   return <Fragment />;

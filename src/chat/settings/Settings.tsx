@@ -10,8 +10,8 @@ import { AuthActionType, AuthContext } from '../../auth/authReducer';
 import useAsyncEffect from 'use-async-effect';
 import {
   areNotificationsEnabled,
-  removeNotificationPermission,
-  requestNotificationPermission,
+  disableNotifications,
+  enableNotifications,
 } from '../../util/notificationUtils';
 
 const Settings: FunctionComponent<{
@@ -20,9 +20,13 @@ const Settings: FunctionComponent<{
   const history = useHistory();
   const [notificationToggle, setNotificationToggle] = useState(false);
   const [, authDispatch] = useContext(AuthContext);
+  const [checkedNotifications, setCheckedNotifications] = useState(false);
 
   useAsyncEffect(async () => {
-    setNotificationToggle(await areNotificationsEnabled());
+    if (!checkedNotifications) {
+      setNotificationToggle(await areNotificationsEnabled());
+      setCheckedNotifications(true);
+    }
   });
 
   async function handleLogOut(shouldLogOutAll: boolean) {
@@ -52,9 +56,9 @@ const Settings: FunctionComponent<{
         checked={notificationToggle}
         onChange={async (val) => {
           if (val) {
-            setNotificationToggle(await requestNotificationPermission());
+            setNotificationToggle(await enableNotifications());
           } else {
-            setNotificationToggle(await removeNotificationPermission());
+            setNotificationToggle(!(await disableNotifications()));
           }
         }}
       >
