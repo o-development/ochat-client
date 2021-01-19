@@ -4,24 +4,53 @@ import { PUSH_SERVER_PUBLIC_KEY } from '@env';
 import errorToast from './errorToast';
 import authFetch from './authFetch';
 import AsyncStorage from '@react-native-community/async-storage';
-import { History } from 'history';
+import { v4 } from 'uuid';
 
 // This is a load bearing console.info. Apparently the
 // dotenv compiler plugin doesn't work properly without it
 console.info('PUSH_SERVER_PUBLIC_KEY', PUSH_SERVER_PUBLIC_KEY);
 
-export function clientSupportsNotifications(): boolean {
-  if (Platform.OS === 'web') {
-    return 'serviceWorker' in navigator && 'PushManager' in window;
-  }
-  return true;
+/**
+ * Types for notification subscriptions
+ */
+export type INotificationSubscription =
+  | IWebNotificationSubscription
+  | IMobileNotificationSubscription;
+
+export interface IBaseNotificationSubscription {
+  type: string;
+  subscription: unknown;
 }
 
-export async function initPushNotificationProcess(options?: {
-  history?: History;
-}): Promise<void> {
-  if (!clientSupportsNotifications()) {
-    return;
+export interface IWebNotificationSubscription
+  extends IBaseNotificationSubscription {
+  type: 'web';
+  subscription: IWebSubscription;
+}
+
+export interface IWebSubscription {
+  endpoint: string;
+  expirationTime: number | null;
+  keys?: {
+    p256dh: string;
+    auth: string;
+  };
+}
+
+export interface IMobileNotificationSubscription
+  extends IBaseNotificationSubscription {
+  type: 'mobile';
+  subscription: string;
+}
+
+/**
+ * Initializes the environment for push notifications when the application mounts
+ */
+export async function initPushNotificationProcess(): Promise<void> {
+  let clientId = await AsyncStorage.getItem('clientId');
+  if (!clientId) {
+    clientId = v4();
+    await AsyncStorage.setItem('clientId', clientId);
   }
   if (Platform.OS === 'web') {
     await navigator.serviceWorker.register('/notification-service-worker.js');
@@ -33,116 +62,191 @@ export async function initPushNotificationProcess(options?: {
         shouldSetBadge: true,
       }),
     });
-
-    const grantedPermissions =
-      (await Notifications.getPermissionsAsync()).status === 'granted';
-    const tokenGenerated =
-      (await AsyncStorage.getItem('tokenGenerated')) === 'true';
-    if (grantedPermissions && !tokenGenerated) {
-      await setupExpoToken();
-    }
   }
 }
 
-async function setupExpoToken(): Promise<void> {
-  if (Platform.OS === 'android') {
-    Notifications.setNotificationChannelAsync('default', {
-      name: 'default',
-      importance: Notifications.AndroidImportance.MAX,
-      vibrationPattern: [200, 100, 200],
-      lightColor: '#FF231F7C',
-    });
+/**
+ * Initializes push notification information when application logged in
+ */
+export async function initPushNotificationOnLogin(): Promise<void> {
+  const [isGranted, isSubscribed] = await Promise.all([
+    isNotificationAccessGranted(),
+    isSubscriptionRegistered(),
+  ]);
+  if (isGranted && !isSubscribed) {
+    await registerNotificationSubscription();
   }
-  const token = (await Notifications.getExpoPushTokenAsync()).data;
+}
+
+/**
+ * Requests access permissions to send push notifications
+ * @returns true if the permission is granted
+ */
+export async function requestNotificationAccess(): Promise<boolean> {
+  let notificationPermission: string;
+  if (Platform.OS === 'web') {
+    notificationPermission = await Notification.requestPermission();
+  } else if (Platform.OS === 'ios' || Platform.OS === 'android') {
+    const { status } = await Notifications.requestPermissionsAsync();
+    notificationPermission = status;
+  } else {
+    return false;
+  }
+  if (notificationPermission === 'denied') {
+    errorToast(
+      'Notifications are blocked. Remove the block in your settings and try again.',
+    );
+  }
+  return notificationPermission === 'granted';
+}
+
+/**
+ * Registers a push notification with the server
+ */
+export async function registerNotificationSubscription(): Promise<boolean> {
+  let notificationSubscription: INotificationSubscription;
+  if (Platform.OS === 'web') {
+    //wait for service worker installation to be ready
+    const serviceWorker = await navigator.serviceWorker.ready;
+    // subscribe and return the subscription
+    notificationSubscription = {
+      type: 'web',
+      subscription: await serviceWorker.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: PUSH_SERVER_PUBLIC_KEY,
+      }),
+    };
+  } else if (Platform.OS === 'ios' || Platform.OS === 'android') {
+    if (Platform.OS === 'android') {
+      Notifications.setNotificationChannelAsync('default', {
+        name: 'default',
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [200, 100, 200],
+        lightColor: '#FF231F7C',
+      });
+    }
+    const token = (await Notifications.getExpoPushTokenAsync()).data;
+    notificationSubscription = {
+      type: 'mobile',
+      subscription: token,
+    };
+  } else {
+    return false;
+  }
+  const clientId = await AsyncStorage.getItem('clientId');
+  if (!clientId) {
+    return false;
+  }
   const result = await authFetch(
-    '/notification/mobile-subscription',
+    `/notification/subscription/${clientId}`,
     {
       method: 'post',
-      body: JSON.stringify({ token }),
+      body: JSON.stringify(notificationSubscription),
       headers: {
         'content-type': 'application/json',
       },
     },
     { expectedStatus: 201 },
   );
-  if (result.status === 201) {
-    await AsyncStorage.setItem('tokenGenerated', 'true');
-  } else {
-    throw new Error('Problem setting up mobile push token.');
-  }
-}
-
-export async function requestNotificationPermission(): Promise<boolean> {
-  if (Platform.OS === 'web') {
-    const permissionResult = await Notification.requestPermission();
-    if (permissionResult === 'denied') {
-      errorToast(
-        'Notifications are blocked. Remove the block in your browser settings and try again.',
-      );
-    }
-    if (permissionResult !== 'granted') {
-      return false;
-    }
-    //wait for service worker installation to be ready
-    const serviceWorker = await navigator.serviceWorker.ready;
-    // subscribe and return the subscription
-    const pushSubscription = await serviceWorker.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: PUSH_SERVER_PUBLIC_KEY,
-    });
-    const result = await authFetch(
-      '/notification/web-subscription',
-      {
-        method: 'post',
-        body: JSON.stringify(pushSubscription),
-        headers: {
-          'content-type': 'application/json',
-        },
-      },
-      { expectedStatus: 201 },
-    );
-    if (result.status === 201) {
-      return true;
-    }
-  } else if (Platform.OS === 'ios' || Platform.OS === 'android') {
-    const { status } = await Notifications.requestPermissionsAsync();
-    if (status === 'denied') {
-      errorToast(
-        'Notifications are blocked. Remove the block in your browser settings and try again.',
-      );
-    }
-    if (status !== 'granted') {
-      return false;
-    }
-    try {
-      await setupExpoToken();
-    } catch {
-      return false;
-    }
+  if (result.status === 201 || result.status === 409) {
+    return true;
   }
   return false;
 }
 
-export async function areNotificationsEnabled(): Promise<boolean> {
+/**
+ * Does all required activities to enable notifications
+ * @returns true if notifications were enabled
+ */
+export async function enableNotifications(): Promise<boolean> {
+  if (!(await isNotificationAccessGranted())) {
+    const wasRequestSuccessful = await requestNotificationAccess();
+    if (!wasRequestSuccessful) {
+      return false;
+    }
+  }
+  if (!(await isSubscriptionRegistered())) {
+    const wasRegistrationSuccessful = await registerNotificationSubscription();
+    if (!wasRegistrationSuccessful) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/**
+ * Checks if permissions are granted to send push notifications
+ * @returns true if access is granted
+ */
+export async function isNotificationAccessGranted(): Promise<boolean> {
   if (Platform.OS === 'web') {
     return Notification.permission === 'granted';
   } else if (Platform.OS === 'ios' || Platform.OS === 'android') {
-    const notificationStatus = (await Notifications.getPermissionsAsync())
-      .status;
-    const generatedToken = await AsyncStorage.getItem('tokenGenerated');
-    return notificationStatus === 'granted' && generatedToken === 'true';
+    return (await Notifications.getPermissionsAsync()).status === 'granted';
   }
   return false;
 }
 
-export async function removeNotificationPermission(): Promise<boolean> {
-  // TODO: this function sucks. It should just disable all notifications on the server.
-  if (Platform.OS === 'web') {
-    errorToast('Notifications can be disabled in the browser settings.');
+/**
+ * Checks with the push server on the API if this client is registered
+ * @returns true if the subscription is registered
+ */
+export async function isSubscriptionRegistered(): Promise<boolean> {
+  const clientId = await AsyncStorage.getItem('clientId');
+  if (!clientId) {
     return false;
-  } else if (Platform.OS === 'android' || Platform.OS === 'ios') {
-    errorToast('Notifications can be disabled in the phone settings.');
-    AsyncStorage.removeItem('tokenGenerated');
+  }
+  const result = await authFetch(
+    `/notification/subscription/${clientId}`,
+    {
+      method: 'get',
+    },
+    {
+      expectedStatus: 200,
+      errorHandlers: {
+        '404': async () => {
+          /* Do Nothing */
+        },
+      },
+    },
+  );
+  if (result.status === 200) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * @returns true if notifications are enabled
+ */
+export async function areNotificationsEnabled(): Promise<boolean> {
+  const [isGranted, isSubscribed] = await Promise.all([
+    isNotificationAccessGranted(),
+    isSubscriptionRegistered(),
+  ]);
+  return isGranted && isSubscribed;
+}
+
+/**
+ * Stops notifications from being sent. This does not remove the permissions,
+ * it just removes the client from the server.
+ * @returns true if notifications were successfully disabled
+ */
+export async function disableNotifications(): Promise<boolean> {
+  const clientId = await AsyncStorage.getItem('clientId');
+  if (!clientId) {
+    return false;
+  }
+  const result = await authFetch(
+    `/notification/subscription/${clientId}`,
+    {
+      method: 'delete',
+    },
+    {
+      expectedStatus: 200,
+    },
+  );
+  if (result.status === 200) {
     return true;
   }
   return false;
