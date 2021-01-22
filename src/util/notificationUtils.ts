@@ -44,9 +44,25 @@ export interface IMobileNotificationSubscription
 }
 
 /**
+ * Checks if the browser supports push notifications
+ */
+export async function doesClientSupportPushNotifications(): Promise<boolean> {
+  if (Platform.OS === 'web') {
+    return 'serviceWorker' in navigator && 'PushManager' in window;
+  } else if (Platform.OS === 'ios' || Platform.OS === 'android') {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+/**
  * Initializes the environment for push notifications when the application mounts
  */
 export async function initPushNotificationProcess(): Promise<void> {
+  if (!(await doesClientSupportPushNotifications())) {
+    return;
+  }
   let clientId = await ClientStorage.getItem('clientId');
   if (!clientId) {
     clientId = v4();
@@ -69,6 +85,9 @@ export async function initPushNotificationProcess(): Promise<void> {
  * Initializes push notification information when application logged in
  */
 export async function initPushNotificationOnLogin(): Promise<void> {
+  if (!(await doesClientSupportPushNotifications())) {
+    return;
+  }
   const [isGranted, isSubscribed] = await Promise.all([
     isNotificationAccessGranted(),
     isSubscriptionRegistered(),
@@ -83,6 +102,9 @@ export async function initPushNotificationOnLogin(): Promise<void> {
  * @returns true if the permission is granted
  */
 export async function requestNotificationAccess(): Promise<boolean> {
+  if (!(await doesClientSupportPushNotifications())) {
+    return false;
+  }
   let notificationPermission: string;
   if (Platform.OS === 'web') {
     notificationPermission = await Notification.requestPermission();
@@ -159,6 +181,9 @@ export async function registerNotificationSubscription(): Promise<boolean> {
  * @returns true if notifications were enabled
  */
 export async function enableNotifications(): Promise<boolean> {
+  if (!(await doesClientSupportPushNotifications())) {
+    return false;
+  }
   if (!(await isNotificationAccessGranted())) {
     const wasRequestSuccessful = await requestNotificationAccess();
     if (!wasRequestSuccessful) {
@@ -179,6 +204,9 @@ export async function enableNotifications(): Promise<boolean> {
  * @returns true if access is granted
  */
 export async function isNotificationAccessGranted(): Promise<boolean> {
+  if (!(await doesClientSupportPushNotifications())) {
+    return false;
+  }
   if (Platform.OS === 'web') {
     return Notification.permission === 'granted';
   } else if (Platform.OS === 'ios' || Platform.OS === 'android') {

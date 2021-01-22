@@ -4,6 +4,7 @@
     "android": "react-native run-android",
     "ios": "react-native run-ios",
     "web": "env BROWSER=firefox expo start --web --https",
+    "expo-reset": "rm -rf .expo",
     "web-chrome": "env BROWSER=chrome expo start --web --https",
     "build:web": "expo build:web",
     "start": "react-native start",
