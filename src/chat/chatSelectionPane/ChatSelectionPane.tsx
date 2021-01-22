@@ -12,6 +12,7 @@ import { ChatContext, ChatActionType } from '../chatReducer';
 import FullPageSpinner from '../../common/FullPageSpinner';
 import IProfile, { AuthContext } from '../../auth/authReducer';
 import ChatSelectionList from './ChatSelectionList';
+import debounce from 'debounce-promise';
 
 const ChatSelectionPane: FunctionComponent<{
   mobileRender?: boolean;
@@ -57,27 +58,35 @@ const ChatSelectionPane: FunctionComponent<{
     }
   });
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const performSearch = useCallback(
+    debounce(async (newTerm: string) => {
+      if (newTerm) {
+        setSearchResultsLoading(true);
+        const result = await authFetch(
+          `/chat/search?term=${newTerm}}`,
+          {
+            method: 'post',
+          },
+          { expectedStatus: 200 },
+        );
+        if (result.status === 200) {
+          const resultBody: {
+            chats: IChat[];
+            profiles?: IProfile[];
+          } = await result.json();
+          setChatSearchResults(resultBody.chats);
+          setProfileSearchResults(resultBody.profiles || []);
+        }
+        setSearchResultsLoading(false);
+      }
+    }, 1000),
+    [setChatSearchResults, setProfileSearchResults, setSearchResultsLoading],
+  );
+
   const handleSearchTermChange = async (newTerm: string) => {
     setSearchTerm(newTerm);
-    if (newTerm) {
-      setSearchResultsLoading(true);
-      const result = await authFetch(
-        `/chat/search?term=${newTerm}}`,
-        {
-          method: 'post',
-        },
-        { expectedStatus: 200 },
-      );
-      if (result.status === 200) {
-        const resultBody: {
-          chats: IChat[];
-          profiles?: IProfile[];
-        } = await result.json();
-        setChatSearchResults(resultBody.chats);
-        setProfileSearchResults(resultBody.profiles || []);
-      }
-      setSearchResultsLoading(false);
-    }
+    await performSearch(newTerm);
   };
 
   const loadMoreResults = useCallback(async (): Promise<void> => {
