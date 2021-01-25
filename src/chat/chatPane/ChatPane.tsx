@@ -6,16 +6,22 @@ import {
   Divider,
   TopNavigationAction,
   Icon,
+  Text,
 } from '@ui-kitten/components';
 import { useHistory } from '../../router';
 import getThemeVars from '../../common/getThemeVars';
-import { ChatContext } from '../chatReducer';
+import { ChatActionType, ChatContext } from '../chatReducer';
 import FullPageSpinner from '../../common/FullPageSpinner';
 import ChatSettingsPane from '../chatSettings/ChatSettingsPane';
 import ChatComponent from './ChatComponent';
 import { useWindowDimensions, View } from 'react-native';
 import ChatDetails from '../chatSettings/ChatDetails';
 import { ScrollView } from 'react-native-gesture-handler';
+import authFetch from '../../util/authFetch';
+import useAsyncEffect from 'use-async-effect';
+import { AuthContext } from '../../auth/authReducer';
+import BigButton from '../../common/BigButton';
+import LoginSolid from '../../home/LoginSolid';
 
 const ChatPane: FunctionComponent<{
   chatUri: string;
@@ -26,13 +32,117 @@ const ChatPane: FunctionComponent<{
 
   const [isEditing, setIsEditing] = useState(false);
 
-  const [chatState] = useContext(ChatContext);
+  const [chatState, chatDispatch] = useContext(ChatContext);
+  const [authState] = useContext(AuthContext);
   const chatData = chatState.chats[chatUri];
 
   const isWide = useWindowDimensions().width > 1000;
 
+  const performInitialChatFetch = async (
+    chatUri: string,
+    actionName: string,
+  ) => {
+    const result = await authFetch(
+      `/chat/${encodeURIComponent(chatUri)}`,
+      undefined,
+      {
+        expectedStatus: 200,
+        errorHandlers: {
+          '401': async (): Promise<void> => {
+            /* Do nothing */
+          },
+        },
+      },
+    );
+    if (result.status === 200) {
+      const resultBody = await result.json();
+      chatDispatch({
+        type: ChatActionType.UPDATE_CHAT,
+        chats: [resultBody],
+        performedAction: actionName,
+      });
+    } else {
+      chatDispatch({
+        type: ChatActionType.UPDATE_CHAT,
+        chats: [],
+        performedAction: actionName,
+      });
+    }
+  };
+
+  useAsyncEffect(async () => {
+    // Fetch Chat
+    if (!chatData) {
+      if (
+        !authState.profile &&
+        !chatState.performedActions[
+          `initialChatFetch:unauthenticated:${chatUri}`
+        ]
+      ) {
+        await performInitialChatFetch(
+          chatUri,
+          `initialChatFetch:unauthenticated:${chatUri}`,
+        );
+      } else if (
+        authState.profile &&
+        !chatState.performedActions[`initialChatFetch:authenticated:${chatUri}`]
+      ) {
+        await performInitialChatFetch(
+          chatUri,
+          `initialChatFetch:authenticated:${chatUri}`,
+        );
+      }
+    }
+  });
+
   if (!chatData || !chatData.chat) {
-    return <FullPageSpinner />;
+    if (
+      !authState.profile &&
+      chatState.performedActions[`initialChatFetch:unauthenticated:${chatUri}`]
+    ) {
+      // If the user is not logged in and they do not have access to the chat
+      return (
+        <Layout
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: 16,
+          }}
+        >
+          <Text category="h2">
+            You do not have access to this chat. Log In to get access.
+          </Text>
+          {mobileRender ? <LoginSolid /> : undefined}
+        </Layout>
+      );
+    } else if (
+      authState.profile &&
+      chatState.performedActions[`initialChatFetch:authenticated:${chatUri}`]
+    ) {
+      // If the user is logged in and they do have access to the chat
+      return (
+        <Layout
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: 16,
+          }}
+        >
+          <Text category="h2">You do not have access to this chat.</Text>
+          {mobileRender ? (
+            <BigButton
+              title="Back Home"
+              onPress={() => history.push('/chat')}
+            />
+          ) : undefined}
+        </Layout>
+      );
+    } else {
+      // Fetches are loading
+      return <FullPageSpinner />;
+    }
   }
 
   if (isEditing) {

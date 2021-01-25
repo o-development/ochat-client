@@ -45,35 +45,6 @@ const ChatComponent: FunctionComponent<{
   useAsyncEffect(async () => {
     await Promise.all([
       (async () => {
-        // Fetch Chat
-        if (
-          !chatData &&
-          !chatState.performedActions[`initialChatFetch:${chatUri}`]
-        ) {
-          const result = await authFetch(
-            `/chat/${encodeURIComponent(chatUri)}`,
-            undefined,
-            {
-              expectedStatus: 200,
-            },
-          );
-          if (result.status === 200) {
-            const resultBody = await result.json();
-            chatDispatch({
-              type: ChatActionType.UPDATE_CHAT,
-              chats: [resultBody],
-              performedAction: `initialChatFetch:${chatUri}`,
-            });
-          } else {
-            chatDispatch({
-              type: ChatActionType.UPDATE_CHAT,
-              chats: [],
-              performedAction: `initialChatFetch:${chatUri}`,
-            });
-          }
-        }
-      })(),
-      (async () => {
         // Fetch Messages
         if (!chatState.performedActions[`initialChatMessageFetch:${chatUri}`]) {
           setIsLoadingEarlier(true);

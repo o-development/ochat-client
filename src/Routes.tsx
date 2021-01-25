@@ -1,6 +1,6 @@
 import React, { FunctionComponent } from 'react';
 import { Route, Router, Switch, BackButton } from './router';
-import OnboardFlow from './onboard/OnboardFlow';
+import AuthCallback from './auth/AuthCallback';
 import ChatApp from './chat/ChatApp';
 import Home from './home/Home';
 import AuthHandler from './auth/AuthHandler';
@@ -15,7 +15,7 @@ export const Routes: FunctionComponent = () => {
       <BackButton>
         <AuthHandler>
           <Switch>
-            <Route path="/onboard" component={OnboardFlow} />
+            <Route path="/auth-callback" component={AuthCallback} />
             <Route path="/chat" component={ChatApp} />
             <Route path="/" component={Home} />
           </Switch>

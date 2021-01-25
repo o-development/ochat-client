@@ -46,6 +46,7 @@ const LinkChatPane: FunctionComponent<{
       history.push(`/chat/?id=${encodeURIComponent(resultBody.uri)}`);
       return;
     }
+    setLoading(false);
   };
 
   return (

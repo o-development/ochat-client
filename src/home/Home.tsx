@@ -79,7 +79,7 @@ const Home: FunctionComponent = () => {
           </View>
         )}
       </View>
-      <LoginSolid />
+      <LoginSolid onLogin={() => history.push('/chat')} />
     </Layout>
   );
 };

@@ -15,6 +15,7 @@ export default interface IProfile {
 export interface IAuthState {
   profile?: IProfile;
   isLoading: boolean;
+  requiresOnboarding: boolean;
 }
 
 /**
@@ -23,6 +24,7 @@ export interface IAuthState {
 export enum AuthActionType {
   LOGGED_IN,
   LOGGED_OUT,
+  REQUIRES_ONBOARDING,
 }
 
 export interface IBaseAuthAction {
@@ -38,7 +40,15 @@ export interface ILoggedOutAction extends IBaseAuthAction {
   type: AuthActionType.LOGGED_OUT;
 }
 
-export type IAuthAction = ILoggedInAction | ILoggedOutAction;
+export interface IRequiresOnboardingAction extends IBaseAuthAction {
+  type: AuthActionType.REQUIRES_ONBOARDING;
+  profileRequiresOnboarding: boolean;
+}
+
+export type IAuthAction =
+  | ILoggedInAction
+  | ILoggedOutAction
+  | IRequiresOnboardingAction;
 
 /**
  * REDUCER
@@ -50,14 +60,21 @@ export const authReducer: Reducer<IAuthState, IAuthAction> = (
   switch (action.type) {
     case AuthActionType.LOGGED_IN:
       return {
+        ...state,
         profile: action.profile,
         isLoading: false,
       };
     case AuthActionType.LOGGED_OUT:
       return {
+        ...state,
+        profile: undefined,
         isLoading: false,
       };
-      break;
+    case AuthActionType.REQUIRES_ONBOARDING:
+      return {
+        ...state,
+        requiresOnboarding: action.profileRequiresOnboarding,
+      };
     default:
       throw new Error('Action type not recognized');
   }
@@ -68,6 +85,7 @@ export const authReducer: Reducer<IAuthState, IAuthAction> = (
  */
 export const initialAuthState: IAuthState = {
   isLoading: true,
+  requiresOnboarding: false,
 };
 
 /**

@@ -54,7 +54,6 @@ const BigButton: FunctionComponent<Props> = ({
     textAlign: 'center',
     color: appearance === 'primary' ? 'white' : themeColor,
     margin: marginSize,
-    height: 20,
     ...textStyle,
   };
   return (

@@ -3,16 +3,20 @@ import { Text } from '@ui-kitten/components';
 import BigButton from '../../common/BigButton';
 import OnboardPageLayout from '../OnboardPageLayout';
 import authFetch from '../../util/authFetch';
-import { useHistory } from '../../router';
 import useAsyncEffect from 'use-async-effect';
 import IProfile, { AuthActionType, AuthContext } from '../../auth/authReducer';
 
-const PersonIndexRequest: FunctionComponent = () => {
-  const history = useHistory();
+interface PersonIndexRequestProps {
+  onComplete: () => void;
+}
+
+const PersonIndexRequest: FunctionComponent<PersonIndexRequestProps> = ({
+  onComplete,
+}) => {
   const [, authDispatch] = useContext(AuthContext);
   const goToNext = async (profile: IProfile) => {
     authDispatch({ type: AuthActionType.LOGGED_IN, profile });
-    history.push('/onboard/push_notifications');
+    onComplete();
   };
   const [isNotIndexed, setIsNotIndexed] = useState(false);
 

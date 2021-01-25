@@ -3,7 +3,6 @@ import React, {
   ReactElement,
   useContext,
   useEffect,
-  useState,
 } from 'react';
 import { useHistory, useLocation } from '../router';
 import { useWindowDimensions, View } from 'react-native';
@@ -16,25 +15,29 @@ import Settings from './settings/Settings';
 import LinkChatPane from './chatSettings/LinkChatPane';
 import { AuthContext } from '../auth/authReducer';
 import FullPageSpinner from '../common/FullPageSpinner';
+import OnboardFlow from '../onboard/OnboardFlow';
 
 const ChatAppLayout: FunctionComponent = () => {
-  const { search, pathname } = useLocation();
   const history = useHistory();
+  const { search, pathname } = useLocation();
   const queryId = queryString.parse(search).id;
   const id = Array.isArray(queryId) ? queryId[0] : queryId || undefined;
   const isMobile = useWindowDimensions().width < 500;
 
   const [authState] = useContext(AuthContext);
-  const [isWaitingForAuth, setIsWaitingForAuth] = useState(true);
+
   useEffect(() => {
-    if (authState.profile) {
-      setIsWaitingForAuth(false);
-    } else if (!authState.isLoading) {
+    if (!authState.profile && !id) {
       history.push('/');
     }
-  }, [setIsWaitingForAuth, authState.isLoading, authState.profile, history]);
-  if (isWaitingForAuth) {
+  });
+
+  if (authState.isLoading) {
     return <FullPageSpinner />;
+  }
+
+  if (authState.requiresOnboarding) {
+    return <OnboardFlow />;
   }
 
   let mainComponent: ReactElement;
