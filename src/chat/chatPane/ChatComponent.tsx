@@ -10,6 +10,7 @@ import {
   Composer,
   SendProps,
   Send,
+  Avatar,
 } from 'react-native-gifted-chat';
 import { useWindowDimensions, View, ViewStyle } from 'react-native';
 import dayjs from 'dayjs';
@@ -22,6 +23,7 @@ import { AuthContext } from '../../auth/authReducer';
 import getParticipantForMessageSender from '../common/getParticipantForMessageSender';
 import { IChat } from '../chatReducer';
 import BigButton from '../../common/BigButton';
+import ChatAvatar from './ChatAvatar';
 
 const ChatComponent: FunctionComponent<{
   chatUri: string;
@@ -144,7 +146,7 @@ const ChatComponent: FunctionComponent<{
         user: {
           _id: message.maker,
           name: participant.name,
-          avatar: participant.image,
+          avatar: participant.image || 'default',
         },
       };
     },
@@ -292,6 +294,9 @@ const ChatComponent: FunctionComponent<{
             ]}
           />
         );
+      }}
+      renderAvatar={(props) => {
+        return <ChatAvatar {...props} />;
       }}
       renderComposer={(props) => (
         <Composer
