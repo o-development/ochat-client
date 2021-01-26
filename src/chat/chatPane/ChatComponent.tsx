@@ -10,7 +10,6 @@ import {
   Composer,
   SendProps,
   Send,
-  Avatar,
 } from 'react-native-gifted-chat';
 import { useWindowDimensions, View, ViewStyle } from 'react-native';
 import dayjs from 'dayjs';
@@ -24,6 +23,7 @@ import getParticipantForMessageSender from '../common/getParticipantForMessageSe
 import { IChat } from '../chatReducer';
 import BigButton from '../../common/BigButton';
 import ChatAvatar from './ChatAvatar';
+import { SocketContext } from '../ChatSocketHandler';
 
 const ChatComponent: FunctionComponent<{
   chatUri: string;
@@ -40,14 +40,47 @@ const ChatComponent: FunctionComponent<{
   const chatData = chatState.chats[chatUri];
 
   const [authState] = useContext(AuthContext);
+  const socket = useContext(SocketContext);
 
   const [isLoadingEarlier, setIsLoadingEarlier] = useState(false);
   const [isLoadingJoinChat, setIsLoadingJoinChat] = useState(false);
   const [isInitialFetching, setIsInitialFetching] = useState(false);
+  const [currentPublicChatUri, setCurrentPublicChatUri] = useState<
+    string | undefined
+  >(undefined);
 
   const shouldSquishBubbles = useWindowDimensions().width < 700;
 
+  const isCurrentUserParticipant = useMemo(
+    (): boolean =>
+      !!chatData.chat?.participants.some(
+        (p) => p.webId === authState.profile?.webId,
+      ),
+    [chatData, authState.profile?.webId],
+  );
+
   useAsyncEffect(async () => {
+    // Setup subscription is this is a public chat
+    if (
+      currentPublicChatUri &&
+      (currentPublicChatUri !== chatUri || isCurrentUserParticipant) &&
+      socket
+    ) {
+      console.log('unsubscribe', currentPublicChatUri);
+      setCurrentPublicChatUri(undefined);
+      socket.emit('unsubscribeFromPublicChat', { uri: currentPublicChatUri });
+    }
+    if (
+      currentPublicChatUri !== chatUri &&
+      socket &&
+      chatData.chat?.isPublic &&
+      !isCurrentUserParticipant
+    ) {
+      console.log('subscribe', chatUri);
+      setCurrentPublicChatUri(chatUri);
+      socket.emit('subscribeToPublicChat', { uri: chatUri });
+    }
+
     // Fetch Messages
     if (
       !chatState.performedActions[`initialChatMessageFetch:${chatUri}`] &&
@@ -80,14 +113,6 @@ const ChatComponent: FunctionComponent<{
       setIsInitialFetching(false);
     }
   });
-
-  const isCurrentUserParticipant = useMemo(
-    (): boolean =>
-      !!chatData.chat?.participants.some(
-        (p) => p.webId === authState.profile?.webId,
-      ),
-    [chatData, authState.profile?.webId],
-  );
 
   const onJoinChat = useCallback(async (): Promise<void> => {
     setIsLoadingJoinChat(true);
