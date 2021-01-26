@@ -12,7 +12,7 @@ const ChatAvatar: FunctionComponent<AvatarProps<IGiftedChatMessage>> = (
   props,
 ) => {
   const participant = props.currentMessage?.user;
-  const [tooltipOpen, setTooltipOpen] = useState(true);
+  const [tooltipOpen, setTooltipOpen] = useState(false);
   return (
     <Tooltip
       anchor={() => {
