@@ -43,40 +43,42 @@ const ChatComponent: FunctionComponent<{
 
   const [isLoadingEarlier, setIsLoadingEarlier] = useState(false);
   const [isLoadingJoinChat, setIsLoadingJoinChat] = useState(false);
+  const [isInitialFetching, setIsInitialFetching] = useState(false);
 
   const shouldSquishBubbles = useWindowDimensions().width < 700;
 
   useAsyncEffect(async () => {
-    await Promise.all([
-      (async () => {
-        // Fetch Messages
-        if (!chatState.performedActions[`initialChatMessageFetch:${chatUri}`]) {
-          setIsLoadingEarlier(true);
-          const result = await authFetch(
-            `/message/${encodeURIComponent(chatUri)}`,
-            undefined,
-            { expectedStatus: 200 },
-          );
-          if (result.status === 200) {
-            const resultBody = await result.json();
-            chatDispatch({
-              type: ChatActionType.ADD_MESSAGE,
-              chatId: chatUri,
-              message: resultBody as IMessage[],
-              performedAction: `initialChatMessageFetch:${chatUri}`,
-            });
-          } else {
-            chatDispatch({
-              type: ChatActionType.ADD_MESSAGE,
-              chatId: chatUri,
-              message: [],
-              performedAction: `initialChatMessageFetch:${chatUri}`,
-            });
-          }
-          setIsLoadingEarlier(false);
-        }
-      })(),
-    ]);
+    // Fetch Messages
+    if (
+      !chatState.performedActions[`initialChatMessageFetch:${chatUri}`] &&
+      !isInitialFetching
+    ) {
+      setIsInitialFetching(true);
+      setIsLoadingEarlier(true);
+      const result = await authFetch(
+        `/message/${encodeURIComponent(chatUri)}`,
+        undefined,
+        { expectedStatus: 200 },
+      );
+      if (result.status === 200) {
+        const resultBody = await result.json();
+        chatDispatch({
+          type: ChatActionType.ADD_MESSAGE,
+          chatId: chatUri,
+          message: resultBody as IMessage[],
+          performedAction: `initialChatMessageFetch:${chatUri}`,
+        });
+      } else {
+        chatDispatch({
+          type: ChatActionType.ADD_MESSAGE,
+          chatId: chatUri,
+          message: [],
+          performedAction: `initialChatMessageFetch:${chatUri}`,
+        });
+      }
+      setIsLoadingEarlier(false);
+      setIsInitialFetching(false);
+    }
   });
 
   const isCurrentUserParticipant = useMemo(
