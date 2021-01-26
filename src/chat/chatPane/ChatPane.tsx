@@ -34,6 +34,7 @@ const ChatPane: FunctionComponent<{
 
   const [chatState, chatDispatch] = useContext(ChatContext);
   const [authState] = useContext(AuthContext);
+  const [isInitialFetching, setIsInitialFetching] = useState(false);
   const chatData = chatState.chats[chatUri];
 
   const isWide = useWindowDimensions().width > 1000;
@@ -42,6 +43,10 @@ const ChatPane: FunctionComponent<{
     chatUri: string,
     actionName: string,
   ) => {
+    if (isInitialFetching) {
+      return;
+    }
+    setIsInitialFetching(true);
     const result = await authFetch(
       `/chat/${encodeURIComponent(chatUri)}`,
       undefined,
@@ -68,10 +73,14 @@ const ChatPane: FunctionComponent<{
         performedAction: actionName,
       });
     }
+    setIsInitialFetching(false);
   };
 
   useAsyncEffect(async () => {
     // Fetch Chat
+    if (authState.isLoading) {
+      return;
+    }
     if (!chatData) {
       if (
         !authState.profile &&

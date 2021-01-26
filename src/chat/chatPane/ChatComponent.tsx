@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { FunctionComponent } from 'react';
 import { Icon, Text } from '@ui-kitten/components';
 import getThemeVars from '../../common/getThemeVars';
@@ -11,7 +11,7 @@ import {
   SendProps,
   Send,
 } from 'react-native-gifted-chat';
-import { useWindowDimensions, ViewStyle } from 'react-native';
+import { useWindowDimensions, View, ViewStyle } from 'react-native';
 import dayjs from 'dayjs';
 import { ChatActionType, ChatContext, IMessage } from '../chatReducer';
 import FullPageSpinner from '../../common/FullPageSpinner';
@@ -21,6 +21,7 @@ import { v4 } from 'uuid';
 import { AuthContext } from '../../auth/authReducer';
 import getParticipantForMessageSender from '../common/getParticipantForMessageSender';
 import { IChat } from '../chatReducer';
+import BigButton from '../../common/BigButton';
 
 const ChatComponent: FunctionComponent<{
   chatUri: string;
@@ -39,6 +40,7 @@ const ChatComponent: FunctionComponent<{
   const [authState] = useContext(AuthContext);
 
   const [isLoadingEarlier, setIsLoadingEarlier] = useState(false);
+  const [isLoadingJoinChat, setIsLoadingJoinChat] = useState(false);
 
   const shouldSquishBubbles = useWindowDimensions().width < 700;
 
@@ -74,6 +76,26 @@ const ChatComponent: FunctionComponent<{
       })(),
     ]);
   });
+
+  const isCurrentUserParticipant = useMemo(
+    (): boolean =>
+      !!chatData.chat?.participants.some(
+        (p) => p.webId === authState.profile?.webId,
+      ),
+    [chatData, authState.profile?.webId],
+  );
+
+  const onJoinChat = useCallback(async (): Promise<void> => {
+    setIsLoadingJoinChat(true);
+    await authFetch(
+      `/chat/${encodeURIComponent(chatUri)}/authenticated`,
+      {
+        method: 'put',
+      },
+      { expectedStatus: 200 },
+    );
+    setIsLoadingJoinChat(false);
+  }, [chatUri]);
 
   if (!authState.profile) {
     return <FullPageSpinner />;
@@ -238,6 +260,23 @@ const ChatComponent: FunctionComponent<{
         );
       }}
       renderInputToolbar={(props) => {
+        if (!isCurrentUserParticipant) {
+          return (
+            <View
+              style={{
+                borderTopColor: dividerColor,
+                borderTopWidth: 1,
+                paddingHorizontal: 8,
+              }}
+            >
+              <BigButton
+                title="Join Chat"
+                onPress={onJoinChat}
+                loading={isLoadingJoinChat}
+              />
+            </View>
+          );
+        }
         return (
           <InputToolbar
             {...props}

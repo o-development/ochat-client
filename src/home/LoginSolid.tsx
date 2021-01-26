@@ -7,7 +7,6 @@ import { makeUrl } from 'expo-linking';
 import BigButton from '../common/BigButton';
 import OnboardPageLayout from '../onboard/OnboardPageLayout';
 import TextInput from '../common/TextInput';
-import { useHistory } from '../router';
 import { API_URL } from '@env';
 import * as ClientStorage from '../util/clientStorage';
 import { AuthActionType, AuthContext } from '../auth/authReducer';
@@ -23,8 +22,6 @@ interface LoginSolidProps {
 }
 
 const LoginSolid: FunctionComponent<LoginSolidProps> = ({ onLogin }) => {
-  const history = useHistory();
-
   const [, authDispatch] = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
   const [issuer, setIssuer] = useState('');
