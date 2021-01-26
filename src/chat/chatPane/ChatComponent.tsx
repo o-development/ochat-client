@@ -97,10 +97,7 @@ const ChatComponent: FunctionComponent<{
     setIsLoadingJoinChat(false);
   }, [chatUri]);
 
-  if (!authState.profile) {
-    return <FullPageSpinner />;
-  }
-  const loggedInUser = authState.profile.webId;
+  const loggedInUser = authState.profile?.webId || 'public';
 
   const onLoadEarlier = async () => {
     if (chatData && chatData.messages) {
@@ -265,15 +262,21 @@ const ChatComponent: FunctionComponent<{
             <View
               style={{
                 borderTopColor: dividerColor,
+                flex: 1,
                 borderTopWidth: 1,
                 paddingHorizontal: 8,
+                justifyContent: 'center',
               }}
             >
-              <BigButton
-                title="Join Chat"
-                onPress={onJoinChat}
-                loading={isLoadingJoinChat}
-              />
+              {authState.profile ? (
+                <BigButton
+                  title="Join Chat"
+                  onPress={onJoinChat}
+                  loading={isLoadingJoinChat}
+                />
+              ) : (
+                <Text>Log in to join this chat.</Text>
+              )}
             </View>
           );
         }
