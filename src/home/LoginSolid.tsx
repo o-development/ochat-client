@@ -50,6 +50,9 @@ const LoginSolid: FunctionComponent<LoginSolidProps> = ({ onLogin }) => {
               type: AuthActionType.REQUIRES_ONBOARDING,
               profileRequiresOnboarding: true,
             });
+            if (onLogin) {
+              onLogin();
+            }
           },
         },
       });
