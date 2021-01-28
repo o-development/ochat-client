@@ -27,7 +27,7 @@ const ChatAppLayout: FunctionComponent = () => {
   const [authState] = useContext(AuthContext);
 
   useEffect(() => {
-    if (!authState.profile && !id) {
+    if (!authState.profile && !id && !authState.requiresOnboarding) {
       history.push('/');
     }
   });
