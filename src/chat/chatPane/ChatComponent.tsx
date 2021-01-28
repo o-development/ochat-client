@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { FunctionComponent } from 'react';
 import { Icon, Text } from '@ui-kitten/components';
 import getThemeVars from '../../common/getThemeVars';
@@ -11,7 +11,7 @@ import {
   SendProps,
   Send,
 } from 'react-native-gifted-chat';
-import { useWindowDimensions, ViewStyle } from 'react-native';
+import { useWindowDimensions, View, ViewStyle } from 'react-native';
 import dayjs from 'dayjs';
 import { ChatActionType, ChatContext, IMessage } from '../chatReducer';
 import FullPageSpinner from '../../common/FullPageSpinner';
@@ -21,6 +21,9 @@ import { v4 } from 'uuid';
 import { AuthContext } from '../../auth/authReducer';
 import getParticipantForMessageSender from '../common/getParticipantForMessageSender';
 import { IChat } from '../chatReducer';
+import BigButton from '../../common/BigButton';
+import ChatAvatar from './ChatAvatar';
+import { SocketContext } from '../ChatSocketHandler';
 
 const ChatComponent: FunctionComponent<{
   chatUri: string;
@@ -37,77 +40,93 @@ const ChatComponent: FunctionComponent<{
   const chatData = chatState.chats[chatUri];
 
   const [authState] = useContext(AuthContext);
+  const socket = useContext(SocketContext);
 
   const [isLoadingEarlier, setIsLoadingEarlier] = useState(false);
+  const [isLoadingJoinChat, setIsLoadingJoinChat] = useState(false);
+  const [isInitialFetching, setIsInitialFetching] = useState(false);
+  const [currentPublicChatUri, setCurrentPublicChatUri] = useState<
+    string | undefined
+  >(undefined);
 
   const shouldSquishBubbles = useWindowDimensions().width < 700;
 
+  const isCurrentUserParticipant = useMemo(
+    (): boolean =>
+      !!chatData.chat?.participants.some(
+        (p) => p.webId === authState.profile?.webId,
+      ),
+    [chatData, authState.profile?.webId],
+  );
+
   useAsyncEffect(async () => {
-    await Promise.all([
-      (async () => {
-        // Fetch Chat
-        if (
-          !chatData &&
-          !chatState.performedActions[`initialChatFetch:${chatUri}`]
-        ) {
-          const result = await authFetch(
-            `/chat/${encodeURIComponent(chatUri)}`,
-            undefined,
-            {
-              expectedStatus: 200,
-            },
-          );
-          if (result.status === 200) {
-            const resultBody = await result.json();
-            chatDispatch({
-              type: ChatActionType.UPDATE_CHAT,
-              chats: [resultBody],
-              performedAction: `initialChatFetch:${chatUri}`,
-            });
-          } else {
-            chatDispatch({
-              type: ChatActionType.UPDATE_CHAT,
-              chats: [],
-              performedAction: `initialChatFetch:${chatUri}`,
-            });
-          }
-        }
-      })(),
-      (async () => {
-        // Fetch Messages
-        if (!chatState.performedActions[`initialChatMessageFetch:${chatUri}`]) {
-          setIsLoadingEarlier(true);
-          const result = await authFetch(
-            `/message/${encodeURIComponent(chatUri)}`,
-            undefined,
-            { expectedStatus: 200 },
-          );
-          if (result.status === 200) {
-            const resultBody = await result.json();
-            chatDispatch({
-              type: ChatActionType.ADD_MESSAGE,
-              chatId: chatUri,
-              message: resultBody as IMessage[],
-              performedAction: `initialChatMessageFetch:${chatUri}`,
-            });
-          } else {
-            chatDispatch({
-              type: ChatActionType.ADD_MESSAGE,
-              chatId: chatUri,
-              message: [],
-              performedAction: `initialChatMessageFetch:${chatUri}`,
-            });
-          }
-          setIsLoadingEarlier(false);
-        }
-      })(),
-    ]);
+    // Setup subscription is this is a public chat
+    if (
+      currentPublicChatUri &&
+      (currentPublicChatUri !== chatUri || isCurrentUserParticipant) &&
+      socket
+    ) {
+      console.log('unsubscribe', currentPublicChatUri);
+      setCurrentPublicChatUri(undefined);
+      socket.emit('unsubscribeFromPublicChat', { uri: currentPublicChatUri });
+    }
+    if (
+      currentPublicChatUri !== chatUri &&
+      socket &&
+      chatData.chat?.isPublic &&
+      !isCurrentUserParticipant
+    ) {
+      console.log('subscribe', chatUri);
+      setCurrentPublicChatUri(chatUri);
+      socket.emit('subscribeToPublicChat', { uri: chatUri });
+    }
+
+    // Fetch Messages
+    if (
+      !chatState.performedActions[`initialChatMessageFetch:${chatUri}`] &&
+      !isInitialFetching
+    ) {
+      setIsInitialFetching(true);
+      setIsLoadingEarlier(true);
+      const result = await authFetch(
+        `/message/${encodeURIComponent(chatUri)}`,
+        undefined,
+        { expectedStatus: 200 },
+      );
+      if (result.status === 200) {
+        const resultBody = await result.json();
+        chatDispatch({
+          type: ChatActionType.ADD_MESSAGE,
+          chatId: chatUri,
+          message: resultBody as IMessage[],
+          performedAction: `initialChatMessageFetch:${chatUri}`,
+        });
+      } else {
+        chatDispatch({
+          type: ChatActionType.ADD_MESSAGE,
+          chatId: chatUri,
+          message: [],
+          performedAction: `initialChatMessageFetch:${chatUri}`,
+        });
+      }
+      setIsLoadingEarlier(false);
+      setIsInitialFetching(false);
+    }
   });
 
-  if (!authState.profile) {
-    return <FullPageSpinner />;
-  }
-  const loggedInUser = authState.profile.webId;
+  const onJoinChat = useCallback(async (): Promise<void> => {
+    setIsLoadingJoinChat(true);
+    await authFetch(
+      `/chat/${encodeURIComponent(chatUri)}/authenticated`,
+      {
+        method: 'put',
+      },
+      { expectedStatus: 200 },
+    );
+    setIsLoadingJoinChat(false);
+  }, [chatUri]);
+
+  const loggedInUser = authState.profile?.webId || 'public';
 
   const onLoadEarlier = async () => {
     if (chatData && chatData.messages) {
@@ -154,7 +173,7 @@ const ChatComponent: FunctionComponent<{
         user: {
           _id: message.maker,
           name: participant.name,
-          avatar: participant.image,
+          avatar: participant.image || 'default',
         },
       };
     },
@@ -267,6 +286,29 @@ const ChatComponent: FunctionComponent<{
         );
       }}
       renderInputToolbar={(props) => {
+        if (!isCurrentUserParticipant) {
+          return (
+            <View
+              style={{
+                borderTopColor: dividerColor,
+                flex: 1,
+                borderTopWidth: 1,
+                paddingHorizontal: 8,
+                justifyContent: 'center',
+              }}
+            >
+              {authState.profile ? (
+                <BigButton
+                  title="Join Chat"
+                  onPress={onJoinChat}
+                  loading={isLoadingJoinChat}
+                />
+              ) : (
+                <Text>Log in to join this chat.</Text>
+              )}
+            </View>
+          );
+        }
         return (
           <InputToolbar
             {...props}
@@ -279,6 +321,9 @@ const ChatComponent: FunctionComponent<{
             ]}
           />
         );
+      }}
+      renderAvatar={(props) => {
+        return <ChatAvatar {...props} />;
       }}
       renderComposer={(props) => (
         <Composer

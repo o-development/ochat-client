@@ -7,8 +7,9 @@ const ChatApp: FunctionComponent = () => {
   // On a browser or tablet
   return (
     <ChatProvider>
-      <ChatSocketHandler />
-      <ChatAppLayout />
+      <ChatSocketHandler>
+        <ChatAppLayout />
+      </ChatSocketHandler>
     </ChatProvider>
   );
 };

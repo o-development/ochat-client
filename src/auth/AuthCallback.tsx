@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useState } from 'react';
-import OnboardPageLayout from '../OnboardPageLayout';
+import OnboardPageLayout from '../onboard/OnboardPageLayout';
 import { View } from 'react-native';
 import useAsyncEffect from 'use-async-effect';
 import { maybeCompleteAuthSession } from 'expo-web-browser';

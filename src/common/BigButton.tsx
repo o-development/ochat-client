@@ -54,7 +54,6 @@ const BigButton: FunctionComponent<Props> = ({
     textAlign: 'center',
     color: appearance === 'primary' ? 'white' : themeColor,
     margin: marginSize,
-    height: 20,
     ...textStyle,
   };
   return (
@@ -66,7 +65,10 @@ const BigButton: FunctionComponent<Props> = ({
       <View style={usedContainerStyle}>
         {loading ? (
           <View style={{ margin: marginSize }}>
-            <Spinner size={spinnerSize} status="control" />
+            <Spinner
+              size={spinnerSize}
+              status={appearance === 'primary' ? 'control' : 'primary'}
+            />
           </View>
         ) : (
           <Text style={usedTextStyle}>{title}</Text>

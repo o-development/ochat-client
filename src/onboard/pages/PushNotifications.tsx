@@ -2,7 +2,6 @@ import React, { FunctionComponent, useState } from 'react';
 import { Text } from '@ui-kitten/components';
 import BigButton from '../../common/BigButton';
 import OnboardPageLayout from '../OnboardPageLayout';
-import { useHistory } from '../../router';
 import useAsyncEffect from 'use-async-effect';
 import FullPageSpinner from '../../common/FullPageSpinner';
 import {
@@ -10,10 +9,15 @@ import {
   enableNotifications,
 } from '../../util/notificationUtils';
 
-const PushNotifications: FunctionComponent = () => {
-  const history = useHistory();
+interface PersonIndexRequestProps {
+  onComplete: () => void;
+}
+
+const PushNotifications: FunctionComponent<PersonIndexRequestProps> = ({
+  onComplete,
+}) => {
   const goToNext = () => {
-    history.push('/chat');
+    onComplete();
   };
   const [loading, setLoading] = useState(true);
 

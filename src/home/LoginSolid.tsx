@@ -7,7 +7,6 @@ import { makeUrl } from 'expo-linking';
 import BigButton from '../common/BigButton';
 import OnboardPageLayout from '../onboard/OnboardPageLayout';
 import TextInput from '../common/TextInput';
-import { useHistory } from '../router';
 import { API_URL } from '@env';
 import * as ClientStorage from '../util/clientStorage';
 import { AuthActionType, AuthContext } from '../auth/authReducer';
@@ -18,15 +17,18 @@ import FullPageSpinner from '../common/FullPageSpinner';
 // dotenv compiler plugin doesn't work properly without it
 console.info('API_URL', API_URL);
 
-const LoginSolid: FunctionComponent = () => {
-  const history = useHistory();
+interface LoginSolidProps {
+  onLogin?: () => void;
+}
 
+const LoginSolid: FunctionComponent<LoginSolidProps> = ({ onLogin }) => {
   const [, authDispatch] = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
+  const [issuer, setIssuer] = useState('');
 
   const initiateLogin = async (issuer: string) => {
     setLoading(true);
-    const callbackUrl = makeUrl('onboard/callback');
+    const callbackUrl = makeUrl('auth-callback');
     const result = await openAuthSessionAsync(
       `${API_URL}/auth/login?redirect=${callbackUrl}&issuer=${issuer}`,
       callbackUrl,
@@ -44,14 +46,19 @@ const LoginSolid: FunctionComponent = () => {
         expectedStatus: 200,
         errorHandlers: {
           '404': async () => {
-            history.push('/onboard/person_index_request');
+            authDispatch({
+              type: AuthActionType.REQUIRES_ONBOARDING,
+              profileRequiresOnboarding: true,
+            });
           },
         },
       });
       if (response.status === 200) {
         const profile = await response.json();
         authDispatch({ type: AuthActionType.LOGGED_IN, profile });
-        history.push('/chat');
+        if (onLogin) {
+          onLogin();
+        }
       }
     }
     setLoading(false);
@@ -67,14 +74,6 @@ const LoginSolid: FunctionComponent = () => {
       middleContent={
         <>
           <View>
-            <TextInput placeholder="WebId (https://example.com/profile/card#me)" />
-            <BigButton
-              title="Log In"
-              onPress={() => history.push(`/onboard/push_notifications`)}
-            />
-          </View>
-          <Text style={{ textAlign: 'center', marginVertical: 16 }}>OR</Text>
-          <View>
             <BigButton
               title="Log In with solidcommunity.net"
               onPress={() => initiateLogin('https://solidcommunity.net')}
@@ -89,6 +88,14 @@ const LoginSolid: FunctionComponent = () => {
               title="Log In with ESS"
               onPress={() => initiateLogin('https://broker.pod.inrupt.com/')}
             />
+          </View>
+          <Text style={{ textAlign: 'center', marginVertical: 16 }}>OR</Text>
+          <View>
+            <TextInput
+              placeholder="Solid Issuer (https://solidcommunity.net/)"
+              onChangeText={setIssuer}
+            />
+            <BigButton title="Log In" onPress={() => initiateLogin(issuer)} />
           </View>
         </>
       }

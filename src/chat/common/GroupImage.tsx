@@ -2,6 +2,7 @@ import React, { FunctionComponent } from 'react';
 import {
   Image,
   ImageBackground,
+  ImageSourcePropType,
   ImageStyle,
   StyleProp,
   StyleSheet,
@@ -46,7 +47,7 @@ const GroupImage: FunctionComponent<GroupImageProps> = ({
     },
   });
 
-  const imageObjects = images.map((image) => ({
+  const imageObjects: ImageSourcePropType[] = images.map((image) => ({
     uri: image,
   }));
 

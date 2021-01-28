@@ -1,26 +1,30 @@
 import React, {
-  Fragment,
+  createContext,
   FunctionComponent,
   useContext,
   useState,
 } from 'react';
 import useAsyncEffect from 'use-async-effect';
 import { ChatActionType, ChatContext, IChat, IMessage } from './chatReducer';
-import { io } from 'socket.io-client';
+import { io, Socket } from 'socket.io-client';
 import { API_WS_URL } from '@env';
 
 // This is a load bearing console.info. Apparently the
 // dotenv compiler plugin doesn't work properly without it
 console.info('API_WS_URL', API_WS_URL);
 
-const ChatSocketHandler: FunctionComponent = () => {
+export const SocketContext = createContext<Socket | undefined>(undefined);
+
+const ChatSocketHandler: FunctionComponent = ({ children }) => {
   const [, chatDispatch] = useContext(ChatContext);
 
-  const [didSetUpSocket, setDidSetUpSocket] = useState(false);
-  useAsyncEffect(() => {
-    if (!didSetUpSocket) {
-      setDidSetUpSocket(true);
+  const [activeSocket, setActiveSocket] = useState<Socket | undefined>(
+    undefined,
+  );
 
+  useAsyncEffect(() => {
+    // Setup Socket
+    if (!activeSocket) {
       const socket = io(API_WS_URL, {
         withCredentials: true,
       });
@@ -44,13 +48,19 @@ const ChatSocketHandler: FunctionComponent = () => {
         });
       });
 
+      setActiveSocket(socket);
+
       return function cleanup() {
         socket.close();
       };
     }
   });
 
-  return <Fragment />;
+  return (
+    <SocketContext.Provider value={activeSocket}>
+      {children}
+    </SocketContext.Provider>
+  );
 };
 
 export default ChatSocketHandler;

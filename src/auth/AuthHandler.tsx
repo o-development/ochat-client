@@ -1,11 +1,9 @@
 import React, { Fragment, FunctionComponent, useContext } from 'react';
 import useAsyncEffect from 'use-async-effect';
-import { useHistory } from '../router';
 import authFetch from '../util/authFetch';
 import { AuthActionType, AuthContext, AuthProvider } from './authReducer';
 
 const AuthLoader: FunctionComponent = () => {
-  const history = useHistory();
   const [authState, dispatch] = useContext(AuthContext);
   useAsyncEffect(async () => {
     // Check if the user is logged in
@@ -14,7 +12,10 @@ const AuthLoader: FunctionComponent = () => {
         expectedStatus: 200,
         errorHandlers: {
           '404': async () => {
-            history.push(`/onboard/person_index_request`);
+            dispatch({
+              type: AuthActionType.REQUIRES_ONBOARDING,
+              profileRequiresOnboarding: true,
+            });
           },
           '401': async () => {
             dispatch({ type: AuthActionType.LOGGED_OUT });

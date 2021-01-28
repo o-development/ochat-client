@@ -26,6 +26,7 @@ import {
   Dimensions,
   KeyboardAvoidingView,
 } from 'react-native';
+import debounce from 'debounce-promise';
 import { IChatParticipant } from '../chatReducer';
 import getThemeVars from '../../common/getThemeVars';
 import ChipInput from '../common/ChipInput';
@@ -123,9 +124,9 @@ const ProfileSelectorUi: FunctionComponent<ProfileSelectorProps> = ({
     [onAdded],
   );
 
-  const onSearch = useCallback(
-    async (searchTerm: string): Promise<void> => {
-      setSearchText(searchTerm);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const performSearch = useCallback(
+    debounce(async (searchTerm: string): Promise<void> => {
       const result = await authFetch(
         `/profile/search?term=${encodeURIComponent(searchTerm)}`,
         { method: 'post' },
@@ -145,8 +146,16 @@ const ProfileSelectorUi: FunctionComponent<ProfileSelectorProps> = ({
         setSearchResults([]);
       }
       setSearchResultSelected(-1);
+    }, 1000),
+    [setSearchResults, isAdmin],
+  );
+
+  const onSearch = useCallback(
+    async (searchTerm: string): Promise<void> => {
+      setSearchText(searchTerm);
+      await performSearch(searchTerm);
     },
-    [setSearchResults, isAdmin, setSearchText],
+    [performSearch, setSearchText],
   );
 
   const onSearchKeyPress = useCallback(
