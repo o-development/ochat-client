@@ -5,7 +5,11 @@ export async function getItem(key: string): Promise<string | null> {
   if (Platform.OS === 'web') {
     return localStorage.getItem(key);
   } else if (Platform.OS === 'ios' || Platform.OS === 'android') {
-    return SecureStore.getItemAsync(key);
+    try {
+      return SecureStore.getItemAsync(key);
+    } catch {
+      return null;
+    }
   }
   throw new Error('Platform not supported.');
 }
