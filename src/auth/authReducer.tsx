@@ -74,6 +74,7 @@ export const authReducer: Reducer<IAuthState, IAuthAction> = (
       return {
         ...state,
         requiresOnboarding: action.profileRequiresOnboarding,
+        isLoading: false,
       };
     default:
       throw new Error('Action type not recognized');
