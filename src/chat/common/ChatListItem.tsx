@@ -1,4 +1,4 @@
-import { ListItem, ListItemProps } from '@ui-kitten/components';
+import { ListItem, ListItemProps, Text } from '@ui-kitten/components';
 import React, { FunctionComponent, memo, useContext } from 'react';
 import { StyleSheet } from 'react-native';
 import getThemeVars from '../../common/getThemeVars';
@@ -21,19 +21,25 @@ const ChatListItem: FunctionComponent<ChatListItemProps> = memo(
     return (
       <ListItem
         {...props}
-        title={chat.name}
+        title={(evaProps) => (
+          <Text {...evaProps} numberOfLines={2}>
+            {chat.name}
+          </Text>
+        )}
         style={StyleSheet.flatten([
           isSelected ? { backgroundColor: highlightColor } : {},
           props.style,
         ])}
         onPress={onPress}
-        description={
-          chat.lastMessage
-            ? `${
-                getParticipantForMessageSender(chat.lastMessage, chat).name
-              }: ${chat.lastMessage.content}`
-            : undefined
-        }
+        description={(evaProps) => (
+          <Text {...evaProps} numberOfLines={2}>
+            {chat.lastMessage
+              ? `${
+                  getParticipantForMessageSender(chat.lastMessage, chat).name
+                }: ${chat.lastMessage.content}`
+              : undefined}
+          </Text>
+        )}
         accessoryLeft={() => (
           <GroupImage
             images={chat.participants
