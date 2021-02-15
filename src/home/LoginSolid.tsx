@@ -1,68 +1,52 @@
 import React, { FunctionComponent, useContext, useState } from 'react';
 import { Text } from '@ui-kitten/components';
-import { View } from 'react-native';
-import { parse } from 'url';
+import { Platform, View } from 'react-native';
 import { openAuthSessionAsync } from 'expo-web-browser';
 import { makeUrl } from 'expo-linking';
 import BigButton from '../common/BigButton';
 import OnboardPageLayout from '../onboard/OnboardPageLayout';
 import TextInput from '../common/TextInput';
 import { API_URL } from '@env';
-import * as ClientStorage from '../util/clientStorage';
-import { AuthActionType, AuthContext } from '../auth/authReducer';
-import authFetch from '../util/authFetch';
+import { AuthContext } from '../auth/authReducer';
 import FullPageSpinner from '../common/FullPageSpinner';
+import { onSuccessfulAuthCallback } from '../auth/onSuccessfulAuthCallback';
+import { useHistory } from '../router';
+import * as ClientStorage from '../util/clientStorage';
 
 // This is a load bearing console.info. Apparently the
 // dotenv compiler plugin doesn't work properly without it
 console.info('API_URL', API_URL);
 
 interface LoginSolidProps {
-  onLogin?: () => void;
+  redirectAfterLogin: string;
 }
 
-const LoginSolid: FunctionComponent<LoginSolidProps> = ({ onLogin }) => {
+const LoginSolid: FunctionComponent<LoginSolidProps> = ({
+  redirectAfterLogin,
+}) => {
   const [, authDispatch] = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
   const [issuer, setIssuer] = useState('');
+  const history = useHistory();
 
   const initiateLogin = async (issuer: string) => {
     setLoading(true);
     const callbackUrl = makeUrl('auth-callback');
-    const result = await openAuthSessionAsync(
-      `${API_URL}/auth/login?redirect=${callbackUrl}&issuer=${issuer}`,
-      callbackUrl,
-    );
+    const idpUrl = `${API_URL}/auth/login?redirect=${callbackUrl}&issuer=${issuer}`;
+
+    // If the platform is web, open the idp in the same window. Safari is
+    // overzealous about blocking popups, so we can't use "openAuthSessionAsync."
+    if (Platform.OS === 'web') {
+      await ClientStorage.setItem('redirectAfterLogin', redirectAfterLogin);
+      window.location.assign(idpUrl);
+      return;
+    }
+
+    const result = await openAuthSessionAsync(idpUrl, callbackUrl);
     if (result.type === 'success') {
-      const url = result.url;
-      const parsedUrl = parse(url, true);
-      const key = Array.isArray(parsedUrl.query.key)
-        ? parsedUrl.query.key[0]
-        : parsedUrl.query.key;
-      if (key) {
-        await ClientStorage.setItem('authkey', key);
-      }
-      const response = await authFetch(`/profile/authenticated`, undefined, {
-        expectedStatus: 200,
-        errorHandlers: {
-          '404': async () => {
-            authDispatch({
-              type: AuthActionType.REQUIRES_ONBOARDING,
-              profileRequiresOnboarding: true,
-            });
-            if (onLogin) {
-              onLogin();
-            }
-          },
-        },
+      await onSuccessfulAuthCallback(result.url, authDispatch, () => {
+        history.push(redirectAfterLogin);
       });
-      if (response.status === 200) {
-        const profile = await response.json();
-        authDispatch({ type: AuthActionType.LOGGED_IN, profile });
-        if (onLogin) {
-          onLogin();
-        }
-      }
     }
     setLoading(false);
   };
