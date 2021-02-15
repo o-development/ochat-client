@@ -19,7 +19,6 @@ API_WS_URL=wss://localhost:8080
 
 # The vapid push server public key (for web push notifications)
 PUSH_SERVER_PUBLIC_KEY=example-key
-
 ```
 
 To run on mobile:
