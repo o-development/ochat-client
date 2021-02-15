@@ -41,7 +41,12 @@ const ChatDetails: FunctionComponent<{
       <Text>{chat.name}</Text>
       <Divider style={{ marginVertical: 8 }} />
       <Text category="label">Chat Location:</Text>
+
       <Text
+        accessibilityRole="link"
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        href={chat.uri}
         onPress={() =>
           Platform.OS !== 'web'
             ? Linking.openURL(chat.uri)
