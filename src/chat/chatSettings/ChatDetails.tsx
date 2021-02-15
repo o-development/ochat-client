@@ -44,6 +44,7 @@ const ChatDetails: FunctionComponent<{
 
       <Text
         accessibilityRole="link"
+        // The typings for the Text object is incorrect; href is an allowable prop
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         href={chat.uri}
