@@ -24,7 +24,9 @@ const ChatSelectionPane: FunctionComponent<{
       {authState.profile ? (
         <ChatSelection currentlySelected={currentlySelected} />
       ) : (
-        <LoginSolid />
+        <LoginSolid
+          redirectAfterLogin={`${window.location.pathname}${window.location.search}`}
+        />
       )}
     </Layout>
   );

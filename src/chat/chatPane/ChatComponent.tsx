@@ -66,7 +66,7 @@ const ChatComponent: FunctionComponent<{
       (currentPublicChatUri !== chatUri || isCurrentUserParticipant) &&
       socket
     ) {
-      console.log('unsubscribe', currentPublicChatUri);
+      console.info('unsubscribe', currentPublicChatUri);
       setCurrentPublicChatUri(undefined);
       socket.emit('unsubscribeFromPublicChat', { uri: currentPublicChatUri });
     }
@@ -76,7 +76,7 @@ const ChatComponent: FunctionComponent<{
       chatData.chat?.isPublic &&
       !isCurrentUserParticipant
     ) {
-      console.log('subscribe', chatUri);
+      console.info('subscribe', chatUri);
       setCurrentPublicChatUri(chatUri);
       socket.emit('subscribeToPublicChat', { uri: chatUri });
     }
