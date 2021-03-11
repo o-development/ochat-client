@@ -17,7 +17,9 @@
       "favicon": "./assets/favicon.png",
       "build": {
         "babel": {
-          "include": ["react-router-native"]
+          "include": [
+            "react-router-native"
+          ]
         }
       }
     },
@@ -28,7 +30,8 @@
       "icon": "./assets/androidIcon.png",
       "adaptiveIcon": {
         "foregroundImage": "./assets/androidIcon.png"
-      }
+      },
+      "package": "com.otherjackson.LiqidChat"
     }
   }
 }

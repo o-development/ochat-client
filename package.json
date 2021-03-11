@@ -7,6 +7,8 @@
     "expo-reset": "rm -rf .expo",
     "web-chrome": "env BROWSER=chrome expo start --web --https",
     "build:web": "expo build:web",
+    "build:android": "expo build:android",
+    "build:ios": "expo build:ios",
     "start": "react-native start",
     "publish": "expo publish",
     "test": "jest",
