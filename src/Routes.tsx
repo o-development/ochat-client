@@ -7,7 +7,7 @@ import AuthHandler from './auth/AuthHandler';
 import { DeepLinking } from 'react-router-native';
 import { Platform } from 'react-native';
 import NotificationInitializer from './NotificationInitializer';
-import PrivacyPolicy from './home/PrivacyPolicy';
+import PrivacyPolicy from './privacyPolicy/PrivacyPolicyPage';
 
 export const Routes: FunctionComponent = () => {
   return (

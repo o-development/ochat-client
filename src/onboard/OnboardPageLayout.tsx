@@ -2,6 +2,7 @@ import React, { FunctionComponent, ReactElement } from 'react';
 import { Text, Layout } from '@ui-kitten/components';
 import { View } from 'react-native';
 import { themeColor } from '../common/const';
+import { ScrollView } from 'react-native-gesture-handler';
 
 interface Props {
   title: string;

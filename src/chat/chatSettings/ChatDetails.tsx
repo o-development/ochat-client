@@ -2,12 +2,12 @@ import React, { useContext } from 'react';
 import { FunctionComponent } from 'react';
 import { IChat, IChatParticipant } from '../chatReducer';
 import { Divider, Text } from '@ui-kitten/components';
-import { Linking, Platform, View } from 'react-native';
-import getThemeVars from '../../common/getThemeVars';
+import { View } from 'react-native';
 import UserProfileListItem from '../common/UserProfileListItem';
 import { getNewChatPaneUriFromProfile } from './getNewChatPaneUri';
 import { useHistory } from '../../router';
 import { AuthContext } from '../../auth/authReducer';
+import Link from '../../common/Link';
 
 const ChatParticipantDetails: FunctionComponent<{
   participants: IChatParticipant[];
@@ -34,29 +34,13 @@ const ChatParticipantDetails: FunctionComponent<{
 const ChatDetails: FunctionComponent<{
   chat: IChat;
 }> = ({ chat }) => {
-  const { themeColor } = getThemeVars();
   return (
     <View>
       <Text category="label">Chat Name:</Text>
       <Text>{chat.name}</Text>
       <Divider style={{ marginVertical: 8 }} />
       <Text category="label">Chat Location:</Text>
-
-      <Text
-        accessibilityRole="link"
-        // The typings for the Text object is incorrect; href is an allowable prop
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        href={chat.uri}
-        onPress={() =>
-          Platform.OS !== 'web'
-            ? Linking.openURL(chat.uri)
-            : window.open(chat.uri, '_blank')
-        }
-        style={{ textDecorationLine: 'underline', color: themeColor }}
-      >
-        {chat.uri}
-      </Text>
+      <Link href={chat.uri} content={chat.uri} />
       <Divider style={{ marginVertical: 8 }} />
       <Text category="label">Public or Private:</Text>
       <Text>{chat.isPublic ? 'Public' : 'Private'}</Text>
