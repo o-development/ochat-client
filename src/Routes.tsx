@@ -7,6 +7,7 @@ import AuthHandler from './auth/AuthHandler';
 import { DeepLinking } from 'react-router-native';
 import { Platform } from 'react-native';
 import NotificationInitializer from './NotificationInitializer';
+import PrivacyPolicy from './privacyPolicy/PrivacyPolicyPage';
 
 export const Routes: FunctionComponent = () => {
   return (
@@ -17,6 +18,7 @@ export const Routes: FunctionComponent = () => {
           <Switch>
             <Route path="/auth-callback" component={AuthCallback} />
             <Route path="/chat" component={ChatApp} />
+            <Route path="/privacy-policy" component={PrivacyPolicy} />
             <Route path="/" component={Home} />
           </Switch>
           <NotificationInitializer />

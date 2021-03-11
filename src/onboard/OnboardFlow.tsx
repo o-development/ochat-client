@@ -3,18 +3,24 @@ import PushNotifications from './pages/PushNotifications';
 import PersonIndexRequest from './pages/PersonIndexRequest';
 import FullPageSpinner from '../common/FullPageSpinner';
 import { AuthActionType, AuthContext } from '../auth/authReducer';
+import OnboardPrivacyPolicy from './pages/OnboardPrivacyPolicy';
 
 enum OnboardPage {
+  PRIVACY_POLICY,
   PERSON_INDEX_REQUEST,
   PUSH_NOTIFICATIONS,
 }
 
 const OnboardFlow: FunctionComponent = () => {
   const [, dispatchAuthState] = useContext(AuthContext);
-  const [page, setPage] = useState<OnboardPage>(
-    OnboardPage.PERSON_INDEX_REQUEST,
-  );
+  const [page, setPage] = useState<OnboardPage>(OnboardPage.PRIVACY_POLICY);
   switch (page) {
+    case OnboardPage.PRIVACY_POLICY:
+      return (
+        <OnboardPrivacyPolicy
+          onComplete={() => setPage(OnboardPage.PERSON_INDEX_REQUEST)}
+        />
+      );
     case OnboardPage.PERSON_INDEX_REQUEST:
       return (
         <PersonIndexRequest

@@ -1,14 +1,17 @@
 {
-  "name": "liqid-chat",
-  "displayName": "Liqid Chat",
   "expo": {
     "name": "Liqid Chat",
+    "description": "A chat client for Solid Pods",
     "slug": "LiqidChat",
     "scheme": "liqidchat",
     "version": "1.0.0",
     "assetBundlePatterns": [
       "**/*"
     ],
+    "splash": {
+      "image": "./assets/loadingSplash.png",
+      "resizeMode": "cover"
+    },
     "icon": "./assets/logo.png",
     "web": {
       "favicon": "./assets/favicon.png",
@@ -16,6 +19,15 @@
         "babel": {
           "include": ["react-router-native"]
         }
+      }
+    },
+    "ios": {
+      "icon": "./assets/iosIcon.png"
+    },
+    "android": {
+      "icon": "./assets/androidIcon.png",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/androidIcon.png"
       }
     }
   }

@@ -74,6 +74,11 @@ const Settings: FunctionComponent<{
         title="Log Out of all Devices"
         onPress={() => handleLogOut(true)}
       />
+      <BigButton
+        appearance="ghost"
+        title="View Privacy Policy"
+        onPress={() => history.push('/privacy-policy')}
+      />
     </SettingsMenuTemplate>
   );
 };
