@@ -4,17 +4,18 @@
     "android": "react-native run-android",
     "ios": "react-native run-ios",
     "web": "env BROWSER=firefox expo start --web --https",
-    "expo-reset": "rm -rf .expo",
+    "expo-reset": "rm -rf .expo && expo r -c",
     "web-chrome": "env BROWSER=chrome expo start --web --https",
     "build:web": "expo build:web",
-    "build:android": "expo build:android",
+    "build:android": "expo build:android -t app-bundle",
+    "upload:android": "expo upload:android",
     "build:ios": "expo build:ios",
+    "upload:ios": "expo upload:ios",
     "start": "react-native start",
     "publish": "expo publish",
     "test": "jest",
     "postinstall": "./scripts/fix.sh",
-    "expo": "expo start",
-    "clear-cache": "expo r -c"
+    "expo": "expo start"
   },
   "dependencies": {
     "@eva-design/eva": "^2.0.0",
