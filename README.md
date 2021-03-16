@@ -1,5 +1,7 @@
 # OChat Client
 
+A chat client for Solid.
+
 ## Setup
 
 ```bash=
