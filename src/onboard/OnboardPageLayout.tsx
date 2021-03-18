@@ -35,7 +35,7 @@ const OnboardPageLayout: FunctionComponent<Props> = ({
       <Text category="h1" style={{ marginBottom: 16, color: themeColor }}>
         {title}
       </Text>
-      <View>{middleContent}</View>
+      {middleContent}
       <View
         style={{
           flexDirection: 'row',

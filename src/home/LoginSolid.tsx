@@ -71,10 +71,6 @@ const LoginSolid: FunctionComponent<LoginSolidProps> = ({
               onPress={() => initiateLogin('https://inrupt.net')}
               containerStyle={{ marginBottom: 8 }}
             />
-            <BigButton
-              title="Log In with ESS"
-              onPress={() => initiateLogin('https://broker.pod.inrupt.com/')}
-            />
           </View>
           <Text style={{ textAlign: 'center', marginVertical: 16 }}>OR</Text>
           <View>

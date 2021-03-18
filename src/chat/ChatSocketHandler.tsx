@@ -8,6 +8,7 @@ import useAsyncEffect from 'use-async-effect';
 import { ChatActionType, ChatContext, IChat, IMessage } from './chatReducer';
 import { io, Socket } from 'socket.io-client';
 import { API_WS_URL } from '@env';
+import * as ClientStorage from '../util/clientStorage';
 
 // This is a load bearing console.info. Apparently the
 // dotenv compiler plugin doesn't work properly without it
@@ -22,12 +23,14 @@ const ChatSocketHandler: FunctionComponent = ({ children }) => {
     undefined,
   );
 
-  useAsyncEffect(() => {
+  useAsyncEffect(async () => {
     // Setup Socket
     if (!activeSocket) {
-      const socket = io(API_WS_URL, {
-        withCredentials: true,
-      });
+      const authkey = await ClientStorage.getItem('authkey');
+      const socketOptions = authkey
+        ? { query: { authkey } }
+        : { withCredentials: true };
+      const socket = io(API_WS_URL, socketOptions);
 
       socket.on('connect', () => {
         console.info('connected to socket.io');

@@ -26,18 +26,18 @@ const OnboardPrivacyPolicy: FunctionComponent<OnboardPrivacyPolicyProps> = ({
           </Text>
           <ScrollView
             style={{
-              height: 300,
               padding: 16,
               borderColor: dividerColor,
               borderWidth: 1,
               marginBottom: 8,
+              flex: 1,
             }}
           >
             <PrivacyPolicyContent />
           </ScrollView>
           <BigButton
             title="Agree and Continue"
-            containerStyle={{ marginBottom: 8 }}
+            containerStyle={{ marginBottom: 8, height: 37 }}
             onPress={() => onComplete()}
           />
         </View>

@@ -94,7 +94,6 @@ const Home: FunctionComponent = () => {
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
-                console.log('herererere');
                 Platform.OS !== 'web'
                   ? Linking.openURL(PLAY_STORE_LINK)
                   : window.open(PLAY_STORE_LINK, '_blank');
