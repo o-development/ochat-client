@@ -93,11 +93,17 @@ const StandardChatList: FunctionComponent<StandardChatListProps> = ({
   const fetchMoreResults = useCallback(
     async () => {
       const listData: IChatListData | undefined = chatState.lists[listName];
+      // Return if already loaded all the chats
       if (listData && (listData.allChatsLoaded || loadingMoreChats)) {
         return;
       }
-      setLoadingMoreChats(true);
+
       const curPage = listData ? listData.lastPageLoaded : -1;
+      // Return if already started to load current page
+      if (listData && listData.pageFetchAttempts.has(curPage + 1)) {
+        return;
+      }
+      setLoadingMoreChats(true);
       const result = await authFetch(
         `/chat/search?page=${curPage + 1}`,
         {

@@ -122,7 +122,11 @@ const ChatPane: FunctionComponent<{
           <Text category="h2">
             You do not have access to this chat. Log In to get access.
           </Text>
-          {mobileRender ? <LoginSolid /> : undefined}
+          {mobileRender ? (
+            <LoginSolid
+              redirectAfterLogin={`${window.location.pathname}${window.location.search}`}
+            />
+          ) : undefined}
         </Layout>
       );
     } else if (

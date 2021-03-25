@@ -45,6 +45,7 @@ export interface IChatData {
 export interface IChatListData {
   allChatsLoaded: boolean;
   lastPageLoaded: number;
+  pageFetchAttempts: Set<number>;
 }
 
 export interface IChatState {
@@ -59,6 +60,7 @@ export interface IChatState {
 export enum ChatActionType {
   UPDATE_CHAT,
   ADD_MESSAGE,
+  BEGIN_CHAT_LIST_FETCH,
 }
 
 export interface IBaseChatAction {
@@ -85,7 +87,16 @@ export interface IAddMessageAction extends IBaseChatAction {
   allMessagesLoaded?: boolean;
 }
 
-export type IChatAction = IUpdateChatAction | IAddMessageAction;
+export interface IBeginChatListFetchAction extends IBaseChatAction {
+  type: ChatActionType.BEGIN_CHAT_LIST_FETCH;
+  list: string;
+  pageNumber: number;
+}
+
+export type IChatAction =
+  | IUpdateChatAction
+  | IAddMessageAction
+  | IBeginChatListFetchAction;
 
 /**
  * REDUCER
@@ -166,6 +177,17 @@ export const chatReducer: Reducer<IChatState, IChatAction> = (
         },
       };
       break;
+    case ChatActionType.BEGIN_CHAT_LIST_FETCH:
+      if (!state.lists[action.list]) {
+        state.lists[action.list] = {
+          lastPageLoaded: -1,
+          allChatsLoaded: false,
+          pageFetchAttempts: new Set(),
+        };
+      }
+      state.lists[action.list].pageFetchAttempts.add(action.pageNumber);
+      return state;
+      break;
     default:
       throw new Error('Action type not recognized');
   }
@@ -180,10 +202,12 @@ export const initialChatState: IChatState = {
     default: {
       lastPageLoaded: -1,
       allChatsLoaded: false,
+      pageFetchAttempts: new Set(),
     },
     discover: {
       lastPageLoaded: -1,
       allChatsLoaded: false,
+      pageFetchAttempts: new Set(),
     },
   },
   performedActions: {},
