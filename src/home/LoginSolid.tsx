@@ -32,7 +32,6 @@ const LoginSolid: FunctionComponent<LoginSolidProps> = ({
   const initiateLogin = async (issuer: string) => {
     setLoading(true);
     const callbackUrl = makeUrl('auth-callback');
-    console.log(callbackUrl)
     const idpUrl = `${API_URL}/auth/login?redirect=${callbackUrl}&issuer=${issuer}`;
 
     // If the platform is web, open the idp in the same window. Safari is
