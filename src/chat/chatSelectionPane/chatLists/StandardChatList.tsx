@@ -105,7 +105,9 @@ const StandardChatList: FunctionComponent<StandardChatListProps> = ({
       }
       setLoadingMoreChats(true);
       const result = await authFetch(
-        `/chat/search?page=${curPage + 1}`,
+        `/chat/search?page=${curPage + 1}${
+          listName === 'discover' ? '&discoverable=true' : ''
+        }`,
         {
           method: 'post',
         },
