@@ -71,7 +71,7 @@ const ChatAppLayout: FunctionComponent = () => {
         height: '100%',
       }}
     >
-      <View style={{ flex: 1, maxWidth: 500, minWidth: 250 }}>
+      <View style={{ flex: 1, maxWidth: 500, minWidth: 283 }}>
         <ChatSelectionPane currentlySelected={id} />
       </View>
       <View style={{ flex: 3 }}>{mainComponent}</View>

@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "611843747500",
+    "firebase_url": "https://ochat-prod.firebaseio.com",
+    "project_id": "ochat-prod",
+    "storage_bucket": "ochat-prod.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:611843747500:android:fb3f1ab91be5cddf95f909",
+        "android_client_info": {
+          "package_name": "com.otherjackson.LiqidChat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "611843747500-puadush2r0u90j03ugemq1opkf2pi820.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBjPzXENRugzbsGjAkEiNUD7X6_GCSbSzs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "611843747500-puadush2r0u90j03ugemq1opkf2pi820.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

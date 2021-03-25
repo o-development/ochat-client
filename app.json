@@ -31,11 +31,12 @@
     },
     "android": {
       "icon": "./assets/androidIcon.png",
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/androidIcon.png"
       },
       "package": "com.otherjackson.LiqidChat",
-      "versionCode": 2
+      "versionCode": 3
     }
   }
 }

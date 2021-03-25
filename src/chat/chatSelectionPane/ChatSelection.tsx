@@ -1,171 +1,27 @@
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { FunctionComponent } from 'react';
 import { Divider, Input, Icon } from '@ui-kitten/components';
 import { useHistory } from '../../router';
 import { View, Image } from 'react-native';
 import BigButton from '../../common/BigButton';
-import { IChat } from '../chatReducer';
-import useAsyncEffect from 'use-async-effect';
-import authFetch from '../../util/authFetch';
-import { ChatContext, ChatActionType } from '../chatReducer';
-import FullPageSpinner from '../../common/FullPageSpinner';
-import IProfile, { AuthContext } from '../../auth/authReducer';
-import ChatSelectionList from './ChatSelectionList';
-import debounce from 'debounce-promise';
+import ChatList from './chatLists/ChatListType';
+import DefaultChatList from './chatLists/DefaultChatList';
+import DiscoverChatList from './chatLists/DiscoverChatList';
 
 const ChatSelection: FunctionComponent<{
   currentlySelected?: string;
 }> = ({ currentlySelected }) => {
   const history = useHistory();
-  const [chatState, chatDispatch] = useContext(ChatContext);
-  const chats = chatState.chats;
-
-  const [authState] = useContext(AuthContext);
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [chatSearchResults, setChatSearchResults] = useState<IChat[]>([]);
-  const [profileSearchResults, setProfileSearchResults] = useState<IProfile[]>(
-    [],
-  );
-  const [searchResultsLoading, setSearchResultsLoading] = useState<boolean>(
-    false,
-  );
-  const [loadingMoreChats, setLoadingMoreChats] = useState(false);
+  const [currentListName, setCurrentListName] = useState('default');
 
-  useAsyncEffect(async () => {
-    if (
-      !chatState.performedActions['initialChatListFetch'] &&
-      authState.profile
-    ) {
-      const result = await authFetch(
-        `/chat/search`,
-        {
-          method: 'post',
-        },
-        { expectedStatus: 200 },
-      );
-      if (result.status === 200) {
-        const resultBody: {
-          chats: IChat[];
-          profiles?: IProfile[];
-        } = await result.json();
-        chatDispatch({
-          type: ChatActionType.UPDATE_CHAT,
-          chats: resultBody.chats,
-          performedAction: 'initialChatListFetch',
-          lastChatPageLoaded: 0,
-        });
-      }
-    }
-  });
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const performSearch = useCallback(
-    debounce(async (newTerm: string) => {
-      if (newTerm) {
-        setSearchResultsLoading(true);
-        const result = await authFetch(
-          `/chat/search?term=${newTerm}}`,
-          {
-            method: 'post',
-          },
-          { expectedStatus: 200 },
-        );
-        if (result.status === 200) {
-          const resultBody: {
-            chats: IChat[];
-            profiles?: IProfile[];
-          } = await result.json();
-          setChatSearchResults(resultBody.chats);
-          setProfileSearchResults(resultBody.profiles || []);
-        }
-        setSearchResultsLoading(false);
-      }
-    }, 1000),
-    [setChatSearchResults, setProfileSearchResults, setSearchResultsLoading],
-  );
-
-  const handleSearchTermChange = async (newTerm: string) => {
-    setSearchTerm(newTerm);
-    await performSearch(newTerm);
+  const componentMap: Record<string, ChatList> = {
+    default: DefaultChatList,
+    discover: DiscoverChatList,
   };
 
-  const loadMoreResults = useCallback(async (): Promise<void> => {
-    if (chatState.allChatsLoaded || loadingMoreChats) {
-      return;
-    }
-    setLoadingMoreChats(true);
-    const result = await authFetch(
-      `/chat/search?page=${chatState.lastChatPageLoaded + 1}`,
-      {
-        method: 'post',
-      },
-      { expectedStatus: 200 },
-    );
-    if (result.status === 200) {
-      const resultBody: {
-        chats: IChat[];
-        profiles?: IProfile[];
-      } = await result.json();
-      chatDispatch({
-        type: ChatActionType.UPDATE_CHAT,
-        chats: resultBody.chats,
-        performedAction: 'initialChatListFetch',
-        lastChatPageLoaded: chatState.lastChatPageLoaded + 1,
-        allChatsLoaded: resultBody.chats.length === 0,
-      });
-    }
-    setLoadingMoreChats(false);
-  }, [
-    chatDispatch,
-    chatState.allChatsLoaded,
-    chatState.lastChatPageLoaded,
-    loadingMoreChats,
-  ]);
-
-  const rawChatList = JSON.stringify(chats);
-  const chatList: (IChat | IProfile)[] = useMemo(() => {
-    return !searchTerm
-      ? (Object.values(chats)
-          .map((chatData) => chatData.chat)
-          .filter((chat): boolean => {
-            if (!chat) {
-              return false;
-            }
-            return chat.participants.some(
-              (participant) => participant.webId === authState.profile?.webId,
-            );
-          }) as IChat[]).sort((a, b) => {
-          if (!a.lastMessage && !b.lastMessage) {
-            return 0;
-          } else if (!a.lastMessage) {
-            return 1;
-          } else if (!b.lastMessage) {
-            return -1;
-          }
-          const aTime = a.lastMessage.timeCreated;
-          const bTime = b.lastMessage.timeCreated;
-          if (aTime > bTime) {
-            return -1;
-          } else if (aTime < bTime) {
-            return 1;
-          } else {
-            return 0;
-          }
-        })
-      : [...chatSearchResults, ...profileSearchResults];
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    searchTerm,
-    chats,
-    chatSearchResults,
-    profileSearchResults,
-    authState.profile?.webId,
-    rawChatList,
-  ]);
-
-  if (!authState.profile) {
-    return <FullPageSpinner />;
-  }
+  const ChatListComponent: ChatList =
+    componentMap[currentListName] || DefaultChatList;
 
   return (
     <>
@@ -196,7 +52,9 @@ const ChatSelection: FunctionComponent<{
           placeholder="Search Chats"
           accessoryLeft={(props) => <Icon {...props} name="search-outline" />}
           style={{ borderColor: 'transparent', borderRadius: 0 }}
-          onChangeText={handleSearchTermChange}
+          onChangeText={async (term) => {
+            setSearchTerm(term);
+          }}
         />
         <View
           style={{
@@ -205,6 +63,17 @@ const ChatSelection: FunctionComponent<{
             marginBottom: 4,
           }}
         >
+          <BigButton
+            appearance="ghost"
+            title={
+              currentListName === 'default' ? 'Discover Chats' : 'My Chats'
+            }
+            onPress={() =>
+              setCurrentListName(
+                currentListName === 'default' ? 'discover' : 'default',
+              )
+            }
+          />
           <BigButton
             appearance="ghost"
             title="Link Chat"
@@ -218,15 +87,10 @@ const ChatSelection: FunctionComponent<{
         </View>
       </View>
       <Divider />
-      {searchResultsLoading ? (
-        <FullPageSpinner />
-      ) : (
-        <ChatSelectionList
-          onLoadMoreResults={loadMoreResults}
-          currentlySelected={currentlySelected}
-          chatList={chatList}
-        />
-      )}
+      <ChatListComponent
+        currentlySelected={currentlySelected}
+        searchTerm={searchTerm}
+      />
     </>
   );
 };

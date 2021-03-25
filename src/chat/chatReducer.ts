@@ -31,6 +31,7 @@ export interface IChat {
   images: string[];
   participants: IChatParticipant[];
   isPublic: boolean;
+  isDiscoverable?: boolean;
   lastMessage?: IMessage;
   error?: { message: string; metadata: Record<string, unknown> };
 }
@@ -41,11 +42,15 @@ export interface IChatData {
   allMessagesLoaded: boolean;
 }
 
+export interface IChatListData {
+  allChatsLoaded: boolean;
+  lastPageLoaded: number;
+}
+
 export interface IChatState {
   chats: Record<string, IChatData>;
-  allChatsLoaded: boolean;
   performedActions: Record<string, boolean>;
-  lastChatPageLoaded: number;
+  lists: Record<string, IChatListData>;
 }
 
 /**
@@ -64,8 +69,13 @@ export interface IBaseChatAction {
 export interface IUpdateChatAction extends IBaseChatAction {
   type: ChatActionType.UPDATE_CHAT;
   chats: IChat[];
-  allChatsLoaded?: boolean;
-  lastChatPageLoaded?: number;
+  lists?: Record<
+    string,
+    {
+      allChatsLoaded?: boolean;
+      lastPageLoaded?: number;
+    }
+  >;
 }
 
 export interface IAddMessageAction extends IBaseChatAction {
@@ -102,15 +112,19 @@ export const chatReducer: Reducer<IChatState, IChatAction> = (
           },
         };
       });
-      return {
+      const toReturn = {
         ...state,
         chats: newChatMap,
-        allChatsLoaded: action.allChatsLoaded || false,
-        lastChatPageLoaded:
-          action.lastChatPageLoaded == undefined
-            ? state.lastChatPageLoaded
-            : action.lastChatPageLoaded,
       };
+      if (action.lists) {
+        Object.entries(action.lists).forEach(([key, value]) => {
+          toReturn.lists[key] = {
+            ...toReturn.lists[key],
+            ...value,
+          };
+        });
+      }
+      return toReturn;
       break;
     case ChatActionType.ADD_MESSAGE:
       const newMessages = Array.isArray(action.message)
@@ -162,9 +176,17 @@ export const chatReducer: Reducer<IChatState, IChatAction> = (
  */
 export const initialChatState: IChatState = {
   chats: {},
-  allChatsLoaded: false,
+  lists: {
+    default: {
+      lastPageLoaded: -1,
+      allChatsLoaded: false,
+    },
+    discover: {
+      lastPageLoaded: -1,
+      allChatsLoaded: false,
+    },
+  },
   performedActions: {},
-  lastChatPageLoaded: -1,
 };
 
 /**

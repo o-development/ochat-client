@@ -51,6 +51,7 @@ const AdminSettings: FunctionComponent<{
           },
         ],
         isPublic: false,
+        isDiscoverable: false,
         ...initialChatData,
       };
     }
@@ -63,6 +64,7 @@ const AdminSettings: FunctionComponent<{
       images: [],
       participants: [],
       isPublic: false,
+      isDiscoverable: false,
       ...initialChatData,
     };
   });
@@ -205,14 +207,36 @@ const AdminSettings: FunctionComponent<{
         checked={editedChat.isPublic}
         style={{ alignSelf: 'flex-start', marginVertical: 16 }}
         onChange={(isChecked) => {
-          setEditedChat({ ...editedChat, isPublic: isChecked });
+          setEditedChat({
+            ...editedChat,
+            isPublic: isChecked,
+            isDiscoverable: false,
+          });
           setEditChatDifference({
             ...editChatDifference,
             isPublic: isChecked,
+            isDiscoverable: false,
           });
         }}
       >
         Public Chat?
+      </Toggle>
+      <Toggle
+        checked={editedChat.isDiscoverable}
+        style={{ alignSelf: 'flex-start', marginVertical: 16 }}
+        disabled={!editedChat.isPublic}
+        onChange={(isChecked) => {
+          setEditedChat({
+            ...editedChat,
+            isDiscoverable: isChecked,
+          });
+          setEditChatDifference({
+            ...editChatDifference,
+            isDiscoverable: isChecked,
+          });
+        }}
+      >
+        Advertise chat in Discover Chats?
       </Toggle>
       <ProfileSelector
         value={editedChat.participants?.filter(
