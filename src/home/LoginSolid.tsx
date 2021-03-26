@@ -12,6 +12,7 @@ import FullPageSpinner from '../common/FullPageSpinner';
 import { onSuccessfulAuthCallback } from '../auth/onSuccessfulAuthCallback';
 import { useHistory } from '../router';
 import * as ClientStorage from '../util/clientStorage';
+import errorToast from '../util/errorToast';
 
 // This is a load bearing console.info. Apparently the
 // dotenv compiler plugin doesn't work properly without it
@@ -30,6 +31,10 @@ const LoginSolid: FunctionComponent<LoginSolidProps> = ({
   const history = useHistory();
 
   const initiateLogin = async (issuer: string) => {
+    if (!issuer) {
+      errorToast('You must enter a custom issuer.');
+      return;
+    }
     setLoading(true);
     const callbackUrl = makeUrl('auth-callback');
     const idpUrl = `${API_URL}/auth/login?redirect=${callbackUrl}&issuer=${issuer}`;
@@ -78,7 +83,10 @@ const LoginSolid: FunctionComponent<LoginSolidProps> = ({
               placeholder="Solid Issuer (https://solidcommunity.net/)"
               onChangeText={setIssuer}
             />
-            <BigButton title="Log In" onPress={() => initiateLogin(issuer)} />
+            <BigButton
+              title="Log In with Custom Issuer"
+              onPress={() => initiateLogin(issuer)}
+            />
           </View>
         </>
       }
