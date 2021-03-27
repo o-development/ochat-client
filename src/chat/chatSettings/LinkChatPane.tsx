@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { FunctionComponent } from 'react';
-import { View } from 'react-native';
+import { Text, View } from 'react-native';
 import TextInput from '../../common/TextInput';
 import SettingsMenuTemplate from '../common/SettingsMenuTemplate';
 import BigButton from '../../common/BigButton';
 import authFetch from '../../util/authFetch';
 import { useHistory } from '../../router';
-import errorToast from '../../util/errorToast';
+import errorToast, { notificationToast } from '../../util/errorToast';
 import getErrorBody from '../../util/getErrorBody';
 
 const LinkChatPane: FunctionComponent<{
@@ -15,8 +15,9 @@ const LinkChatPane: FunctionComponent<{
   const history = useHistory();
   const [chatUrl, setChatUrl] = useState('');
   const [loading, setLoading] = useState(false);
+  const [allChatsLoading, setAllChatsLoading] = useState(false);
 
-  const linkChats = async () => {
+  const linkChats = useCallback(async () => {
     setLoading(true);
     const result = await authFetch(
       `/chat/${encodeURIComponent(chatUrl)}`,
@@ -47,7 +48,20 @@ const LinkChatPane: FunctionComponent<{
       return;
     }
     setLoading(false);
-  };
+  }, [chatUrl, history]);
+
+  const linkAllChatsOnPod = useCallback(async () => {
+    setAllChatsLoading(true);
+    const result = await authFetch(
+      '/chat/authenticated',
+      { method: 'POST' },
+      { expectedStatus: 201 },
+    );
+    if (result.status === 201) {
+      notificationToast('All chats successfully linked.');
+    }
+    setAllChatsLoading(false);
+  }, []);
 
   return (
     <SettingsMenuTemplate
@@ -66,6 +80,13 @@ const LinkChatPane: FunctionComponent<{
           appearance="primary"
           title="Link Chat"
           onPress={linkChats}
+        />
+        <Text style={{ textAlign: 'center', marginVertical: 8 }}>OR</Text>
+        <BigButton
+          loading={allChatsLoading}
+          appearance="primary"
+          title="Link all chats in your Pod"
+          onPress={linkAllChatsOnPod}
         />
       </View>
     </SettingsMenuTemplate>
