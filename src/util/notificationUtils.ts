@@ -181,22 +181,30 @@ export async function registerNotificationSubscription(): Promise<boolean> {
  * @returns true if notifications were enabled
  */
 export async function enableNotifications(): Promise<boolean> {
-  if (!(await doesClientSupportPushNotifications())) {
+  try {
+    if (!(await doesClientSupportPushNotifications())) {
+      errorToast('Client does not support notifications.');
+      return false;
+    }
+    if (!(await isNotificationAccessGranted())) {
+      const wasRequestSuccessful = await requestNotificationAccess();
+      if (!wasRequestSuccessful) {
+        errorToast('Notification request was not successful.');
+        return false;
+      }
+    }
+    if (!(await isSubscriptionRegistered())) {
+      const wasRegistrationSuccessful = await registerNotificationSubscription();
+      if (!wasRegistrationSuccessful) {
+        errorToast('Notification registration was not successful.');
+        return false;
+      }
+    }
+    return true;
+  } catch (err: unknown) {
+    errorToast((err as Error).message);
     return false;
   }
-  if (!(await isNotificationAccessGranted())) {
-    const wasRequestSuccessful = await requestNotificationAccess();
-    if (!wasRequestSuccessful) {
-      return false;
-    }
-  }
-  if (!(await isSubscriptionRegistered())) {
-    const wasRegistrationSuccessful = await registerNotificationSubscription();
-    if (!wasRegistrationSuccessful) {
-      return false;
-    }
-  }
-  return true;
 }
 
 /**

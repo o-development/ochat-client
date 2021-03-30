@@ -5,7 +5,7 @@
     "slug": "LiqidChat",
     "scheme": "liqidchat",
     "privacy": "unlisted",
-    "version": "1.0.2",
+    "version": "1.0.4",
     "assetBundlePatterns": [
       "**/*"
     ],
@@ -36,7 +36,7 @@
         "foregroundImage": "./assets/androidIcon.png"
       },
       "package": "com.otherjackson.LiqidChat",
-      "versionCode": 3
+      "versionCode": 6
     }
   }
 }
