@@ -7,11 +7,13 @@ import createReducerContext from '../util/createReducerContext';
 export enum IChatType {
   LongChat = 'LongChat',
   ShortChat = 'ShortChat',
+  SplitChat = 'SplitChat',
 }
 
 export interface IChatParticipant {
   name?: string;
   image?: string;
+  messageContainer?: string;
   webId: string;
   isAdmin: boolean;
 }

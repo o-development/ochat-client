@@ -36,6 +36,7 @@ import authFetch from '../../util/authFetch';
 import IProfile from '../../auth/authReducer';
 import { ScrollView } from 'react-native-gesture-handler';
 import { getStatusBarHeight } from 'react-native-status-bar-height';
+import { v4 } from 'uuid';
 
 interface ProfileSelectorProps {
   value?: IChatParticipant[];
@@ -137,6 +138,9 @@ const ProfileSelectorUi: FunctionComponent<ProfileSelectorProps> = ({
         setSearchResults(
           profiles.map((profile) => ({
             webId: profile.webId,
+            messageContainer: `${
+              profile.defaultStorageLocation
+            }split-messages/${v4()}`,
             image: profile.image,
             name: profile.name,
             isAdmin,

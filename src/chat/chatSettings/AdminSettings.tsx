@@ -1,6 +1,12 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useMemo, useState } from 'react';
 import { FunctionComponent } from 'react';
-import { Toggle, Text } from '@ui-kitten/components';
+import {
+  Toggle,
+  Text,
+  Select,
+  SelectItem,
+  IndexPath,
+} from '@ui-kitten/components';
 import { Linking, Platform, View } from 'react-native';
 import TextInput from '../../common/TextInput';
 import { IChat, IChatParticipant, IChatType } from '../chatReducer';
@@ -17,6 +23,25 @@ import {
 } from './modifyParticipants';
 import getThemeVars from '../../common/getThemeVars';
 import ProfileSelector from './ProfileSelector';
+import Collapsable from '../../common/Collapsable';
+
+const chatTypeOptions: {
+  name: string;
+  description: string;
+  type: IChatType;
+}[] = [
+  {
+    name: 'Split Chat',
+    type: IChatType.SplitChat,
+    description: "All messages are stored on the message author's Pod.",
+  },
+  {
+    name: 'Long Chat',
+    type: IChatType.LongChat,
+    description:
+      "All messages are stored on the Admin's Pod. This chat is backwards compatible with Tim's Data Browser, but it is possible for participants to create fake messages.",
+  },
+];
 
 const AdminSettings: FunctionComponent<{
   modifyingChat?: IChat;
@@ -40,13 +65,16 @@ const AdminSettings: FunctionComponent<{
         uri: `${authState.profile.defaultStorageLocation}${
           initialChatData.name ? encodeURIComponent(initialChatData.name) : v4()
         }/index.ttl`,
-        type: IChatType.LongChat,
+        type: IChatType.SplitChat,
         images: [],
         participants: [
           {
             webId: authState.profile.webId,
             name: authState.profile.name,
             image: authState.profile.image,
+            messageContainer: `${
+              authState.profile.defaultStorageLocation
+            }split-messages/${v4()}`,
             isAdmin: true,
           },
         ],
@@ -70,6 +98,14 @@ const AdminSettings: FunctionComponent<{
   });
   const [editChatDifference, setEditChatDifference] = useState<Partial<IChat>>(
     {},
+  );
+
+  const chatTypeSelectedIndex = useMemo(
+    () =>
+      chatTypeOptions.findIndex(
+        (optionInfo) => optionInfo.type === editedChat.type,
+      ),
+    [editedChat.type],
   );
 
   if (!authState.profile) {
@@ -256,6 +292,50 @@ const AdminSettings: FunctionComponent<{
         onRemoved={removeParticipant}
         label="Chat Participants"
       />
+      <View style={{ marginBottom: 8 }}>
+        <Collapsable title="Advanced Chat Settings">
+          {!modifyingChat ? (
+            <Select
+              selectedIndex={new IndexPath(chatTypeSelectedIndex)}
+              label="Chat Type"
+              value={(props) => (
+                <Text {...props}>
+                  {chatTypeOptions[chatTypeSelectedIndex].name}
+                </Text>
+              )}
+              onSelect={(indexPath) => {
+                const row = (indexPath as IndexPath).row;
+                setEditedChat({
+                  ...editedChat,
+                  type: chatTypeOptions[row].type,
+                });
+                setEditChatDifference({
+                  ...editChatDifference,
+                  type: chatTypeOptions[row].type,
+                });
+              }}
+            >
+              {chatTypeOptions.map((chatTypeOptions) => (
+                <SelectItem
+                  title={`${chatTypeOptions.name} (${chatTypeOptions.description})`}
+                  key={chatTypeOptions.type}
+                />
+              ))}
+            </Select>
+          ) : (
+            <>
+              <Text
+                appearance="hint"
+                category="label"
+                style={{ marginBottom: 4 }}
+              >
+                Chat Type
+              </Text>
+              <Text>{chatTypeOptions[chatTypeSelectedIndex].name}</Text>
+            </>
+          )}
+        </Collapsable>
+      </View>
       <BigButton
         loading={loading}
         containerStyle={{ marginBottom: 16 }}
