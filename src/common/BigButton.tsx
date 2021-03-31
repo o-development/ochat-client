@@ -7,6 +7,7 @@ import { themeColor } from './const';
 interface Props {
   appearance?: 'primary' | 'ghost' | 'secondary';
   containerStyle?: ViewStyle;
+  wrapperStyle?: ViewStyle;
   textStyle?: TextStyle;
   title?: string;
   size?: 'big' | 'small' | 'medium';
@@ -18,6 +19,7 @@ const BigButton: FunctionComponent<Props> = ({
   appearance = 'secondary',
   containerStyle = {},
   textStyle = {},
+  wrapperStyle = {},
   size = 'medium',
   title = 'Submit',
   onPress = () => {
@@ -61,6 +63,7 @@ const BigButton: FunctionComponent<Props> = ({
       onPress={() => {
         if (!loading) onPress();
       }}
+      style={{ ...wrapperStyle }}
     >
       <View style={usedContainerStyle}>
         {loading ? (
