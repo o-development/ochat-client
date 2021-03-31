@@ -4,11 +4,13 @@ import PersonIndexRequest from './pages/PersonIndexRequest';
 import FullPageSpinner from '../common/FullPageSpinner';
 import { AuthActionType, AuthContext } from '../auth/authReducer';
 import OnboardPrivacyPolicy from './pages/OnboardPrivacyPolicy';
+import SetUpTypeIndex from './pages/SetUpTypeIndex';
 
 enum OnboardPage {
   PRIVACY_POLICY,
   PERSON_INDEX_REQUEST,
   PUSH_NOTIFICATIONS,
+  TYPE_INDEX,
 }
 
 const OnboardFlow: FunctionComponent = () => {
@@ -29,7 +31,11 @@ const OnboardFlow: FunctionComponent = () => {
       );
     case OnboardPage.PUSH_NOTIFICATIONS:
       return (
-        <PushNotifications
+        <PushNotifications onComplete={() => setPage(OnboardPage.TYPE_INDEX)} />
+      );
+    case OnboardPage.TYPE_INDEX:
+      return (
+        <SetUpTypeIndex
           onComplete={() =>
             dispatchAuthState({
               type: AuthActionType.REQUIRES_ONBOARDING,

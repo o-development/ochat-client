@@ -1,6 +1,6 @@
 import React, { FunctionComponent, useContext, useState } from 'react';
-import { Text } from '@ui-kitten/components';
-import { Platform, View } from 'react-native';
+import { Divider, Text } from '@ui-kitten/components';
+import { Linking, Platform, View } from 'react-native';
 import { openAuthSessionAsync } from 'expo-web-browser';
 import { makeUrl } from 'expo-linking';
 import BigButton from '../common/BigButton';
@@ -21,6 +21,25 @@ console.info('API_URL', API_URL);
 interface LoginSolidProps {
   redirectAfterLogin: string;
 }
+
+interface IProviderData {
+  name: string;
+  issuer: string;
+  registerLink: string;
+}
+
+const providerData: IProviderData[] = [
+  {
+    name: 'inrupt.net',
+    issuer: 'https://inrupt.net',
+    registerLink: 'https://inrupt.net/register',
+  },
+  {
+    name: 'solidcommunity.net',
+    issuer: 'https://solidcommunity.net',
+    registerLink: 'https://solidcommunity.net/register',
+  },
+];
 
 const LoginSolid: FunctionComponent<LoginSolidProps> = ({
   redirectAfterLogin,
@@ -62,20 +81,40 @@ const LoginSolid: FunctionComponent<LoginSolidProps> = ({
 
   return (
     <OnboardPageLayout
-      title="Log In with an Existing Solid Account"
+      title="Log In with a Solid Pod"
       middleContent={
         <>
           <View>
-            <BigButton
-              title="Log In with solidcommunity.net"
-              onPress={() => initiateLogin('https://solidcommunity.net')}
-              containerStyle={{ marginBottom: 8 }}
-            />
-            <BigButton
-              title="Log In with inrupt.net"
-              onPress={() => initiateLogin('https://inrupt.net')}
-              containerStyle={{ marginBottom: 8 }}
-            />
+            {providerData.map((provider, index) => (
+              <View key={provider.issuer}>
+                {index !== 0 ? (
+                  <Divider style={{ marginBottom: 8 }} />
+                ) : undefined}
+                <Text category="h5">Use {provider.name}</Text>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    marginVertical: 8,
+                  }}
+                >
+                  <BigButton
+                    title="Get a Pod"
+                    onPress={() => {
+                      Platform.OS !== 'web'
+                        ? Linking.openURL(provider.registerLink)
+                        : window.open(provider.registerLink, '_blank');
+                    }}
+                    wrapperStyle={{ flex: 1, marginRight: 4 }}
+                  />
+                  <BigButton
+                    title="Log In"
+                    onPress={() => initiateLogin(provider.issuer)}
+                    wrapperStyle={{ flex: 1, marginLeft: 4 }}
+                  />
+                </View>
+              </View>
+            ))}
           </View>
           <Text style={{ textAlign: 'center', marginVertical: 16 }}>OR</Text>
           <View>

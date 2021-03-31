@@ -80,7 +80,7 @@ const Home: FunctionComponent = () => {
         />
         {!isMobileDimensions && isWeb && (
           <View style={{ flexDirection: 'row' }}>
-            <TouchableOpacity
+            {/* <TouchableOpacity
               onPress={() => {
                 Platform.OS !== 'web'
                   ? Linking.openURL(APP_STORE_LINK)
@@ -91,7 +91,7 @@ const Home: FunctionComponent = () => {
                 source={require('../../assets/download-on-the-app-store.png')}
                 style={{ width: 150, height: 44, margin: 10 }}
               />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
             <TouchableOpacity
               onPress={() => {
                 Platform.OS !== 'web'
