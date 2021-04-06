@@ -19,7 +19,7 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 
 const PLAY_STORE_LINK =
   'https://play.google.com/store/apps/details?id=com.otherjackson.LiqidChat';
-const APP_STORE_LINK = 'https://liqid.chat';
+const APP_STORE_LINK = 'https://apps.apple.com/us/app/liqid-chat/id1558716710';
 
 const Home: FunctionComponent = () => {
   const isMobileDimensions = useWindowDimensions().width < 800;
@@ -80,7 +80,7 @@ const Home: FunctionComponent = () => {
         />
         {!isMobileDimensions && isWeb && (
           <View style={{ flexDirection: 'row' }}>
-            {/* <TouchableOpacity
+            <TouchableOpacity
               onPress={() => {
                 Platform.OS !== 'web'
                   ? Linking.openURL(APP_STORE_LINK)
@@ -91,7 +91,7 @@ const Home: FunctionComponent = () => {
                 source={require('../../assets/download-on-the-app-store.png')}
                 style={{ width: 150, height: 44, margin: 10 }}
               />
-            </TouchableOpacity> */}
+            </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
                 Platform.OS !== 'web'
