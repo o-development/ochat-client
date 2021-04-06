@@ -1,4 +1,4 @@
-# OChat Client
+# Liqid Chat Client
 
 A chat client for Solid.
 
