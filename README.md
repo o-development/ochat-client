@@ -1,6 +1,6 @@
 # Liqid Chat Client
 
-A chat client for Solid.
+A chat client for Solid
 
 ## Setup
 
