@@ -24,6 +24,11 @@ import { IChat } from '../chatReducer';
 import BigButton from '../../common/BigButton';
 import ChatAvatar from './ChatAvatar';
 import { SocketContext } from '../ChatSocketHandler';
+import UnverifiedMessageIndicator from './UnverifiedMessageIndicator';
+
+interface IAugmentedGiftedChatMessage extends IGiftedChatMessage {
+  isInvalid?: boolean;
+}
 
 const ChatComponent: FunctionComponent<{
   chatUri: string;
@@ -160,8 +165,8 @@ const ChatComponent: FunctionComponent<{
     return <FullPageSpinner />;
   }
 
-  const giftedChatMessages: IGiftedChatMessage[] = chatData.messages.map(
-    (message): IGiftedChatMessage => {
+  const giftedChatMessages: IAugmentedGiftedChatMessage[] = chatData.messages.map(
+    (message): IAugmentedGiftedChatMessage => {
       const participant = getParticipantForMessageSender(
         message,
         chatData.chat as IChat,
@@ -170,6 +175,7 @@ const ChatComponent: FunctionComponent<{
         _id: message.id,
         text: message.content,
         createdAt: new Date(message.timeCreated),
+        isInvalid: message.isInvalid,
         user: {
           _id: message.maker,
           name: participant.name,
@@ -189,7 +195,9 @@ const ChatComponent: FunctionComponent<{
     });
   }
 
-  async function handleOnSend(newGiftedChatMessages: IGiftedChatMessage[]) {
+  async function handleOnSend(
+    newGiftedChatMessages: IAugmentedGiftedChatMessage[],
+  ) {
     const messages = newGiftedChatMessages.map((newGiftedChatMessage) => ({
       id: v4(),
       page:
@@ -282,6 +290,12 @@ const ChatComponent: FunctionComponent<{
               },
               right: { backgroundColor: themeColor, ...commonWrapperStyle },
             }}
+            renderCustomView={() => {
+              if (props.currentMessage?.isInvalid) {
+                return <UnverifiedMessageIndicator />;
+              }
+              return undefined;
+            }}
           />
         );
       }}
@@ -331,7 +345,10 @@ const ChatComponent: FunctionComponent<{
           textInputProps={{
             returnKeyType: 'next',
             onSubmitEditing: () => {
-              const { onSend, text } = props as SendProps<IGiftedChatMessage>;
+              const {
+                onSend,
+                text,
+              } = props as SendProps<IAugmentedGiftedChatMessage>;
               if (text && onSend) {
                 onSend({ text: text.trim() }, true);
               }

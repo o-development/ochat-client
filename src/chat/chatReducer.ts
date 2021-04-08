@@ -22,6 +22,7 @@ export interface IMessage {
   maker: string;
   content: string;
   timeCreated: string;
+  isInvalid?: boolean;
 }
 
 export interface IChat {

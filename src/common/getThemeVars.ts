@@ -11,6 +11,7 @@ interface ThemeVars {
   highlightColor: string;
   basicTextColor: string;
   hintTextColor: string;
+  alertColor: string;
 }
 
 export default function (): ThemeVars {
@@ -25,5 +26,6 @@ export default function (): ThemeVars {
     highlightColor: theme['color-basic-transparent-300'],
     basicTextColor: theme['text-basic-color'],
     hintTextColor: theme['text-hint-color'],
+    alertColor: theme['text-warning-color'],
   };
 }
