@@ -13,6 +13,7 @@ import {
   disableNotifications,
   enableNotifications,
 } from '../../util/notificationUtils';
+import AppStoreButtons from '../../home/AppStoreButtons';
 
 const Settings: FunctionComponent<{
   mobileRender?: boolean;
@@ -79,6 +80,7 @@ const Settings: FunctionComponent<{
         title="View Privacy Policy"
         onPress={() => history.push('/privacy-policy')}
       />
+      <AppStoreButtons />
     </SettingsMenuTemplate>
   );
 };
