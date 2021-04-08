@@ -36,6 +36,7 @@ import authFetch from '../../util/authFetch';
 import IProfile from '../../auth/authReducer';
 import { ScrollView } from 'react-native-gesture-handler';
 import { getStatusBarHeight } from 'react-native-status-bar-height';
+import UserProfileActionsMenu from '../common/UserProfileActionsMenu';
 
 interface ProfileSelectorProps {
   value?: IChatParticipant[];
@@ -75,6 +76,7 @@ const ProfileSelectorChip: FunctionComponent<{
         style={{ marginRight: 8 }}
       />
       <Text>{value.name || value.webId}</Text>
+      <UserProfileActionsMenu profile={value} />
       <Button
         appearance="ghost"
         size={'small'}
@@ -228,6 +230,7 @@ const ProfileSelectorUi: FunctionComponent<ProfileSelectorProps> = ({
                 name={`Add ${participant.name || participant.webId} as ${
                   isAdmin ? `an administrator` : `a participant`
                 }`}
+                profile={participant}
                 image={participant.image}
                 style={
                   searchResultSelected === index

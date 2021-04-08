@@ -3,6 +3,7 @@ import React, { FunctionComponent, memo, useContext } from 'react';
 import { View } from 'react-native';
 import IProfile, { AuthContext } from '../../auth/authReducer';
 import GroupImage from './GroupImage';
+import UserProfileActionsMenu from './UserProfileActionsMenu';
 
 interface UserProfileListItem extends ListItemProps {
   profile?: Partial<IProfile>;
@@ -14,6 +15,7 @@ interface UserProfileListItem extends ListItemProps {
 const UserProfileListItem: FunctionComponent<UserProfileListItem> = memo(
   ({ profile, name, image, ...props }) => {
     const [authState] = useContext(AuthContext);
+
     const displayName =
       name ||
       `${profile?.name || 'User'}${
@@ -33,6 +35,7 @@ const UserProfileListItem: FunctionComponent<UserProfileListItem> = memo(
             <GroupImage images={displayImages} />
           </View>
         )}
+        accessoryRight={() => <UserProfileActionsMenu profile={profile} />}
       />
     );
   },

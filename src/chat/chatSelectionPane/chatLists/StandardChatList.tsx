@@ -36,6 +36,7 @@ const StandardChatList: FunctionComponent<StandardChatListProps> = ({
   const [oldSearchTerm, setOldSearchTerm] = useState<string | undefined>('');
   const [searchResults, setSearchResults] = useState<(IChat | IProfile)[]>([]);
   const [loadingMoreChats, setLoadingMoreChats] = useState(false);
+  const [didInitialFetch, setDidInitialFetch] = useState(false);
 
   const rawChatResults = JSON.stringify(chatState.chats);
   const chatResults = useMemo((): (IChat | IProfile)[] => {
@@ -89,23 +90,10 @@ const StandardChatList: FunctionComponent<StandardChatListProps> = ({
     [setLoading],
   );
 
-  const rawListData = JSON.stringify(chatState.lists);
-  const fetchMoreResults = useCallback(
-    async () => {
-      const listData: IChatListData | undefined = chatState.lists[listName];
-      // Return if already loaded all the chats
-      if (listData && (listData.allChatsLoaded || loadingMoreChats)) {
-        return;
-      }
-
-      const curPage = listData ? listData.lastPageLoaded : -1;
-      // Return if already started to load current page
-      if (listData && listData.pageFetchAttempts.has(curPage + 1)) {
-        return;
-      }
-      setLoadingMoreChats(true);
+  const fetchResults = useCallback(
+    async (pageNumber: number): Promise<void> => {
       const result = await authFetch(
-        `/chat/search?page=${curPage + 1}${
+        `/chat/search?page=${pageNumber}${
           listName === 'discover' ? '&discoverable=true' : ''
         }`,
         {
@@ -124,12 +112,32 @@ const StandardChatList: FunctionComponent<StandardChatListProps> = ({
           performedAction: 'initialChatListFetch',
           lists: {
             [listName]: {
-              lastPageLoaded: curPage + 1,
+              lastPageLoaded: pageNumber,
               allChatsLoaded: resultBody.chats.length === 0,
             },
           },
         });
       }
+    },
+    [chatDispatch, listName],
+  );
+
+  const rawListData = JSON.stringify(chatState.lists);
+  const fetchMoreResults = useCallback(
+    async () => {
+      const listData: IChatListData | undefined = chatState.lists[listName];
+      // Return if already loaded all the chats
+      if (listData && (listData.allChatsLoaded || loadingMoreChats)) {
+        return;
+      }
+
+      const curPage = listData ? listData.lastPageLoaded : -1;
+      // Return if already started to load current page
+      if (listData && listData.pageFetchAttempts.has(curPage + 1)) {
+        return;
+      }
+      setLoadingMoreChats(true);
+      await fetchResults(curPage + 1);
       setLoadingMoreChats(false);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -152,7 +160,11 @@ const StandardChatList: FunctionComponent<StandardChatListProps> = ({
       !chatState.lists[listName] ||
       chatState.lists[listName].lastPageLoaded === -1
     ) {
+      setDidInitialFetch(true);
       await fetchMoreResults();
+    } else if (!didInitialFetch) {
+      setDidInitialFetch(true);
+      await fetchResults(0);
     }
   });
 
@@ -164,6 +176,8 @@ const StandardChatList: FunctionComponent<StandardChatListProps> = ({
     <ChatSelectionList
       onLoadMoreResults={fetchMoreResults}
       currentlySelected={currentlySelected}
+      isLoadingMore={loadingMoreChats}
+      allLoaded={chatState.lists[listName].allChatsLoaded}
       chatList={searchTerm ? searchResults : chatResults}
     />
   );
