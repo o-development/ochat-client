@@ -1,6 +1,6 @@
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { FunctionComponent } from 'react';
-import { Icon, Text } from '@ui-kitten/components';
+import { Button, Icon, Text } from '@ui-kitten/components';
 import getThemeVars from '../../common/getThemeVars';
 import {
   GiftedChat,
@@ -10,8 +10,15 @@ import {
   Composer,
   SendProps,
   Send,
+  Actions,
 } from 'react-native-gifted-chat';
-import { useWindowDimensions, View, ViewStyle } from 'react-native';
+import {
+  Image,
+  Platform,
+  useWindowDimensions,
+  View,
+  ViewStyle,
+} from 'react-native';
 import dayjs from 'dayjs';
 import { ChatActionType, ChatContext, IMessage } from '../chatReducer';
 import FullPageSpinner from '../../common/FullPageSpinner';
@@ -343,7 +350,25 @@ const ChatComponent: FunctionComponent<{
         <Composer
           {...props}
           textInputProps={{
-            returnKeyType: 'next',
+            returnKeyType: 'send',
+            onKeyPress: (e) => {
+              if (Platform.OS === 'web') {
+                if (
+                  e.nativeEvent.key === 'Enter' &&
+                  !((e.nativeEvent as unknown) as { shiftKey: boolean })
+                    .shiftKey
+                ) {
+                  e.preventDefault();
+                  const {
+                    onSend,
+                    text,
+                  } = props as SendProps<IAugmentedGiftedChatMessage>;
+                  if (text && onSend) {
+                    onSend({ text: text.trim() }, true);
+                  }
+                }
+              }
+            },
             onSubmitEditing: () => {
               const {
                 onSend,
@@ -355,29 +380,69 @@ const ChatComponent: FunctionComponent<{
             },
             blurOnSubmit: false,
           }}
-          multiline={false}
+          multiline={true}
           textInputStyle={[
             props.textInputStyle,
             {
               color: basicTextColor,
-              marginVertical: 4,
-              paddingVertical: 4,
+              fontSize: 15,
             },
           ]}
         />
       )}
+      alwaysShowSend={true}
       renderSend={(props) => {
+        if (props.text) {
+          return (
+            <Send
+              {...props}
+              containerStyle={{ padding: 4, justifyContent: 'center' }}
+            >
+              <Icon
+                style={{ width: 32, height: 32 }}
+                name="arrow-circle-right"
+                fill={themeColor}
+              />
+            </Send>
+          );
+        }
         return (
-          <Send
-            {...props}
-            containerStyle={{ padding: 4, justifyContent: 'center' }}
+          <View
+            style={{
+              flexDirection: 'row',
+              height: 44,
+              alignItems: 'center',
+            }}
           >
-            <Icon
-              style={{ width: 32, height: 32 }}
-              name="arrow-circle-right"
-              fill={themeColor}
+            <Button
+              appearance="ghost"
+              size={'small'}
+              style={{ width: 38, height: 44 }}
+              onPress={() => console.log('camera')}
+              accessoryLeft={(props) => (
+                <Icon
+                  {...props}
+                  name="camera-outline"
+                  fill={themeColor}
+                  style={{ height: 28, width: 28 }}
+                />
+              )}
             />
-          </Send>
+            <Button
+              appearance="ghost"
+              size={'small'}
+              style={{ width: 38, height: 44 }}
+              onPress={() => console.log('camera')}
+              accessoryLeft={(props) => (
+                <Icon
+                  {...props}
+                  name="image-outline"
+                  fill={themeColor}
+                  style={{ height: 28, width: 28 }}
+                />
+              )}
+            />
+          </View>
         );
       }}
     />
