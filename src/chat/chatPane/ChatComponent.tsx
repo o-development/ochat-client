@@ -10,15 +10,8 @@ import {
   Composer,
   SendProps,
   Send,
-  Actions,
 } from 'react-native-gifted-chat';
-import {
-  Image,
-  Platform,
-  useWindowDimensions,
-  View,
-  ViewStyle,
-} from 'react-native';
+import { Platform, useWindowDimensions, View, ViewStyle } from 'react-native';
 import dayjs from 'dayjs';
 import { ChatActionType, ChatContext, IMessage } from '../chatReducer';
 import FullPageSpinner from '../../common/FullPageSpinner';
@@ -32,6 +25,7 @@ import BigButton from '../../common/BigButton';
 import ChatAvatar from './ChatAvatar';
 import { SocketContext } from '../ChatSocketHandler';
 import UnverifiedMessageIndicator from './UnverifiedMessageIndicator';
+import MessageText from './chatElements/MessageText';
 
 interface IAugmentedGiftedChatMessage extends IGiftedChatMessage {
   isInvalid?: boolean;
@@ -261,9 +255,10 @@ const ChatComponent: FunctionComponent<{
       infiniteScroll={true}
       onLoadEarlier={onLoadEarlier}
       renderMessageText={(props) => (
-        <Text style={{ color: props.position === 'left' ? '#000' : '#FFF' }}>
-          {props.currentMessage?.text}
-        </Text>
+        <MessageText
+          text={props.currentMessage?.text}
+          isSelf={props.position === 'right'}
+        />
       )}
       renderTime={({ currentMessage, timeFormat, position }) => {
         return (

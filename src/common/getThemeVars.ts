@@ -3,6 +3,7 @@ import { useContext } from 'react';
 
 interface ThemeVars {
   themeColor: string;
+  themeColorDark: string;
   backgroundColor1: string;
   backgroundColor2: string;
   backgroundColor3: string;
@@ -18,6 +19,7 @@ export default function (): ThemeVars {
   const theme = useContext(ThemeContext);
   return {
     themeColor: theme['color-primary-400'],
+    themeColorDark: theme['color-primary-600'],
     backgroundColor1: theme['background-basic-color-1'],
     backgroundColor2: theme['background-basic-color-2'],
     backgroundColor3: theme['background-basic-color-3'],
