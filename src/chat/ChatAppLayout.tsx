@@ -12,7 +12,6 @@ import NoChatSelectedPane from './chatSelectionPane/NoChatSelectedPane';
 import queryString from 'query-string';
 import NewChatPane from './chatSettings/NewChatPane';
 import Settings from './settings/Settings';
-import LinkChatPane from './chatSettings/LinkChatPane';
 import { AuthContext } from '../auth/authReducer';
 import FullPageSpinner from '../common/FullPageSpinner';
 import OnboardFlow from '../onboard/OnboardFlow';
@@ -43,8 +42,6 @@ const ChatAppLayout: FunctionComponent = () => {
   let mainComponent: ReactElement;
   if (pathname === '/chat/new') {
     mainComponent = <NewChatPane mobileRender={isMobile} />;
-  } else if (pathname === '/chat/link') {
-    mainComponent = <LinkChatPane mobileRender={isMobile} />;
   } else if (pathname === '/chat/settings') {
     mainComponent = <Settings mobileRender={isMobile} />;
   } else if (id) {
@@ -71,7 +68,7 @@ const ChatAppLayout: FunctionComponent = () => {
         height: '100%',
       }}
     >
-      <View style={{ flex: 1, maxWidth: 500, minWidth: 283 }}>
+      <View style={{ flex: 1, maxWidth: 500, minWidth: 255 }}>
         <ChatSelectionPane currentlySelected={id} />
       </View>
       <View style={{ flex: 3 }}>{mainComponent}</View>

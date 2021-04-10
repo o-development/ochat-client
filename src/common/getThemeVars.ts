@@ -18,7 +18,7 @@ interface ThemeVars {
 export default function (): ThemeVars {
   const theme = useContext(ThemeContext);
   return {
-    themeColor: theme['color-primary-400'],
+    themeColor: theme['color-primary-default'],
     themeColorDark: theme['color-primary-600'],
     backgroundColor1: theme['background-basic-color-1'],
     backgroundColor2: theme['background-basic-color-2'],

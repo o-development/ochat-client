@@ -9,6 +9,9 @@ import IProfile from '../../auth/authReducer';
 import { addParticipantToParticipantList } from './modifyParticipants';
 import AdminSettings from './AdminSettings';
 import SettingsMenuTemplate from '../common/SettingsMenuTemplate';
+import { TabBar, Tab } from '@ui-kitten/components';
+import { View } from 'react-native';
+import LinkChatPane from './LinkChatPane';
 
 function getStringArrayFromParsedQs(
   input: undefined | string | string[] | ParsedQs | ParsedQs[],
@@ -63,6 +66,7 @@ const NewChatPane: FunctionComponent<NewChatPaneProps> = ({ mobileRender }) => {
   const [loading, setLoading] = useState(true);
   const [initialData, setInitialData] = useState<Partial<IChat>>({});
   const [curQuery, setCurQuery] = useState(location.search);
+  const [isLinkChatShowing, setIsLinkChatShowing] = useState(false);
 
   useAsyncEffect(async () => {
     if (curQuery !== location.search) {
@@ -114,10 +118,23 @@ const NewChatPane: FunctionComponent<NewChatPaneProps> = ({ mobileRender }) => {
       backButton={true}
       mobileRender={mobileRender}
     >
-      <AdminSettings
-        initialChatData={initialData}
-        mobileRender={mobileRender}
-      />
+      <View style={{ marginBottom: 16 }}>
+        <TabBar
+          selectedIndex={isLinkChatShowing ? 1 : 0}
+          onSelect={(index) => setIsLinkChatShowing(index === 1)}
+        >
+          <Tab title="Create a New Chat" />
+          <Tab title="Link an Existing Chat from your Solid Pod" />
+        </TabBar>
+      </View>
+      {!isLinkChatShowing ? (
+        <AdminSettings
+          initialChatData={initialData}
+          mobileRender={mobileRender}
+        />
+      ) : (
+        <LinkChatPane />
+      )}
     </SettingsMenuTemplate>
   );
 };

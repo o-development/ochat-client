@@ -23,12 +23,6 @@ const NoChatSelectedPane: FunctionComponent = () => {
         onPress={() => history.push('/chat/new')}
       />
       <Text style={{ marginVertical: 8, textAlign: 'center' }}>OR</Text>
-      <BigButton
-        containerStyle={{ marginVertical: 8 }}
-        title="Link an existing Solid Chat"
-        onPress={() => history.push('/chat/link')}
-      />
-      <Text style={{ marginVertical: 8, textAlign: 'center' }}>OR</Text>
       <Text style={{ marginVertical: 8 }}>Discover Public Chats:</Text>
       <DiscoverChatList />
     </SettingsMenuTemplate>

@@ -2,16 +2,13 @@ import React, { useCallback, useState } from 'react';
 import { FunctionComponent } from 'react';
 import { Text, View } from 'react-native';
 import TextInput from '../../common/TextInput';
-import SettingsMenuTemplate from '../common/SettingsMenuTemplate';
 import BigButton from '../../common/BigButton';
 import authFetch from '../../util/authFetch';
 import { useHistory } from '../../router';
 import errorToast, { notificationToast } from '../../util/errorToast';
 import getErrorBody from '../../util/getErrorBody';
 
-const LinkChatPane: FunctionComponent<{
-  mobileRender?: boolean;
-}> = ({ mobileRender }) => {
+const LinkChatPane: FunctionComponent = () => {
   const history = useHistory();
   const [chatUrl, setChatUrl] = useState('');
   const [loading, setLoading] = useState(false);
@@ -64,32 +61,27 @@ const LinkChatPane: FunctionComponent<{
   }, []);
 
   return (
-    <SettingsMenuTemplate
-      title="Link an existing Solid Chat"
-      mobileRender={mobileRender}
-    >
-      <View>
-        <TextInput
-          placeholder="https://pod.example/chat/index.ttl#this"
-          label="Chat Uri"
-          value={chatUrl}
-          onChangeText={setChatUrl}
-        />
-        <BigButton
-          loading={loading}
-          appearance="primary"
-          title="Link Chat"
-          onPress={linkChats}
-        />
-        <Text style={{ textAlign: 'center', marginVertical: 8 }}>OR</Text>
-        <BigButton
-          loading={allChatsLoading}
-          appearance="primary"
-          title="Link all chats in your Pod"
-          onPress={linkAllChatsOnPod}
-        />
-      </View>
-    </SettingsMenuTemplate>
+    <View>
+      <TextInput
+        placeholder="https://pod.example/chat/index.ttl#this"
+        label="Chat Uri"
+        value={chatUrl}
+        onChangeText={setChatUrl}
+      />
+      <BigButton
+        loading={loading}
+        appearance="primary"
+        title="Link Chat"
+        onPress={linkChats}
+      />
+      <Text style={{ textAlign: 'center', marginVertical: 8 }}>OR</Text>
+      <BigButton
+        loading={allChatsLoading}
+        appearance="primary"
+        title="Link all chats in your Pod"
+        onPress={linkAllChatsOnPod}
+      />
+    </View>
   );
 };
 

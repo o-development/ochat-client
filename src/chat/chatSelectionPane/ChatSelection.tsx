@@ -3,10 +3,10 @@ import { FunctionComponent } from 'react';
 import { Divider, Input, Icon } from '@ui-kitten/components';
 import { useHistory } from '../../router';
 import { View, Image } from 'react-native';
-import BigButton from '../../common/BigButton';
 import ChatList from './chatLists/ChatListType';
 import DefaultChatList from './chatLists/DefaultChatList';
 import DiscoverChatList from './chatLists/DiscoverChatList';
+import IconTextButton from '../../common/IconTextButton';
 
 const ChatSelection: FunctionComponent<{
   currentlySelected?: string;
@@ -32,7 +32,9 @@ const ChatSelection: FunctionComponent<{
             justifyContent: 'space-between',
             alignItems: 'center',
             marginBottom: 4,
-            padding: 4,
+            paddingTop: 4,
+            paddingLeft: 4,
+            paddingBottom: 4,
           }}
         >
           <Image
@@ -42,9 +44,9 @@ const ChatSelection: FunctionComponent<{
               height: 30,
             }}
           />
-          <BigButton
-            appearance="ghost"
-            title="Settings"
+          <IconTextButton
+            text="Settings"
+            iconName="settings-2-outline"
             onPress={() => history.push('/chat/settings')}
           />
         </View>
@@ -63,25 +65,18 @@ const ChatSelection: FunctionComponent<{
             marginBottom: 4,
           }}
         >
-          <BigButton
-            appearance="ghost"
-            title={
-              currentListName === 'default' ? 'Discover Chats' : 'My Chats'
-            }
+          <IconTextButton
+            iconName="message-circle-outline"
+            text={currentListName === 'default' ? 'Discover Chats' : 'My Chats'}
             onPress={() =>
               setCurrentListName(
                 currentListName === 'default' ? 'discover' : 'default',
               )
             }
           />
-          <BigButton
-            appearance="ghost"
-            title="Link Chat"
-            onPress={() => history.push('/chat/link')}
-          />
-          <BigButton
-            appearance="ghost"
-            title="New Chat"
+          <IconTextButton
+            text="New Chat"
+            iconName="plus-circle-outline"
             onPress={() => history.push('/chat/new')}
           />
         </View>

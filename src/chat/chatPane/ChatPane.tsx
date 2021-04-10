@@ -22,6 +22,7 @@ import useAsyncEffect from 'use-async-effect';
 import { AuthContext } from '../../auth/authReducer';
 import BigButton from '../../common/BigButton';
 import LoginSolid from '../../home/LoginSolid';
+import IconButton from '../../common/IconButton';
 
 const ChatPane: FunctionComponent<{
   chatUri: string;
@@ -174,21 +175,17 @@ const ChatPane: FunctionComponent<{
         alignment="center"
         title={chatData.chat.name}
         accessoryRight={() => (
-          <TopNavigationAction
+          <IconButton
+            iconName="settings-2-outline"
             onPress={() => setIsEditing(true)}
-            icon={(props) => (
-              <Icon {...props} name="settings-2-outline" fill={themeColor} />
-            )}
           />
         )}
         accessoryLeft={
           mobileRender
             ? () => (
-                <TopNavigationAction
+                <IconButton
+                  iconName="people-outline"
                   onPress={() => history.push('/chat')}
-                  icon={(props) => (
-                    <Icon {...props} name="people-outline" fill={themeColor} />
-                  )}
                 />
               )
             : undefined

@@ -14,6 +14,7 @@ import {
   enableNotifications,
 } from '../../util/notificationUtils';
 import AppStoreButtons from '../../home/AppStoreButtons';
+import { Platform } from 'react-native';
 
 const Settings: FunctionComponent<{
   mobileRender?: boolean;
@@ -80,7 +81,7 @@ const Settings: FunctionComponent<{
         title="View Privacy Policy"
         onPress={() => history.push('/privacy-policy')}
       />
-      <AppStoreButtons />
+      {Platform.OS === 'web' ? <AppStoreButtons /> : undefined}
     </SettingsMenuTemplate>
   );
 };

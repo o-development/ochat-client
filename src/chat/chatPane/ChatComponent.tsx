@@ -1,17 +1,9 @@
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { FunctionComponent } from 'react';
-import { Button, Icon, Text } from '@ui-kitten/components';
+import { Text } from '@ui-kitten/components';
 import getThemeVars from '../../common/getThemeVars';
-import {
-  GiftedChat,
-  IMessage as IGiftedChatMessage,
-  Bubble,
-  InputToolbar,
-  Composer,
-  SendProps,
-  Send,
-} from 'react-native-gifted-chat';
-import { Platform, useWindowDimensions, View, ViewStyle } from 'react-native';
+import { GiftedChat, Bubble } from 'react-native-gifted-chat';
+import { useWindowDimensions, View, ViewStyle } from 'react-native';
 import dayjs from 'dayjs';
 import { ChatActionType, ChatContext, IMessage } from '../chatReducer';
 import FullPageSpinner from '../../common/FullPageSpinner';
@@ -26,21 +18,13 @@ import ChatAvatar from './ChatAvatar';
 import { SocketContext } from '../ChatSocketHandler';
 import UnverifiedMessageIndicator from './UnverifiedMessageIndicator';
 import MessageText from './chatElements/MessageText';
-
-interface IAugmentedGiftedChatMessage extends IGiftedChatMessage {
-  isInvalid?: boolean;
-}
+import CustomInputToolbar from './chatElements/CustomInputToolbar';
+import IAugmentedGiftedChatMessage from './IAugmentedGiftedChatMessage';
 
 const ChatComponent: FunctionComponent<{
   chatUri: string;
 }> = ({ chatUri }) => {
-  const {
-    themeColor,
-    backgroundColor4,
-    dividerColor,
-    backgroundColor1,
-    basicTextColor,
-  } = getThemeVars();
+  const { themeColor, backgroundColor4, dividerColor } = getThemeVars();
 
   const [chatState, chatDispatch] = useContext(ChatContext);
   const chatData = chatState.chats[chatUri];
@@ -325,121 +309,12 @@ const ChatComponent: FunctionComponent<{
             </View>
           );
         }
-        return (
-          <InputToolbar
-            {...props}
-            containerStyle={[
-              props.containerStyle,
-              {
-                borderTopColor: dividerColor,
-                backgroundColor: backgroundColor1,
-              },
-            ]}
-          />
-        );
+        return <CustomInputToolbar {...props} />;
       }}
       renderAvatar={(props) => {
         return <ChatAvatar {...props} />;
       }}
-      renderComposer={(props) => (
-        <Composer
-          {...props}
-          textInputProps={{
-            returnKeyType: 'send',
-            onKeyPress: (e) => {
-              if (Platform.OS === 'web') {
-                if (
-                  e.nativeEvent.key === 'Enter' &&
-                  !((e.nativeEvent as unknown) as { shiftKey: boolean })
-                    .shiftKey
-                ) {
-                  e.preventDefault();
-                  const {
-                    onSend,
-                    text,
-                  } = props as SendProps<IAugmentedGiftedChatMessage>;
-                  if (text && onSend) {
-                    onSend({ text: text.trim() }, true);
-                  }
-                }
-              }
-            },
-            onSubmitEditing: () => {
-              const {
-                onSend,
-                text,
-              } = props as SendProps<IAugmentedGiftedChatMessage>;
-              if (text && onSend) {
-                onSend({ text: text.trim() }, true);
-              }
-            },
-            blurOnSubmit: false,
-          }}
-          multiline={true}
-          textInputStyle={[
-            props.textInputStyle,
-            {
-              color: basicTextColor,
-              fontSize: 15,
-            },
-          ]}
-        />
-      )}
       alwaysShowSend={true}
-      renderSend={(props) => {
-        if (props.text) {
-          return (
-            <Send
-              {...props}
-              containerStyle={{ padding: 4, justifyContent: 'center' }}
-            >
-              <Icon
-                style={{ width: 32, height: 32 }}
-                name="arrow-circle-right"
-                fill={themeColor}
-              />
-            </Send>
-          );
-        }
-        return (
-          <View
-            style={{
-              flexDirection: 'row',
-              height: 44,
-              alignItems: 'center',
-            }}
-          >
-            <Button
-              appearance="ghost"
-              size={'small'}
-              style={{ width: 38, height: 44 }}
-              onPress={() => console.log('camera')}
-              accessoryLeft={(props) => (
-                <Icon
-                  {...props}
-                  name="camera-outline"
-                  fill={themeColor}
-                  style={{ height: 28, width: 28 }}
-                />
-              )}
-            />
-            <Button
-              appearance="ghost"
-              size={'small'}
-              style={{ width: 38, height: 44 }}
-              onPress={() => console.log('camera')}
-              accessoryLeft={(props) => (
-                <Icon
-                  {...props}
-                  name="image-outline"
-                  fill={themeColor}
-                  style={{ height: 28, width: 28 }}
-                />
-              )}
-            />
-          </View>
-        );
-      }}
     />
   );
 };
