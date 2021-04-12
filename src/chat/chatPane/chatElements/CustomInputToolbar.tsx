@@ -1,28 +1,50 @@
 import { Icon } from '@ui-kitten/components';
-import React, { FunctionComponent } from 'react';
-import { Platform } from 'react-native';
+import React, { FunctionComponent, useCallback, useState } from 'react';
 import {
-  Composer,
   InputToolbar,
   InputToolbarProps,
   Send,
-  SendProps,
 } from 'react-native-gifted-chat';
 import getThemeVars from '../../../common/getThemeVars';
-import IAugmentedGiftedChatMessage from '../IAugmentedGiftedChatMessage';
+import CustomComposer from './CustomComposer';
+import IMediaData from './mediaMenu/IMediaData';
 import MediaMenu from './mediaMenu/MediaMenu';
+import SelectedMedia from './mediaMenu/SelectedMedia';
 
 const CustomInputToolbar: FunctionComponent<InputToolbarProps> = (
   parentProps,
 ) => {
-  const {
-    themeColor,
-    dividerColor,
-    backgroundColor1,
-    basicTextColor,
-  } = getThemeVars();
+  const { themeColor, dividerColor, backgroundColor1 } = getThemeVars();
 
-  // const queuedFiles = useState<DocumentResult>([]);
+  const [queuedMedia, setQueuedMedia] = useState<IMediaData[]>([]);
+  const handleNewMedia = async (newMedia: IMediaData[]) => {
+    setQueuedMedia((oldQueuedMedia) => oldQueuedMedia.concat(newMedia));
+  };
+  const handleRemoveMedia = useCallback(
+    async (index: number) => {
+      const newArr = [...queuedMedia];
+      newArr.splice(index, 1);
+      setQueuedMedia((oldQueuedMedia) => {
+        const newArr = [...oldQueuedMedia];
+        newArr.splice(index, 1);
+        return newArr;
+      });
+    },
+    [queuedMedia],
+  );
+
+  const renderAccessoryProp: Partial<InputToolbarProps> = {};
+  if (queuedMedia.length > 0) {
+    renderAccessoryProp.renderAccessory = function SelectedMediaFunc() {
+      return (
+        <SelectedMedia
+          onNewMedia={handleNewMedia}
+          onRemoveMedia={handleRemoveMedia}
+          media={queuedMedia}
+        />
+      );
+    };
+  }
 
   return (
     <InputToolbar
@@ -35,51 +57,10 @@ const CustomInputToolbar: FunctionComponent<InputToolbarProps> = (
         },
       ]}
       renderComposer={(props) => (
-        <Composer
-          {...props}
-          textInputProps={{
-            returnKeyType: 'send',
-            onKeyPress: (e) => {
-              if (Platform.OS === 'web') {
-                if (
-                  e.nativeEvent.key === 'Enter' &&
-                  !((e.nativeEvent as unknown) as { shiftKey: boolean })
-                    .shiftKey
-                ) {
-                  e.preventDefault();
-                  const {
-                    onSend,
-                    text,
-                  } = props as SendProps<IAugmentedGiftedChatMessage>;
-                  if (text && onSend) {
-                    onSend({ text: text.trim() }, true);
-                  }
-                }
-              }
-            },
-            onSubmitEditing: () => {
-              const {
-                onSend,
-                text,
-              } = props as SendProps<IAugmentedGiftedChatMessage>;
-              if (text && onSend) {
-                onSend({ text: text.trim() }, true);
-              }
-            },
-            blurOnSubmit: false,
-          }}
-          multiline={true}
-          textInputStyle={[
-            props.textInputStyle,
-            {
-              color: basicTextColor,
-              fontSize: 15,
-            },
-          ]}
-        />
+        <CustomComposer {...props} onNewMedia={handleNewMedia} />
       )}
       renderSend={(props) => {
-        if (props.text) {
+        if (props.text || queuedMedia.length > 0) {
           return (
             <Send
               {...props}
@@ -93,8 +74,9 @@ const CustomInputToolbar: FunctionComponent<InputToolbarProps> = (
             </Send>
           );
         }
-        return <MediaMenu />;
+        return <MediaMenu onNewMedia={handleNewMedia} />;
       }}
+      {...renderAccessoryProp}
     />
   );
 };

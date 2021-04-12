@@ -1,38 +1,196 @@
-import { Button, Icon } from '@ui-kitten/components';
-import React, { FunctionComponent } from 'react';
-import { View } from 'react-native';
+import { Button, Icon, Modal } from '@ui-kitten/components';
+import React, { FunctionComponent, useCallback, useState } from 'react';
+import {
+  Platform,
+  StyleProp,
+  useWindowDimensions,
+  View,
+  ViewStyle,
+} from 'react-native';
+import { getDocumentAsync } from 'expo-document-picker';
 import getThemeVars from '../../../../common/getThemeVars';
+import {
+  launchImageLibraryAsync,
+  MediaTypeOptions,
+  launchCameraAsync,
+} from 'expo-image-picker';
+import IMediaData, { IMediaType } from './IMediaData';
+import { v4 } from 'uuid';
+import { AssetsSelector } from 'expo-images-picker';
+import { Ionicons } from '@expo/vector-icons';
+import { getStatusBarHeight } from 'react-native-status-bar-height';
 
-const MediaMenu: FunctionComponent = () => {
-  const { themeColor } = getThemeVars();
+interface MediaMenuProps {
+  onNewMedia(newMedia: IMediaData[]): void;
+  style?: StyleProp<ViewStyle>;
+}
+
+const MediaMenu: FunctionComponent<MediaMenuProps> = ({
+  onNewMedia,
+  style,
+}) => {
+  const { themeColor, backgroundColor1 } = getThemeVars();
+  const [
+    multipleImageBrowserShowing,
+    setMultipleImageBrowserShowing,
+  ] = useState(false);
+
+  const handleCamera = useCallback(async (): Promise<void> => {
+    const result = await launchCameraAsync({
+      mediaTypes: MediaTypeOptions.All,
+      quality: 1,
+    });
+    if (!result.cancelled) {
+      onNewMedia([
+        {
+          type: IMediaType.image,
+          identifier: v4(),
+          content: result,
+        },
+      ]);
+    }
+  }, [onNewMedia]);
+
+  const handleImage = useCallback(async (): Promise<void> => {
+    if (Platform.OS === 'web') {
+      const result = await launchImageLibraryAsync({
+        mediaTypes: MediaTypeOptions.All,
+        quality: 1,
+        allowsMultipleSelection: true,
+      });
+      if (!result.cancelled) {
+        onNewMedia(
+          result.selected.map((info) => ({
+            type: IMediaType.image,
+            identifier: v4(),
+            content: info,
+          })),
+        );
+      }
+    } else {
+      setMultipleImageBrowserShowing(true);
+    }
+  }, [onNewMedia]);
+
+  const handleFile = useCallback(async (): Promise<void> => {
+    const document = await getDocumentAsync({ multiple: false });
+    if (document.type === 'success') {
+      onNewMedia([
+        {
+          type: IMediaType.file,
+          identifier: v4(),
+          name: document.name,
+          content: document,
+        },
+      ]);
+    }
+  }, [onNewMedia]);
+
+  const handlePhotoSelectionDone = useCallback(
+    (data: { height: number; width: number; uri: string }[]) => {
+      setMultipleImageBrowserShowing(false);
+      onNewMedia(
+        data.map((photoData) => ({
+          type: IMediaType.image,
+          identifier: v4(),
+          content: photoData,
+        })),
+      );
+    },
+    [onNewMedia],
+  );
+
+  const { width, height } = useWindowDimensions();
 
   return (
     <View
-      style={{
-        flexDirection: 'row',
-        height: 44,
-        alignItems: 'center',
-      }}
+      style={[
+        {
+          flexDirection: 'row',
+          height: 44,
+          alignItems: 'center',
+        },
+        style,
+      ]}
     >
-      <Button
-        appearance="ghost"
-        size={'small'}
-        style={{ width: 38, height: 44 }}
-        onPress={() => console.log('camera')}
-        accessoryLeft={(props) => (
-          <Icon
-            {...props}
-            name="camera-outline"
-            fill={themeColor}
-            style={{ height: 28, width: 28 }}
+      <Modal visible={multipleImageBrowserShowing}>
+        <View
+          style={{
+            width,
+            height: height,
+            marginTop: getStatusBarHeight() * 2,
+            backgroundColor: 'red',
+          }}
+        >
+          <AssetsSelector
+            options={{
+              manipulate: {
+                width: 512,
+                compress: 0.7,
+                base64: false,
+                saveTo: 'jpeg',
+              },
+              assetsType: ['photo', 'video'],
+              noAssets: {
+                Component: function noAssets() {
+                  return <View></View>;
+                },
+              },
+              spinnerColor: themeColor,
+              maxSelections: 50,
+              margin: 2,
+              portraitCols: 4,
+              landscapeCols: 5,
+              widgetWidth: 100,
+              widgetBgColor: backgroundColor1,
+              videoIcon: {
+                Component: Ionicons,
+                iconName: 'ios-videocam',
+                color: themeColor,
+                size: 22,
+              },
+              selectedIcon: {
+                Component: Ionicons,
+                iconName: 'ios-checkmark-circle-outline',
+                color: 'white',
+                bg: `${themeColor}80`,
+                size: 26,
+              },
+              defaultTopNavigator: {
+                continueText: 'Done ',
+                goBackText: 'Cancel ',
+                textStyle: { color: themeColor },
+                buttonStyle: {},
+                backFunction: () => {
+                  setMultipleImageBrowserShowing(false);
+                },
+                doneFunction: handlePhotoSelectionDone,
+              },
+            }}
           />
-        )}
-      />
+        </View>
+      </Modal>
+      {Platform.OS !== 'web' ? (
+        <Button
+          appearance="ghost"
+          size={'small'}
+          style={{ width: 38, height: 44 }}
+          onPress={handleCamera}
+          accessoryLeft={(props) => (
+            <Icon
+              {...props}
+              name="camera-outline"
+              fill={themeColor}
+              style={{ height: 28, width: 28 }}
+            />
+          )}
+        />
+      ) : undefined}
       <Button
         appearance="ghost"
         size={'small'}
         style={{ width: 38, height: 44 }}
-        onPress={() => console.log('image')}
+        onPress={handleImage}
         accessoryLeft={(props) => (
           <Icon
             {...props}
@@ -46,7 +204,7 @@ const MediaMenu: FunctionComponent = () => {
         appearance="ghost"
         size={'small'}
         style={{ width: 38, height: 44 }}
-        onPress={() => console.log('file')}
+        onPress={handleFile}
         accessoryLeft={(props) => (
           <Icon
             {...props}
