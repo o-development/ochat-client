@@ -1,13 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { FunctionComponent } from 'react';
-import {
-  Layout,
-  TopNavigation,
-  Divider,
-  TopNavigationAction,
-  Icon,
-  Text,
-} from '@ui-kitten/components';
+import { Layout, TopNavigation, Divider, Text } from '@ui-kitten/components';
 import { useHistory } from '../../router';
 import getThemeVars from '../../common/getThemeVars';
 import { ChatActionType, ChatContext } from '../chatReducer';
@@ -29,7 +22,7 @@ const ChatPane: FunctionComponent<{
   mobileRender?: boolean;
 }> = ({ chatUri, mobileRender }) => {
   const history = useHistory();
-  const { themeColor, dividerColor } = getThemeVars();
+  const { dividerColor } = getThemeVars();
 
   const [isEditing, setIsEditing] = useState(false);
 

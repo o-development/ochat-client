@@ -1,13 +1,12 @@
 import React, {
   FunctionComponent,
   RefObject,
-  useCallback,
   useEffect,
   useRef,
   useState,
 } from 'react';
 import { Platform } from 'react-native';
-import { Composer, ComposerProps, SendProps } from 'react-native-gifted-chat';
+import { Composer, ComposerProps } from 'react-native-gifted-chat';
 import { v4 } from 'uuid';
 import getThemeVars from '../../../common/getThemeVars';
 import IAugmentedGiftedChatMessage from '../IAugmentedGiftedChatMessage';
@@ -15,10 +14,17 @@ import IMediaData, { IMediaType } from './mediaMenu/IMediaData';
 
 interface CustomComposerProps extends ComposerProps {
   onNewMedia: (mediaData: IMediaData[]) => void;
+  customOnSend: (
+    messages:
+      | Partial<IAugmentedGiftedChatMessage>
+      | Partial<IAugmentedGiftedChatMessage>[],
+    shouldResetInputToolbar: boolean,
+  ) => void;
 }
 
 const CustomComposer: FunctionComponent<CustomComposerProps> = ({
   onNewMedia,
+  customOnSend,
   ...restProps
 }) => {
   const { basicTextColor } = getThemeVars();
@@ -83,24 +89,12 @@ const CustomComposer: FunctionComponent<CustomComposerProps> = ({
             };
             if (castNativeEvent.key === 'Enter' && !castNativeEvent.shiftKey) {
               e.preventDefault();
-              const {
-                onSend,
-                text,
-              } = restProps as SendProps<IAugmentedGiftedChatMessage>;
-              if (text && onSend) {
-                onSend({ text: text.trim() }, true);
-              }
+              customOnSend({ text: restProps.text?.trim() }, true);
             }
           }
         },
         onSubmitEditing: () => {
-          const {
-            onSend,
-            text,
-          } = restProps as SendProps<IAugmentedGiftedChatMessage>;
-          if (text && onSend) {
-            onSend({ text: text.trim() }, true);
-          }
+          customOnSend({ text: restProps.text?.trim() }, true);
         },
         blurOnSubmit: false,
       }}
