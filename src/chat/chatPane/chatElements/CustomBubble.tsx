@@ -8,6 +8,7 @@ import {
 import getThemeVars from '../../../common/getThemeVars';
 import IAugmentedGiftedChatMessage from '../IAugmentedGiftedChatMessage';
 import UnverifiedMessageIndicator from '../UnverifiedMessageIndicator';
+import CustomMessageFile from './CustomMessageFile';
 import CustomMessageImage from './CustomMessageImage';
 
 const CustomBubble: FunctionComponent<
@@ -29,7 +30,6 @@ const CustomBubble: FunctionComponent<
   return (
     <Bubble
       {...props}
-      renderMessage
       containerStyle={{
         left: commonContainerStyle,
         right: commonContainerStyle,
@@ -42,10 +42,16 @@ const CustomBubble: FunctionComponent<
         right: { backgroundColor: themeColor, ...commonWrapperStyle },
       }}
       renderCustomView={() => {
-        if (props.currentMessage?.isInvalid) {
-          return <UnverifiedMessageIndicator />;
-        }
-        return undefined;
+        return (
+          <>
+            {props.currentMessage?.isInvalid ? (
+              <UnverifiedMessageIndicator />
+            ) : undefined}
+            {props.currentMessage?.file ? (
+              <CustomMessageFile {...props} />
+            ) : undefined}
+          </>
+        );
       }}
       renderMessageImage={(
         messageImageProps: MessageImageProps<IAugmentedGiftedChatMessage>,

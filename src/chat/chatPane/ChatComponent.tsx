@@ -156,9 +156,10 @@ const ChatComponent: FunctionComponent<{
       );
       return {
         _id: message.id,
-        text: message.content.text || '',
-        image: message.content.image,
-        file: message.content.file,
+        text: message.content.text?.join(' ') || '',
+        image: message.content.image ? message.content.image[0] : undefined,
+        file: message.content.file ? message.content.file[0] : undefined,
+        video: message.content.video ? message.content.video[0] : undefined,
         createdAt: new Date(message.timeCreated),
         isInvalid: message.isInvalid,
         user: {
@@ -191,9 +192,18 @@ const ChatComponent: FunctionComponent<{
           : '',
       maker: loggedInUser,
       content: {
-        text: newGiftedChatMessage.text ? newGiftedChatMessage.text : undefined,
-        image: newGiftedChatMessage.image,
-        file: newGiftedChatMessage.file,
+        text: newGiftedChatMessage.text
+          ? [newGiftedChatMessage.text]
+          : undefined,
+        image: newGiftedChatMessage.image
+          ? [newGiftedChatMessage.image]
+          : undefined,
+        file: newGiftedChatMessage.file
+          ? [newGiftedChatMessage.file]
+          : undefined,
+        video: newGiftedChatMessage.video
+          ? [newGiftedChatMessage.video]
+          : undefined,
       },
       timeCreated: new Date(newGiftedChatMessage.createdAt).toISOString(),
     }));

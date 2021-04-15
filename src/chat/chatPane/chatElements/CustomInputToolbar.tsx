@@ -66,13 +66,16 @@ const CustomInputToolbar: FunctionComponent<
             };
           }),
         );
-        console.log('uploadedMedia');
-        console.log(uploadedMedia);
         messages = messages.concat(
           uploadedMedia.map((uploadedItem) => {
-            return uploadedItem.type === IMediaType.image
-              ? { image: uploadedItem.uri, text: uploadedItem.uri }
-              : { text: uploadedItem.uri };
+            switch (uploadedItem.type) {
+              case IMediaType.image:
+                return { image: uploadedItem.uri };
+              case IMediaType.file:
+                return { file: uploadedItem.uri };
+              default:
+                return { text: uploadedItem.uri };
+            }
           }),
         );
         setIsUploadingMedia(false);

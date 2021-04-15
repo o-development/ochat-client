@@ -21,9 +21,10 @@ export interface IMessage {
   page: string;
   maker: string;
   content: {
-    text?: string;
-    image?: string;
-    file?: string;
+    text?: string[];
+    image?: string[];
+    file?: string[];
+    video?: string[];
   };
   timeCreated: string;
   isInvalid?: boolean;
