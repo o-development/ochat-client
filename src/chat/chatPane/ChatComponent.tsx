@@ -2,8 +2,8 @@ import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { FunctionComponent } from 'react';
 import { Text } from '@ui-kitten/components';
 import getThemeVars from '../../common/getThemeVars';
-import { GiftedChat, Bubble } from 'react-native-gifted-chat';
-import { useWindowDimensions, View, ViewStyle } from 'react-native';
+import { GiftedChat } from 'react-native-gifted-chat';
+import { View } from 'react-native';
 import dayjs from 'dayjs';
 import { ChatActionType, ChatContext, IMessage } from '../chatReducer';
 import FullPageSpinner from '../../common/FullPageSpinner';
@@ -16,15 +16,15 @@ import { IChat } from '../chatReducer';
 import BigButton from '../../common/BigButton';
 import ChatAvatar from './ChatAvatar';
 import { SocketContext } from '../ChatSocketHandler';
-import UnverifiedMessageIndicator from './UnverifiedMessageIndicator';
 import MessageText from './chatElements/MessageText';
 import CustomInputToolbar from './chatElements/CustomInputToolbar';
 import IAugmentedGiftedChatMessage from './IAugmentedGiftedChatMessage';
+import CustomBubble from './chatElements/CustomBubble';
 
 const ChatComponent: FunctionComponent<{
   chatUri: string;
 }> = ({ chatUri }) => {
-  const { themeColor, backgroundColor4, dividerColor } = getThemeVars();
+  const { dividerColor } = getThemeVars();
 
   const [chatState, chatDispatch] = useContext(ChatContext);
   const chatData = chatState.chats[chatUri];
@@ -38,8 +38,6 @@ const ChatComponent: FunctionComponent<{
   const [currentPublicChatUri, setCurrentPublicChatUri] = useState<
     string | undefined
   >(undefined);
-
-  const shouldSquishBubbles = useWindowDimensions().width < 700;
 
   const isCurrentUserParticipant = useMemo(
     (): boolean =>
@@ -158,7 +156,9 @@ const ChatComponent: FunctionComponent<{
       );
       return {
         _id: message.id,
-        text: message.content,
+        text: message.content.text || '',
+        image: message.content.image,
+        file: message.content.file,
         createdAt: new Date(message.timeCreated),
         isInvalid: message.isInvalid,
         user: {
@@ -190,7 +190,11 @@ const ChatComponent: FunctionComponent<{
           ? chatData.messages[0].page
           : '',
       maker: loggedInUser,
-      content: newGiftedChatMessage.text,
+      content: {
+        text: newGiftedChatMessage.text ? newGiftedChatMessage.text : undefined,
+        image: newGiftedChatMessage.image,
+        file: newGiftedChatMessage.file,
+      },
       timeCreated: new Date(newGiftedChatMessage.createdAt).toISOString(),
     }));
     chatDispatch({
@@ -245,6 +249,9 @@ const ChatComponent: FunctionComponent<{
         />
       )}
       renderTime={({ currentMessage, timeFormat, position }) => {
+        if (currentMessage?.image) {
+          return undefined;
+        }
         return (
           <Text
             category="c1"
@@ -254,37 +261,7 @@ const ChatComponent: FunctionComponent<{
           </Text>
         );
       }}
-      renderBubble={(props) => {
-        const commonWrapperStyle: ViewStyle = {
-          padding: 10,
-          maxWidth: shouldSquishBubbles ? undefined : '55%',
-        };
-        const commonContainerStyle: ViewStyle = {
-          marginVertical: 1,
-        };
-        return (
-          <Bubble
-            {...props}
-            containerStyle={{
-              left: commonContainerStyle,
-              right: commonContainerStyle,
-            }}
-            wrapperStyle={{
-              left: {
-                backgroundColor: backgroundColor4,
-                ...commonWrapperStyle,
-              },
-              right: { backgroundColor: themeColor, ...commonWrapperStyle },
-            }}
-            renderCustomView={() => {
-              if (props.currentMessage?.isInvalid) {
-                return <UnverifiedMessageIndicator />;
-              }
-              return undefined;
-            }}
-          />
-        );
-      }}
+      renderBubble={(props) => <CustomBubble {...props} />}
       renderInputToolbar={(props) => {
         if (!isCurrentUserParticipant) {
           return (
@@ -309,7 +286,7 @@ const ChatComponent: FunctionComponent<{
             </View>
           );
         }
-        return <CustomInputToolbar {...props} />;
+        return <CustomInputToolbar {...props} chatUri={chatUri} />;
       }}
       renderAvatar={(props) => {
         return <ChatAvatar {...props} />;

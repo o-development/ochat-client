@@ -11,6 +11,7 @@ import { v4 } from 'uuid';
 import getThemeVars from '../../../common/getThemeVars';
 import IAugmentedGiftedChatMessage from '../IAugmentedGiftedChatMessage';
 import IMediaData, { IMediaType } from './mediaMenu/IMediaData';
+import { getMimeTypeFromUri } from './mediaMenu/uploadUtils';
 
 interface CustomComposerProps extends ComposerProps {
   onNewMedia: (mediaData: IMediaData[]) => void;
@@ -49,6 +50,7 @@ const CustomComposer: FunctionComponent<CustomComposerProps> = ({
             const reader = new FileReader();
             reader.onload = (readerEvent) => {
               if (readerEvent.target?.result) {
+                const photoUri = readerEvent.target.result as string;
                 onNewMedia([
                   {
                     type: IMediaType.image,
@@ -56,8 +58,9 @@ const CustomComposer: FunctionComponent<CustomComposerProps> = ({
                     content: {
                       width: 0,
                       height: 0,
-                      uri: readerEvent.target.result as string,
+                      uri: photoUri,
                     },
+                    ...getMimeTypeFromUri(photoUri),
                   },
                 ]);
               }

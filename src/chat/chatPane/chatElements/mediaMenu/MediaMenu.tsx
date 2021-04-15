@@ -19,6 +19,8 @@ import { v4 } from 'uuid';
 import { AssetsSelector } from 'expo-images-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { getStatusBarHeight } from 'react-native-status-bar-height';
+import errorToast from '../../../../util/errorToast';
+import { getMimeTypeFromUri } from './uploadUtils';
 
 interface MediaMenuProps {
   onNewMedia(newMedia: IMediaData[]): void;
@@ -35,6 +37,9 @@ const MediaMenu: FunctionComponent<MediaMenuProps> = ({
     setMultipleImageBrowserShowing,
   ] = useState(false);
 
+  /**
+   * Handle Camera on Mobile
+   */
   const handleCamera = useCallback(async (): Promise<void> => {
     const result = await launchCameraAsync({
       mediaTypes: MediaTypeOptions.All,
@@ -46,11 +51,16 @@ const MediaMenu: FunctionComponent<MediaMenuProps> = ({
           type: IMediaType.image,
           identifier: v4(),
           content: result,
+          ...getMimeTypeFromUri(result.uri),
         },
       ]);
     }
   }, [onNewMedia]);
 
+  /**
+   * Handle Image on Web, if we're on mobile, it pops up the mobile image
+   * selection view
+   */
   const handleImage = useCallback(async (): Promise<void> => {
     if (Platform.OS === 'web') {
       const result = await launchImageLibraryAsync({
@@ -60,11 +70,14 @@ const MediaMenu: FunctionComponent<MediaMenuProps> = ({
       });
       if (!result.cancelled) {
         onNewMedia(
-          result.selected.map((info) => ({
-            type: IMediaType.image,
-            identifier: v4(),
-            content: info,
-          })),
+          result.selected.map((info) => {
+            return {
+              type: IMediaType.image,
+              identifier: v4(),
+              content: info,
+              ...getMimeTypeFromUri(info.uri),
+            };
+          }),
         );
       }
     } else {
@@ -72,36 +85,58 @@ const MediaMenu: FunctionComponent<MediaMenuProps> = ({
     }
   }, [onNewMedia]);
 
+  /**
+   * Handles uploading a file for both web and mobile
+   */
   const handleFile = useCallback(async (): Promise<void> => {
     const document = await getDocumentAsync({ multiple: false });
     if (document.type === 'success') {
-      onNewMedia([
-        {
-          type: IMediaType.file,
-          identifier: v4(),
-          name: document.name,
-          content: document,
-        },
-      ]);
+      if (document.name) {
+        // const nameSplit = document.name.split('.');
+        // const fileExtension = nameSplit[nameSplit.length - 1];
+        // const mimeType =
+        //   document.file?.type ||
+        //   mimeTypeLookup(fileExtension) ||
+        //   'application/octet-stream';
+        onNewMedia([
+          {
+            type: IMediaType.file,
+            identifier: v4(),
+            name: document.name,
+            content: document,
+            ...getMimeTypeFromUri(document.uri),
+          },
+        ]);
+      } else {
+        errorToast('Could not deduce file type.');
+      }
     }
   }, [onNewMedia]);
 
+  /**
+   * Handles getting an image using the image selector (displayed on mobile)
+   */
   const handlePhotoSelectionDone = useCallback(
     (data: { height: number; width: number; uri: string }[]) => {
       setMultipleImageBrowserShowing(false);
       onNewMedia(
-        data.map((photoData) => ({
-          type: IMediaType.image,
-          identifier: v4(),
-          content: photoData,
-        })),
+        data.map((photoData) => {
+          return {
+            type: IMediaType.image,
+            identifier: v4(),
+            content: photoData,
+            ...getMimeTypeFromUri(photoData.uri),
+          };
+        }),
       );
     },
     [onNewMedia],
   );
 
+  /**
+   * Render
+   */
   const { width, height } = useWindowDimensions();
-
   return (
     <View
       style={[

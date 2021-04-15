@@ -1,29 +1,27 @@
-import { Icon } from '@ui-kitten/components';
 import React, { FunctionComponent, useCallback, useState } from 'react';
-import { Platform } from 'react-native';
 import {
   InputToolbar,
   InputToolbarProps,
-  Send,
   SendProps,
 } from 'react-native-gifted-chat';
 import getThemeVars from '../../../common/getThemeVars';
 import IconButton from '../../../common/IconButton';
-import authFetch from '../../../util/authFetch';
-import uploadMedia from '../../chatFunctions/uploadMedia';
+import { uploadMedia } from './mediaMenu/uploadUtils';
 import IAugmentedGiftedChatMessage from '../IAugmentedGiftedChatMessage';
 import CustomComposer from './CustomComposer';
-import IMediaData from './mediaMenu/IMediaData';
+import IMediaData, { IMediaType } from './mediaMenu/IMediaData';
 import MediaMenu from './mediaMenu/MediaMenu';
 import SelectedMedia from './mediaMenu/SelectedMedia';
 
 const CustomInputToolbar: FunctionComponent<
-  InputToolbarProps & SendProps<IAugmentedGiftedChatMessage>
+  InputToolbarProps &
+    SendProps<IAugmentedGiftedChatMessage> & { chatUri: string }
 > = (parentProps) => {
-  const { themeColor, dividerColor, backgroundColor1 } = getThemeVars();
+  const { dividerColor, backgroundColor1 } = getThemeVars();
 
   // Media
   const [queuedMedia, setQueuedMedia] = useState<IMediaData[]>([]);
+  const [isUploadingMedia, setIsUploadingMedia] = useState(false);
   const handleNewMedia = async (newMedia: IMediaData[]) => {
     setQueuedMedia((oldQueuedMedia) => oldQueuedMedia.concat(newMedia));
   };
@@ -42,6 +40,9 @@ const CustomInputToolbar: FunctionComponent<
 
   // Send media before send message
   const sendMediaAndMessage = useCallback(async () => {
+    if (isUploadingMedia) {
+      return;
+    }
     const text = parentProps.text;
     if (text || queuedMedia.length > 0) {
       // Create Messages
@@ -53,21 +54,37 @@ const CustomInputToolbar: FunctionComponent<
       }
       // Upload Media
       if (queuedMedia.length > 0) {
-        const mediaMessages: Partial<IAugmentedGiftedChatMessage>[] = await Promise.all(
+        setIsUploadingMedia(true);
+        const uploadedMedia: {
+          type: IMediaType;
+          uri: string;
+        }[] = await Promise.all(
           queuedMedia.map(async (media) => {
-            return uploadMedia(media);
+            return {
+              uri: await uploadMedia(media, parentProps.chatUri),
+              type: media.type,
+            };
           }),
         );
-        messages = messages.concat(mediaMessages);
+        console.log('uploadedMedia');
+        console.log(uploadedMedia);
+        messages = messages.concat(
+          uploadedMedia.map((uploadedItem) => {
+            return uploadedItem.type === IMediaType.image
+              ? { image: uploadedItem.uri, text: uploadedItem.uri }
+              : { text: uploadedItem.uri };
+          }),
+        );
+        setIsUploadingMedia(false);
+        setQueuedMedia([]);
       }
-      console.log('done');
 
       // Send Messages
-      // if (parentProps.onSend) {
-      //   parentProps.onSend(messages, true);
-      // }
+      if (parentProps.onSend) {
+        parentProps.onSend(messages, true);
+      }
     }
-  }, [parentProps.text, queuedMedia]);
+  }, [isUploadingMedia, parentProps, queuedMedia]);
 
   const renderAccessoryProp: Partial<InputToolbarProps> = {};
   if (queuedMedia.length > 0) {
@@ -105,6 +122,7 @@ const CustomInputToolbar: FunctionComponent<
             <IconButton
               iconName="arrow-circle-right"
               onPress={sendMediaAndMessage}
+              loading={isUploadingMedia}
             />
           );
         }

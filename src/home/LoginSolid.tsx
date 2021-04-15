@@ -102,7 +102,6 @@ const LoginSolid: FunctionComponent<LoginSolidProps> = ({
         setNssModalIssuer(issuer);
         return;
       }
-      console.log('Not NSS');
       performLogin(issuer);
     },
     [performLogin],

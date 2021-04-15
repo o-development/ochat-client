@@ -9,14 +9,20 @@ export enum IMediaType {
 type IMediaData = IImageData | IFileData;
 export default IMediaData;
 
-export interface IImageData {
-  type: IMediaType.image;
+export interface IMediaDataBase {
+  type: IMediaType;
   identifier: string;
   name?: string;
+  mimeType: string;
+  fileExtension: string;
+}
+
+export interface IImageData extends IMediaDataBase {
+  type: IMediaType.image;
   content: ImageInfo;
 }
 
-export interface IFileData {
+export interface IFileData extends IMediaDataBase {
   type: IMediaType.file;
   identifier: string;
   name?: string;
