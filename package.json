@@ -22,8 +22,10 @@
     "@react-native-community/clipboard": "^1.5.1",
     "@ui-kitten/components": "^5.0.0",
     "@ui-kitten/eva-icons": "^5.0.0",
+    "@ungap/url-search-params": "^0.2.2",
     "debounce-promise": "^3.1.2",
     "expo": "~40.0.0",
+    "expo-av": "~8.7.0",
     "expo-document-picker": "~8.4.1",
     "expo-image-picker": "~9.2.0",
     "expo-images-picker": "^1.3.0",
@@ -55,8 +57,7 @@
     "socket.io-client": "^3.0.4",
     "use-async-effect": "^2.2.2",
     "use-file-picker": "^0.2.1",
-    "uuid": "^3.4.0",
-    "expo-av": "~8.7.0"
+    "uuid": "^3.4.0"
   },
   "devDependencies": {
     "@babel/core": "~7.9.0",
