@@ -51,7 +51,7 @@ const ChatSelection: FunctionComponent<{
           />
         </View>
         <Input
-          placeholder="Search Chats"
+          placeholder="Search Chats and People"
           accessoryLeft={(props) => <Icon {...props} name="search-outline" />}
           style={{ borderColor: 'transparent', borderRadius: 0 }}
           onChangeText={async (term) => {

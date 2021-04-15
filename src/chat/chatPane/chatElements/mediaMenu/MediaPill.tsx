@@ -42,6 +42,13 @@ const MediaPill: FunctionComponent<MediaPillProps> = ({
           <Text category="label">{mediaData.name || 'File'}</Text>
         </>
       ) : undefined}
+      {mediaData.type === IMediaType.video ? (
+        <Icon
+          fill={basicTextColor}
+          name="video-outline"
+          style={{ width: 16, height: 16, marginLeft: 8 }}
+        />
+      ) : undefined}
       <Button
         appearance="ghost"
         size={'small'}

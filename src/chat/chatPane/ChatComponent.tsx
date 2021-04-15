@@ -4,7 +4,6 @@ import { Text } from '@ui-kitten/components';
 import getThemeVars from '../../common/getThemeVars';
 import { GiftedChat } from 'react-native-gifted-chat';
 import { View } from 'react-native';
-import dayjs from 'dayjs';
 import { ChatActionType, ChatContext, IMessage } from '../chatReducer';
 import FullPageSpinner from '../../common/FullPageSpinner';
 import useAsyncEffect from 'use-async-effect';
@@ -258,19 +257,6 @@ const ChatComponent: FunctionComponent<{
           isSelf={props.position === 'right'}
         />
       )}
-      renderTime={({ currentMessage, timeFormat, position }) => {
-        if (currentMessage?.image) {
-          return undefined;
-        }
-        return (
-          <Text
-            category="c1"
-            style={{ color: position === 'left' ? '#000' : '#FFF' }}
-          >
-            {dayjs(currentMessage?.createdAt).locale('en').format(timeFormat)}
-          </Text>
-        );
-      }}
       renderBubble={(props) => <CustomBubble {...props} />}
       renderInputToolbar={(props) => {
         if (!isCurrentUserParticipant) {

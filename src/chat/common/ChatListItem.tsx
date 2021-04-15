@@ -36,7 +36,20 @@ const ChatListItem: FunctionComponent<ChatListItemProps> = memo(
             {chat.lastMessage
               ? `${
                   getParticipantForMessageSender(chat.lastMessage, chat).name
-                }: ${chat.lastMessage.content}`
+                }: ${(() => {
+                  const chatContent = chat.lastMessage.content;
+                  if (chatContent.text && chatContent.text[0]) {
+                    return chatContent.text[0];
+                  } else if (chatContent.image && chatContent.image[0]) {
+                    return 'Sent an Image';
+                  } else if (chatContent.video && chatContent.video[0]) {
+                    return 'Sent a Video';
+                  } else if (chatContent.file && chatContent.file[0]) {
+                    return 'Sent a File';
+                  } else {
+                    return 'Sent a Message';
+                  }
+                })()}`
               : undefined}
           </Text>
         )}

@@ -71,8 +71,16 @@ const MediaMenu: FunctionComponent<MediaMenuProps> = ({
       if (!result.cancelled) {
         onNewMedia(
           result.selected.map((info) => {
+            let type: IMediaType;
+            if (info.uri.startsWith('data:image')) {
+              type = IMediaType.image;
+            } else if (info.uri.startsWith('data:video')) {
+              type = IMediaType.video;
+            } else {
+              type = IMediaType.image;
+            }
             return {
-              type: IMediaType.image,
+              type,
               identifier: v4(),
               content: info,
               ...getMimeTypeFromUri(info.uri),
@@ -117,12 +125,22 @@ const MediaMenu: FunctionComponent<MediaMenuProps> = ({
    * Handles getting an image using the image selector (displayed on mobile)
    */
   const handlePhotoSelectionDone = useCallback(
-    (data: { height: number; width: number; uri: string }[]) => {
+    (
+      data: {
+        height: number;
+        width: number;
+        uri: string;
+        mediaType?: 'image' | 'video';
+      }[],
+    ) => {
       setMultipleImageBrowserShowing(false);
       onNewMedia(
         data.map((photoData) => {
           return {
-            type: IMediaType.image,
+            type:
+              photoData.mediaType === 'video'
+                ? IMediaType.video
+                : IMediaType.image,
             identifier: v4(),
             content: photoData,
             ...getMimeTypeFromUri(photoData.uri),

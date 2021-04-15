@@ -60,10 +60,14 @@ const CustomInputToolbar: FunctionComponent<
           uri: string;
         }[] = await Promise.all(
           queuedMedia.map(async (media) => {
-            return {
-              uri: await uploadMedia(media, parentProps.chatUri),
-              type: media.type,
-            };
+            try {
+              return {
+                uri: await uploadMedia(media, parentProps.chatUri),
+                type: media.type,
+              };
+            } catch (err) {
+              return { uri: '', type: media.type };
+            }
           }),
         );
         messages = messages.concat(
@@ -73,6 +77,8 @@ const CustomInputToolbar: FunctionComponent<
                 return { image: uploadedItem.uri };
               case IMediaType.file:
                 return { file: uploadedItem.uri };
+              case IMediaType.video:
+                return { video: uploadedItem.uri };
               default:
                 return { text: uploadedItem.uri };
             }

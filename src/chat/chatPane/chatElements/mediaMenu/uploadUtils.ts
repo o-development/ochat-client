@@ -40,8 +40,7 @@ export async function uploadMedia(
   // Make media name
   let fileName: string;
   if (media.name) {
-    const rawName = media.name.split('.').slice(0, -1).join('.');
-    fileName = `${rawName}-${media.identifier}.${media.fileExtension}`;
+    fileName = `${media.identifier}/${media.name}`;
   } else {
     fileName = `${media.identifier}.${media.fileExtension}`;
   }
@@ -65,7 +64,10 @@ export async function uploadMedia(
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     formData.append('file', media.content.file);
-  } else if (media.type === IMediaType.image) {
+  } else if (
+    media.type === IMediaType.image ||
+    media.type === IMediaType.video
+  ) {
     // Image uploaded on on web client
     formData.append('file', dataURItoBlob(media.content.uri, media.mimeType));
   }
@@ -85,54 +87,4 @@ export async function uploadMedia(
     return await result.text();
   }
   throw new Error('File upload problem.');
-
-  /**
-   * Make request for files and images on mobile
-   */
-  // const formData = new FormData();
-  // // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // // @ts-ignore
-  // formData.append('file', {
-  //   // @ts-ignore
-  //   uri: media.content.uri,
-  //   name: fileName,
-  //   type: media.mimeType,
-  // });
-  // const result = await authFetch(requestUri, {
-  //   method: 'POST',
-  //   body: formData,
-  //   headers: {},
-  // });
-  // console.log(result.status);
-  // return 'string';
-
-  /**
-   * Make request for images on web
-   */
-  // const formData = new FormData();
-  // // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // // @ts-ignore
-  // formData.append('file', dataURItoBlob(media.content.uri, media.mimeType));
-  // const result = await authFetch(requestUri, {
-  //   method: 'POST',
-  //   body: formData,
-  //   headers: {},
-  // });
-  // console.log(result.status);
-  // return 'string';
-
-  /**
-   * Make request for files on web
-   */
-  // const formData = new FormData();
-  // // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // // @ts-ignore
-  // formData.append('file', media.content.file);
-  // const result = await authFetch(requestUri, {
-  //   method: 'POST',
-  //   body: formData,
-  //   headers: {},
-  // });
-  // console.log(result.status);
-  // return 'string';
 }

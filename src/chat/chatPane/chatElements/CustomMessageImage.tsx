@@ -7,6 +7,7 @@ import React, {
 } from 'react';
 import { Image, View } from 'react-native';
 import { MessageImage, MessageImageProps } from 'react-native-gifted-chat';
+import getThemeVars from '../../../common/getThemeVars';
 import IAugmentedGiftedChatMessage from '../IAugmentedGiftedChatMessage';
 
 type ImageSize = {
@@ -19,6 +20,7 @@ const DEFAULT_IMAGE_HEIGHT = 300;
 const CustomMessageImage: FunctionComponent<
   MessageImageProps<IAugmentedGiftedChatMessage>
 > = (props) => {
+  const { dividerColor } = getThemeVars();
   const [rawImageSize, setRawImageSize] = useState<ImageSize>(null);
   const [rawBubbleWidth, setRawBubbleWidth] = useState<number | null>(null);
 
@@ -56,12 +58,7 @@ const CustomMessageImage: FunctionComponent<
 
   if (!imageDimensions || !rawBubbleWidth) {
     return (
-      <View
-        onLayout={handleLayout}
-        style={{
-          margin: 10,
-        }}
-      >
+      <View onLayout={handleLayout}>
         {/* This is a really stupid way to stretch to div out to measure it */}
         <Text>{`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   `}</Text>
       </View>
@@ -72,12 +69,14 @@ const CustomMessageImage: FunctionComponent<
     <View style={{ width: '100%' }}>
       <MessageImage
         {...props}
-        containerStyle={[props.containerStyle, { padding: 0, borderRadius: 0 }]}
+        containerStyle={[props.containerStyle, { padding: 0 }]}
         imageStyle={[
           props.imageStyle,
           {
             margin: 0,
             borderRadius: 15,
+            borderColor: dividerColor,
+            borderWidth: 1,
             ...imageDimensions,
             maxWidth: '100%',
             resizeMode: 'contain',

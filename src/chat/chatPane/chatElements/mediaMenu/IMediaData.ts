@@ -4,9 +4,10 @@ import { ImageInfo } from 'expo-image-picker/build/ImagePicker.types';
 export enum IMediaType {
   image = 'image',
   file = 'file',
+  video = 'video',
 }
 
-type IMediaData = IImageData | IFileData;
+type IMediaData = IImageData | IFileData | IVideoData;
 export default IMediaData;
 
 export interface IMediaDataBase {
@@ -24,7 +25,10 @@ export interface IImageData extends IMediaDataBase {
 
 export interface IFileData extends IMediaDataBase {
   type: IMediaType.file;
-  identifier: string;
-  name?: string;
   content: DocumentResult;
+}
+
+export interface IVideoData extends IMediaDataBase {
+  type: IMediaType.video;
+  content: ImageInfo;
 }
