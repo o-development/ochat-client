@@ -4,22 +4,12 @@ import React, {
   useEffect,
   useState,
 } from 'react';
-import { Layout } from '@ui-kitten/components';
-import {
-  Image,
-  Linking,
-  Platform,
-  useWindowDimensions,
-  View,
-} from 'react-native';
+import { Layout, Text } from '@ui-kitten/components';
+import { Image, Platform, useWindowDimensions, View } from 'react-native';
 import LoginSolid from './LoginSolid';
 import { AuthContext } from '../auth/authReducer';
 import { useHistory } from '../router';
-import { TouchableOpacity } from 'react-native-gesture-handler';
-
-const PLAY_STORE_LINK =
-  'https://play.google.com/store/apps/details?id=com.otherjackson.LiqidChat';
-const APP_STORE_LINK = 'https://apps.apple.com/us/app/liqid-chat/id1558716710';
+import AppStoreButtons from './AppStoreButtons';
 
 const Home: FunctionComponent = () => {
   const isMobileDimensions = useWindowDimensions().width < 800;
@@ -79,31 +69,26 @@ const Home: FunctionComponent = () => {
           resizeMode="contain"
         />
         {!isMobileDimensions && isWeb && (
-          <View style={{ flexDirection: 'row' }}>
-            <TouchableOpacity
-              onPress={() => {
-                Platform.OS !== 'web'
-                  ? Linking.openURL(APP_STORE_LINK)
-                  : window.open(APP_STORE_LINK, '_blank');
+          <View
+            style={{
+              alignItems: 'center',
+              maxWidth: 564,
+              width: '100%',
+            }}
+          >
+            <Text category="h1" style={{ textAlign: 'center' }}>
+              Store your messages on your Solid Pod, not with a Company
+            </Text>
+            <Image
+              source={require('../../assets/productPicture.png')}
+              style={{
+                width: '100%',
+                height: 400,
+                marginVertical: 16,
+                resizeMode: 'contain',
               }}
-            >
-              <Image
-                source={require('../../assets/download-on-the-app-store.png')}
-                style={{ width: 150, height: 44, margin: 10 }}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => {
-                Platform.OS !== 'web'
-                  ? Linking.openURL(PLAY_STORE_LINK)
-                  : window.open(PLAY_STORE_LINK, '_blank');
-              }}
-            >
-              <Image
-                source={require('../../assets/google-play-badge.png')}
-                style={{ width: 150, height: 44, margin: 10 }}
-              />
-            </TouchableOpacity>
+            />
+            <AppStoreButtons />
           </View>
         )}
       </View>

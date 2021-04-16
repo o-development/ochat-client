@@ -11,6 +11,7 @@ import { useHistory } from '../../router';
 import getThemeVars from '../../common/getThemeVars';
 import { KeyboardAvoidingView } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
+import IconButton from '../../common/IconButton';
 
 const SettingsMenuTemplate: FunctionComponent<{
   title: string;
@@ -39,18 +40,9 @@ const SettingsMenuTemplate: FunctionComponent<{
         accessoryRight={
           closeButton
             ? () => (
-                <TopNavigationAction
-                  style={{
-                    height: 40,
-                    width: 32,
-                    margin: 0,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                  }}
+                <IconButton
                   onPress={() => onCloseButton()}
-                  icon={(props) => (
-                    <Icon {...props} name="close-outline" fill={themeColor} />
-                  )}
+                  iconName="close-outline"
                 />
               )
             : undefined
@@ -58,22 +50,9 @@ const SettingsMenuTemplate: FunctionComponent<{
         accessoryLeft={
           mobileRender && backButton
             ? () => (
-                <TopNavigationAction
-                  style={{
-                    height: 40,
-                    width: 32,
-                    margin: 0,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                  }}
+                <IconButton
+                  iconName="arrow-back-outline"
                   onPress={() => history.push('/chat')}
-                  icon={(props) => (
-                    <Icon
-                      {...props}
-                      name="arrow-back-outline"
-                      fill={themeColor}
-                    />
-                  )}
                 />
               )
             : undefined

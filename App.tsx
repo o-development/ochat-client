@@ -23,7 +23,13 @@ const App: FunctionComponent = () => {
     >
       {/* <OneSignalHandler /> */}
       <IconRegistry icons={EvaIconsPack} />
-      <ApplicationProvider {...eva} theme={eva.light}>
+      <ApplicationProvider
+        {...eva}
+        theme={{
+          ...eva.light,
+          'color-primary-default': eva.light['color-primary-400'],
+        }}
+      >
         <View
           style={{
             position: 'absolute',

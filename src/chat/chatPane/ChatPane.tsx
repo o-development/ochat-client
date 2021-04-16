@@ -1,13 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { FunctionComponent } from 'react';
-import {
-  Layout,
-  TopNavigation,
-  Divider,
-  TopNavigationAction,
-  Icon,
-  Text,
-} from '@ui-kitten/components';
+import { Layout, TopNavigation, Divider, Text } from '@ui-kitten/components';
 import { useHistory } from '../../router';
 import getThemeVars from '../../common/getThemeVars';
 import { ChatActionType, ChatContext } from '../chatReducer';
@@ -22,13 +15,14 @@ import useAsyncEffect from 'use-async-effect';
 import { AuthContext } from '../../auth/authReducer';
 import BigButton from '../../common/BigButton';
 import LoginSolid from '../../home/LoginSolid';
+import IconButton from '../../common/IconButton';
 
 const ChatPane: FunctionComponent<{
   chatUri: string;
   mobileRender?: boolean;
 }> = ({ chatUri, mobileRender }) => {
   const history = useHistory();
-  const { themeColor, dividerColor } = getThemeVars();
+  const { dividerColor } = getThemeVars();
 
   const [isEditing, setIsEditing] = useState(false);
 
@@ -174,21 +168,17 @@ const ChatPane: FunctionComponent<{
         alignment="center"
         title={chatData.chat.name}
         accessoryRight={() => (
-          <TopNavigationAction
+          <IconButton
+            iconName="settings-2-outline"
             onPress={() => setIsEditing(true)}
-            icon={(props) => (
-              <Icon {...props} name="settings-2-outline" fill={themeColor} />
-            )}
           />
         )}
         accessoryLeft={
           mobileRender
             ? () => (
-                <TopNavigationAction
+                <IconButton
+                  iconName="people-outline"
                   onPress={() => history.push('/chat')}
-                  icon={(props) => (
-                    <Icon {...props} name="people-outline" fill={themeColor} />
-                  )}
                 />
               )
             : undefined

@@ -1,4 +1,5 @@
 import IProfile from '../../auth/authReducer';
+import URLSearchParams from '@ungap/url-search-params';
 
 export function getNewChatPaneUriFromProfile(
   profile: { name?: string; webId: string },

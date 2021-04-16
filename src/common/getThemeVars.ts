@@ -3,6 +3,7 @@ import { useContext } from 'react';
 
 interface ThemeVars {
   themeColor: string;
+  themeColorDark: string;
   backgroundColor1: string;
   backgroundColor2: string;
   backgroundColor3: string;
@@ -11,12 +12,14 @@ interface ThemeVars {
   highlightColor: string;
   basicTextColor: string;
   hintTextColor: string;
+  alertColor: string;
 }
 
 export default function (): ThemeVars {
   const theme = useContext(ThemeContext);
   return {
-    themeColor: theme['color-primary-400'],
+    themeColor: theme['color-primary-default'],
+    themeColorDark: theme['color-primary-600'],
     backgroundColor1: theme['background-basic-color-1'],
     backgroundColor2: theme['background-basic-color-2'],
     backgroundColor3: theme['background-basic-color-3'],
@@ -25,5 +28,6 @@ export default function (): ThemeVars {
     highlightColor: theme['color-basic-transparent-300'],
     basicTextColor: theme['text-basic-color'],
     hintTextColor: theme['text-hint-color'],
+    alertColor: theme['text-warning-color'],
   };
 }

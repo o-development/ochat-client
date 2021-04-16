@@ -74,7 +74,9 @@ const BigButton: FunctionComponent<Props> = ({
             />
           </View>
         ) : (
-          <Text style={usedTextStyle}>{title}</Text>
+          <Text category="label" style={usedTextStyle}>
+            {title}
+          </Text>
         )}
       </View>
     </TouchableOpacity>

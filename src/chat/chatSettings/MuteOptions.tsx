@@ -31,7 +31,6 @@ const MuteOptions: FunctionComponent<MuteOptionsProps> = ({ chatUri }) => {
 
   const handleNewMuteSetting = useCallback(
     (muteSetting: INotificationMuteSetting | null) => {
-      console.log(muteSetting);
       if (timeoutObj) {
         clearTimeout(timeoutObj);
         setTimeoutObj(null);

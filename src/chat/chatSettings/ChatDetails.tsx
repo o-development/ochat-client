@@ -1,31 +1,18 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { FunctionComponent } from 'react';
 import { IChat, IChatParticipant } from '../chatReducer';
 import { Divider, Text } from '@ui-kitten/components';
 import { View } from 'react-native';
 import UserProfileListItem from '../common/UserProfileListItem';
-import { getNewChatPaneUriFromProfile } from './getNewChatPaneUri';
-import { useHistory } from '../../router';
-import { AuthContext } from '../../auth/authReducer';
 import Link from '../../common/Link';
 
 const ChatParticipantDetails: FunctionComponent<{
   participants: IChatParticipant[];
 }> = ({ participants }) => {
-  const history = useHistory();
-  const [authState] = useContext(AuthContext);
   return (
     <>
       {participants.map((participant) => (
-        <UserProfileListItem
-          key={participant.webId}
-          profile={participant}
-          onPress={() =>
-            history.push(
-              getNewChatPaneUriFromProfile(participant, authState.profile),
-            )
-          }
-        />
+        <UserProfileListItem key={participant.webId} profile={participant} />
       ))}
     </>
   );

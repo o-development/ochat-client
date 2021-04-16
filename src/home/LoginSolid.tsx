@@ -1,6 +1,11 @@
-import React, { FunctionComponent, useContext, useState } from 'react';
+import React, {
+  FunctionComponent,
+  useCallback,
+  useContext,
+  useState,
+} from 'react';
 import { Divider, Text } from '@ui-kitten/components';
-import { Linking, Platform, View } from 'react-native';
+import { Image, Linking, Platform, View } from 'react-native';
 import { openAuthSessionAsync } from 'expo-web-browser';
 import { makeUrl } from 'expo-linking';
 import BigButton from '../common/BigButton';
@@ -39,6 +44,11 @@ const providerData: IProviderData[] = [
     issuer: 'https://solidcommunity.net',
     registerLink: 'https://solidcommunity.net/register',
   },
+  {
+    name: 'solidweb.org',
+    issuer: 'https://solidweb.org',
+    registerLink: 'https://solidweb.org/register',
+  },
 ];
 
 const LoginSolid: FunctionComponent<LoginSolidProps> = ({
@@ -47,33 +57,100 @@ const LoginSolid: FunctionComponent<LoginSolidProps> = ({
   const [, authDispatch] = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
   const [issuer, setIssuer] = useState('');
+  const [nssModalIssuer, setNssModalIssuer] = useState<string | undefined>(
+    undefined,
+  );
   const history = useHistory();
 
-  const initiateLogin = async (issuer: string) => {
-    if (!issuer) {
-      errorToast('You must enter a custom issuer.');
-      return;
-    }
-    setLoading(true);
-    const callbackUrl = makeUrl('auth-callback');
-    const idpUrl = `${API_URL}/auth/login?redirect=${callbackUrl}&issuer=${issuer}`;
+  const performLogin = useCallback(
+    async (issuer: string) => {
+      const callbackUrl = makeUrl('auth-callback');
+      const idpUrl = `${API_URL}/auth/login?redirect=${callbackUrl}&issuer=${issuer}`;
 
-    // If the platform is web, open the idp in the same window. Safari is
-    // overzealous about blocking popups, so we can't use "openAuthSessionAsync."
-    if (Platform.OS === 'web') {
-      await ClientStorage.setItem('redirectAfterLogin', redirectAfterLogin);
-      window.location.assign(idpUrl);
-      return;
-    }
+      // If the platform is web, open the idp in the same window. Safari is
+      // overzealous about blocking popups, so we can't use "openAuthSessionAsync."
+      if (Platform.OS === 'web') {
+        await ClientStorage.setItem('redirectAfterLogin', redirectAfterLogin);
+        window.location.assign(idpUrl);
+        return;
+      }
 
-    const result = await openAuthSessionAsync(idpUrl, callbackUrl);
-    if (result.type === 'success') {
-      await onSuccessfulAuthCallback(result.url, authDispatch, () => {
-        history.push(redirectAfterLogin);
-      });
-    }
-    setLoading(false);
-  };
+      const result = await openAuthSessionAsync(idpUrl, callbackUrl);
+      if (result.type === 'success') {
+        await onSuccessfulAuthCallback(result.url, authDispatch, () => {
+          history.push(redirectAfterLogin);
+        });
+      }
+      setLoading(false);
+    },
+    [authDispatch, history, redirectAfterLogin],
+  );
+
+  const initiateLogin = useCallback(
+    async (issuer: string) => {
+      if (!issuer) {
+        errorToast('You must enter a custom issuer.');
+        return;
+      }
+      setLoading(true);
+      // Check if the issuer is NSS:
+      const serverResponse = await fetch(issuer, { method: 'HEAD' });
+      const powerByHeader = serverResponse.headers.get('X-Powered-By');
+      const isNss = powerByHeader && powerByHeader.startsWith('solid-server/');
+      // If it is NSS give instructions for trustedApp
+      if (isNss) {
+        setNssModalIssuer(issuer);
+        return;
+      }
+      performLogin(issuer);
+    },
+    [performLogin],
+  );
+
+  if (nssModalIssuer) {
+    return (
+      <View
+        style={{
+          padding: 16,
+          flex: 1,
+          alignItems: 'stretch',
+          justifyContent: 'center',
+          width: '100%',
+        }}
+      >
+        <Text>
+          When you see the screen below, be sure all permissions are checked.
+          This will allow Liqid Chat to make new chats on your Pod and change
+          their permissions to add your friends as participants.
+        </Text>
+        <Image
+          source={require('../../assets/NSSAuthScreen.png')}
+          style={{
+            marginVertical: 16,
+            width: '100%',
+            height: 300,
+            resizeMode: 'contain',
+          }}
+        />
+        <BigButton
+          title="Okay, continue to login"
+          appearance="primary"
+          onPress={() => {
+            performLogin(nssModalIssuer);
+            setNssModalIssuer(undefined);
+          }}
+        />
+        <BigButton
+          title="Back to issuer selection"
+          appearance="ghost"
+          onPress={() => {
+            setNssModalIssuer(undefined);
+            setLoading(false);
+          }}
+        />
+      </View>
+    );
+  }
 
   if (loading) {
     return <FullPageSpinner />;
@@ -85,11 +162,8 @@ const LoginSolid: FunctionComponent<LoginSolidProps> = ({
       middleContent={
         <>
           <View>
-            {providerData.map((provider, index) => (
+            {providerData.map((provider) => (
               <View key={provider.issuer}>
-                {index !== 0 ? (
-                  <Divider style={{ marginBottom: 8 }} />
-                ) : undefined}
                 <Text category="h5">Use {provider.name}</Text>
                 <View
                   style={{
@@ -109,14 +183,15 @@ const LoginSolid: FunctionComponent<LoginSolidProps> = ({
                   />
                   <BigButton
                     title="Log In"
+                    appearance="primary"
                     onPress={() => initiateLogin(provider.issuer)}
                     wrapperStyle={{ flex: 1, marginLeft: 4 }}
                   />
                 </View>
+                <Divider style={{ marginVertical: 16 }} />
               </View>
             ))}
           </View>
-          <Text style={{ textAlign: 'center', marginVertical: 16 }}>OR</Text>
           <View>
             <TextInput
               placeholder="Solid Issuer (https://solidcommunity.net/)"
@@ -124,6 +199,7 @@ const LoginSolid: FunctionComponent<LoginSolidProps> = ({
             />
             <BigButton
               title="Log In with Custom Issuer"
+              appearance="primary"
               onPress={() => initiateLogin(issuer)}
             />
           </View>

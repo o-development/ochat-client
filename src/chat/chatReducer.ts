@@ -20,8 +20,14 @@ export interface IMessage {
   id: string;
   page: string;
   maker: string;
-  content: string;
+  content: {
+    text?: string[];
+    image?: string[];
+    file?: string[];
+    video?: string[];
+  };
   timeCreated: string;
+  isInvalid?: boolean;
 }
 
 export interface IChat {

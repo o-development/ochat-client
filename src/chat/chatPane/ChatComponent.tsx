@@ -1,18 +1,9 @@
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { FunctionComponent } from 'react';
-import { Icon, Text } from '@ui-kitten/components';
+import { Text } from '@ui-kitten/components';
 import getThemeVars from '../../common/getThemeVars';
-import {
-  GiftedChat,
-  IMessage as IGiftedChatMessage,
-  Bubble,
-  InputToolbar,
-  Composer,
-  SendProps,
-  Send,
-} from 'react-native-gifted-chat';
-import { useWindowDimensions, View, ViewStyle } from 'react-native';
-import dayjs from 'dayjs';
+import { GiftedChat } from 'react-native-gifted-chat';
+import { View } from 'react-native';
 import { ChatActionType, ChatContext, IMessage } from '../chatReducer';
 import FullPageSpinner from '../../common/FullPageSpinner';
 import useAsyncEffect from 'use-async-effect';
@@ -24,17 +15,15 @@ import { IChat } from '../chatReducer';
 import BigButton from '../../common/BigButton';
 import ChatAvatar from './ChatAvatar';
 import { SocketContext } from '../ChatSocketHandler';
+import MessageText from './chatElements/MessageText';
+import CustomInputToolbar from './chatElements/CustomInputToolbar';
+import IAugmentedGiftedChatMessage from './IAugmentedGiftedChatMessage';
+import CustomBubble from './chatElements/CustomBubble';
 
 const ChatComponent: FunctionComponent<{
   chatUri: string;
 }> = ({ chatUri }) => {
-  const {
-    themeColor,
-    backgroundColor4,
-    dividerColor,
-    backgroundColor1,
-    basicTextColor,
-  } = getThemeVars();
+  const { dividerColor } = getThemeVars();
 
   const [chatState, chatDispatch] = useContext(ChatContext);
   const chatData = chatState.chats[chatUri];
@@ -48,8 +37,6 @@ const ChatComponent: FunctionComponent<{
   const [currentPublicChatUri, setCurrentPublicChatUri] = useState<
     string | undefined
   >(undefined);
-
-  const shouldSquishBubbles = useWindowDimensions().width < 700;
 
   const isCurrentUserParticipant = useMemo(
     (): boolean =>
@@ -160,16 +147,20 @@ const ChatComponent: FunctionComponent<{
     return <FullPageSpinner />;
   }
 
-  const giftedChatMessages: IGiftedChatMessage[] = chatData.messages.map(
-    (message): IGiftedChatMessage => {
+  const giftedChatMessages: IAugmentedGiftedChatMessage[] = chatData.messages.map(
+    (message): IAugmentedGiftedChatMessage => {
       const participant = getParticipantForMessageSender(
         message,
         chatData.chat as IChat,
       );
       return {
         _id: message.id,
-        text: message.content,
+        text: message.content.text?.join(' ') || '',
+        image: message.content.image ? message.content.image[0] : undefined,
+        file: message.content.file ? message.content.file[0] : undefined,
+        video: message.content.video ? message.content.video[0] : undefined,
         createdAt: new Date(message.timeCreated),
+        isInvalid: message.isInvalid,
         user: {
           _id: message.maker,
           name: participant.name,
@@ -189,7 +180,9 @@ const ChatComponent: FunctionComponent<{
     });
   }
 
-  async function handleOnSend(newGiftedChatMessages: IGiftedChatMessage[]) {
+  async function handleOnSend(
+    newGiftedChatMessages: IAugmentedGiftedChatMessage[],
+  ) {
     const messages = newGiftedChatMessages.map((newGiftedChatMessage) => ({
       id: v4(),
       page:
@@ -197,7 +190,20 @@ const ChatComponent: FunctionComponent<{
           ? chatData.messages[0].page
           : '',
       maker: loggedInUser,
-      content: newGiftedChatMessage.text,
+      content: {
+        text: newGiftedChatMessage.text
+          ? [newGiftedChatMessage.text]
+          : undefined,
+        image: newGiftedChatMessage.image
+          ? [newGiftedChatMessage.image]
+          : undefined,
+        file: newGiftedChatMessage.file
+          ? [newGiftedChatMessage.file]
+          : undefined,
+        video: newGiftedChatMessage.video
+          ? [newGiftedChatMessage.video]
+          : undefined,
+      },
       timeCreated: new Date(newGiftedChatMessage.createdAt).toISOString(),
     }));
     chatDispatch({
@@ -246,45 +252,12 @@ const ChatComponent: FunctionComponent<{
       infiniteScroll={true}
       onLoadEarlier={onLoadEarlier}
       renderMessageText={(props) => (
-        <Text style={{ color: props.position === 'left' ? '#000' : '#FFF' }}>
-          {props.currentMessage?.text}
-        </Text>
+        <MessageText
+          text={props.currentMessage?.text}
+          isSelf={props.position === 'right'}
+        />
       )}
-      renderTime={({ currentMessage, timeFormat, position }) => {
-        return (
-          <Text
-            category="c1"
-            style={{ color: position === 'left' ? '#000' : '#FFF' }}
-          >
-            {dayjs(currentMessage?.createdAt).locale('en').format(timeFormat)}
-          </Text>
-        );
-      }}
-      renderBubble={(props) => {
-        const commonWrapperStyle: ViewStyle = {
-          padding: 10,
-          maxWidth: shouldSquishBubbles ? undefined : '55%',
-        };
-        const commonContainerStyle: ViewStyle = {
-          marginVertical: 1,
-        };
-        return (
-          <Bubble
-            {...props}
-            containerStyle={{
-              left: commonContainerStyle,
-              right: commonContainerStyle,
-            }}
-            wrapperStyle={{
-              left: {
-                backgroundColor: backgroundColor4,
-                ...commonWrapperStyle,
-              },
-              right: { backgroundColor: themeColor, ...commonWrapperStyle },
-            }}
-          />
-        );
-      }}
+      renderBubble={(props) => <CustomBubble {...props} />}
       renderInputToolbar={(props) => {
         if (!isCurrentUserParticipant) {
           return (
@@ -309,60 +282,12 @@ const ChatComponent: FunctionComponent<{
             </View>
           );
         }
-        return (
-          <InputToolbar
-            {...props}
-            containerStyle={[
-              props.containerStyle,
-              {
-                borderTopColor: dividerColor,
-                backgroundColor: backgroundColor1,
-              },
-            ]}
-          />
-        );
+        return <CustomInputToolbar {...props} chatUri={chatUri} />;
       }}
       renderAvatar={(props) => {
         return <ChatAvatar {...props} />;
       }}
-      renderComposer={(props) => (
-        <Composer
-          {...props}
-          textInputProps={{
-            returnKeyType: 'next',
-            onSubmitEditing: () => {
-              const { onSend, text } = props as SendProps<IGiftedChatMessage>;
-              if (text && onSend) {
-                onSend({ text: text.trim() }, true);
-              }
-            },
-            blurOnSubmit: false,
-          }}
-          multiline={false}
-          textInputStyle={[
-            props.textInputStyle,
-            {
-              color: basicTextColor,
-              marginVertical: 4,
-              paddingVertical: 4,
-            },
-          ]}
-        />
-      )}
-      renderSend={(props) => {
-        return (
-          <Send
-            {...props}
-            containerStyle={{ padding: 4, justifyContent: 'center' }}
-          >
-            <Icon
-              style={{ width: 32, height: 32 }}
-              name="arrow-circle-right"
-              fill={themeColor}
-            />
-          </Send>
-        );
-      }}
+      alwaysShowSend={true}
     />
   );
 };
