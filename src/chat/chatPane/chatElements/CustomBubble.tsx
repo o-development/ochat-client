@@ -1,6 +1,6 @@
 import { Text } from '@ui-kitten/components';
 import React, { FunctionComponent } from 'react';
-import { useWindowDimensions, ViewStyle } from 'react-native';
+import { useWindowDimensions, View, ViewStyle } from 'react-native';
 import {
   Bubble,
   BubbleProps,
@@ -69,16 +69,31 @@ const CustomBubble: FunctionComponent<
       ) => <CustomMessageImage {...messageImageProps} />}
       renderTime={(timeProps: TimeProps<IAugmentedGiftedChatMessage>) => {
         const { currentMessage, timeFormat, position } = timeProps;
+        const textColor = '#8f9bb3';
         if (doNotDisplayBubble) {
           return undefined;
         }
         return (
-          <Text
-            category="c1"
-            style={{ color: position === 'left' ? '#000' : '#FFF' }}
+          <View
+            style={{
+              justifyContent: 'space-between',
+              flexDirection: 'row',
+              width: '100%',
+              marginTop: 4,
+            }}
           >
-            {dayjs(currentMessage?.createdAt).locale('en').format(timeFormat)}
-          </Text>
+            <Text category="c1" style={{ marginRight: 4, color: textColor }}>
+              {position === 'left' ? currentMessage?.user.name : ''}
+            </Text>
+            <Text
+              category="c1"
+              style={{
+                color: position === 'left' ? textColor : '#FFF',
+              }}
+            >
+              {dayjs(currentMessage?.createdAt).locale('en').format(timeFormat)}
+            </Text>
+          </View>
         );
       }}
     />

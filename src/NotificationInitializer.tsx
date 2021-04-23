@@ -1,23 +1,20 @@
-import React, { FunctionComponent, Fragment, useState } from 'react';
+import React, { FunctionComponent, Fragment } from 'react';
 import useAsyncEffect from 'use-async-effect';
 import { initPushNotificationProcess } from './util/notificationUtils';
+import { addNotificationResponseReceivedListener } from 'expo-notifications';
+import { useHistory } from 'react-router';
 
 const NotificationInitializer: FunctionComponent = () => {
-  // const [authState] = useContext(AuthContext);
-  const [initialized, setInitialized] = useState(false);
-  // const [initializedOnLogin, setInitializedOnLogin] = useState(false);
+  const history = useHistory();
   useAsyncEffect(async () => {
-    if (!initialized) {
-      await initPushNotificationProcess();
-      setInitialized(true);
-    }
-    // InitializeOnLogin was removed because it caused anyone who disabled notifications
-    // to have them reactivated on reload.
-    // if (!initializedOnLogin && authState.profile?.webId) {
-    //   await initPushNotificationOnLogin();
-    //   setInitializedOnLogin(true);
-    // }
-  });
+    await initPushNotificationProcess();
+    const subscription = addNotificationResponseReceivedListener((response) => {
+      const url = response.notification.request.content.data.url as string;
+      history.push(url);
+    });
+    return () => subscription.remove();
+  }, []);
+
   return <Fragment />;
 };
 

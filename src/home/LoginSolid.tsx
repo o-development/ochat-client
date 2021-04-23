@@ -2,6 +2,7 @@ import React, {
   FunctionComponent,
   useCallback,
   useContext,
+  useEffect,
   useState,
 } from 'react';
 import { Divider, Text } from '@ui-kitten/components';
@@ -15,9 +16,10 @@ import { API_URL } from '@env';
 import { AuthContext } from '../auth/authReducer';
 import FullPageSpinner from '../common/FullPageSpinner';
 import { onSuccessfulAuthCallback } from '../auth/onSuccessfulAuthCallback';
-import { useHistory } from '../router';
+import { useHistory, useLocation } from '../router';
 import * as ClientStorage from '../util/clientStorage';
 import errorToast from '../util/errorToast';
+import { parse as parseQs } from 'qs';
 
 // This is a load bearing console.info. Apparently the
 // dotenv compiler plugin doesn't work properly without it
@@ -51,6 +53,19 @@ const providerData: IProviderData[] = [
   },
 ];
 
+// Check if the issuer is an NSS server
+async function isServerNss(issuer: string): Promise<boolean> {
+  const serverResponse = await Promise.race([
+    fetch(issuer, { method: 'HEAD' }).catch(() => undefined),
+    new Promise<undefined>((resolve) => setTimeout(resolve, 4000)),
+  ]);
+  if (!serverResponse) {
+    return false;
+  }
+  const powerByHeader = serverResponse.headers.get('X-Powered-By');
+  return !!(powerByHeader && powerByHeader.startsWith('solid-server/'));
+}
+
 const LoginSolid: FunctionComponent<LoginSolidProps> = ({
   redirectAfterLogin,
 }) => {
@@ -61,6 +76,7 @@ const LoginSolid: FunctionComponent<LoginSolidProps> = ({
     undefined,
   );
   const history = useHistory();
+  const location = useLocation();
 
   const performLogin = useCallback(
     async (issuer: string) => {
@@ -93,12 +109,8 @@ const LoginSolid: FunctionComponent<LoginSolidProps> = ({
         return;
       }
       setLoading(true);
-      // Check if the issuer is NSS:
-      const serverResponse = await fetch(issuer, { method: 'HEAD' });
-      const powerByHeader = serverResponse.headers.get('X-Powered-By');
-      const isNss = powerByHeader && powerByHeader.startsWith('solid-server/');
       // If it is NSS give instructions for trustedApp
-      if (isNss) {
+      if (await isServerNss(issuer)) {
         setNssModalIssuer(issuer);
         return;
       }
@@ -106,6 +118,13 @@ const LoginSolid: FunctionComponent<LoginSolidProps> = ({
     },
     [performLogin],
   );
+
+  useEffect(() => {
+    const parsedQuery = parseQs(location.search, { ignoreQueryPrefix: true });
+    if (parsedQuery.issuer && typeof parsedQuery.issuer === 'string') {
+      initiateLogin(parsedQuery.issuer);
+    }
+  });
 
   if (nssModalIssuer) {
     return (
@@ -153,11 +172,16 @@ const LoginSolid: FunctionComponent<LoginSolidProps> = ({
   }
 
   if (loading) {
-    return <FullPageSpinner />;
+    return (
+      <View style={{ width: '100%', height: '100%' }}>
+        <FullPageSpinner />
+      </View>
+    );
   }
 
   return (
     <OnboardPageLayout
+      style={{ width: Platform.OS === 'web' ? 'auto' : '100%' }}
       title="Log In with a Solid Pod"
       middleContent={
         <>

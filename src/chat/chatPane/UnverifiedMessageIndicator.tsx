@@ -46,7 +46,14 @@ const UnverifiedMessageIndicator: FunctionComponent = () => {
           fill={alertColor}
           style={{ width: 16, height: 16, marginRight: 4 }}
         />
-        <Text style={{ color: alertColor }}>Unverified Message</Text>
+        <Text style={{ color: alertColor, textDecorationLine: 'underline' }}>
+          Unverified Message
+        </Text>
+        <Icon
+          name="question-mark-circle-outline"
+          fill={alertColor}
+          style={{ width: 16, height: 16, marginLeft: 4 }}
+        />
       </TouchableOpacity>
     </>
   );
