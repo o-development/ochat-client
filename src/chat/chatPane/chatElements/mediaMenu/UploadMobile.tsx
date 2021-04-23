@@ -9,12 +9,10 @@ const UploadMobile: FunctionComponent = () => {
   const { themeColor } = getThemeVars();
 
   const handleFileUpload = useCallback(async (): Promise<void> => {
-    console.log('File upload mobile');
     const document = await getDocumentAsync({ multiple: true });
     if (document.type !== 'success') {
       return;
     }
-    console.log(document);
     if (Platform.OS === 'web') {
       const formData = new FormData();
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
