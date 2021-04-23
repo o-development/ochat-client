@@ -38,6 +38,7 @@ const StandardChatList: FunctionComponent<StandardChatListProps> = ({
   const [loadingMoreChats, setLoadingMoreChats] = useState(false);
   const [didInitialFetch, setDidInitialFetch] = useState(false);
 
+  // All Chats to display
   const rawChatResults = JSON.stringify(chatState.chats);
   const chatResults = useMemo((): (IChat | IProfile)[] => {
     return (Object.values(chatState.chats)
@@ -65,6 +66,7 @@ const StandardChatList: FunctionComponent<StandardChatListProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chatFilterFunction, chatState.chats, rawChatResults]);
 
+  // Function that fetches search results
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const fetchSearchResults = useCallback(
     debounce(async (newTerm: string) => {
@@ -90,6 +92,7 @@ const StandardChatList: FunctionComponent<StandardChatListProps> = ({
     [setLoading],
   );
 
+  // Function that fetches results
   const fetchResults = useCallback(
     async (pageNumber: number): Promise<void> => {
       const result = await authFetch(
@@ -122,6 +125,7 @@ const StandardChatList: FunctionComponent<StandardChatListProps> = ({
     [chatDispatch, listName],
   );
 
+  // Fetch more results when load more if clicked
   const rawListData = JSON.stringify(chatState.lists);
   const fetchMoreResults = useCallback(
     async () => {
@@ -144,6 +148,7 @@ const StandardChatList: FunctionComponent<StandardChatListProps> = ({
     [chatDispatch, loadingMoreChats, chatState.lists, rawListData],
   );
 
+  // Perform Search
   useAsyncEffect(async () => {
     if (oldSearchTerm !== searchTerm) {
       setOldSearchTerm(searchTerm);
@@ -155,6 +160,7 @@ const StandardChatList: FunctionComponent<StandardChatListProps> = ({
     }
   }, [oldSearchTerm, searchTerm, fetchSearchResults]);
 
+  // Do Initial Fetch
   useAsyncEffect(async () => {
     if (
       !chatState.lists[listName] ||
