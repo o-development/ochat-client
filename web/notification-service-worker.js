@@ -32,7 +32,7 @@ function notificationClicked(event) {
         type: 'window',
       })
       .then(function (clientList) {
-        const navigateLocation = event.notification.data?.url || '/';
+        const navigateLocation = event.notification.data.url || '/';
         for (let i = 0; i < clientList.length; i++) {
           const client = clientList[i];
           if ('focus' in client && 'navigate' in client) {
