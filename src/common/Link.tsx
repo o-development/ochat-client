@@ -13,10 +13,6 @@ const Link: FunctionComponent<LinkProps> = ({ href, content }) => {
   return (
     <Text
       accessibilityRole="link"
-      // The typings for the Text object is incorrect; href is an allowable prop
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      href={href}
       onPress={() =>
         Platform.OS !== 'web'
           ? Linking.openURL(href)
