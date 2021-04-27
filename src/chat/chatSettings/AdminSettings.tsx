@@ -17,6 +17,7 @@ import {
 } from './modifyParticipants';
 import getThemeVars from '../../common/getThemeVars';
 import ProfileSelector from './ProfileSelector';
+import Collapsable from '../../common/Collapsable';
 
 const AdminSettings: FunctionComponent<{
   modifyingChat?: IChat;
@@ -256,6 +257,25 @@ const AdminSettings: FunctionComponent<{
         onRemoved={removeParticipant}
         label="Chat Participants"
       />
+      <View style={{ marginBottom: 8 }}>
+        <Collapsable title="Advanced Chat Settings">
+          <TextInput
+            label="Chat subject uri"
+            placeholder="https://example.com/interesting-thing"
+            value={editedChat.subject}
+            onChangeText={(text) => {
+              setEditedChat({
+                ...editedChat,
+                subject: text,
+              });
+              setEditChatDifference({
+                ...editChatDifference,
+                subject: text,
+              });
+            }}
+          />
+        </Collapsable>
+      </View>
       <BigButton
         loading={loading}
         containerStyle={{ marginBottom: 16 }}

@@ -29,6 +29,13 @@ const ChatDetails: FunctionComponent<{
       <Text category="label">Chat Location:</Text>
       <Link href={chat.uri} content={chat.uri} />
       <Divider style={{ marginVertical: 8 }} />
+      {chat.subject ? (
+        <>
+          <Text category="label">Chat Subject:</Text>
+          <Link href={chat.subject} content={chat.subject} />
+          <Divider style={{ marginVertical: 8 }} />
+        </>
+      ) : undefined}
       <Text category="label">Public or Private:</Text>
       <Text>{chat.isPublic ? 'Public' : 'Private'}</Text>
       <Divider style={{ marginVertical: 8 }} />

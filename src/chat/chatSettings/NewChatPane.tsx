@@ -81,6 +81,9 @@ const NewChatPane: FunctionComponent<NewChatPaneProps> = ({ mobileRender }) => {
     if (parsedQuery.name && typeof parsedQuery.name === 'string') {
       initialData.name = parsedQuery.name;
     }
+    if (parsedQuery.subject && typeof parsedQuery.subject === 'string') {
+      initialData.subject = parsedQuery.subject;
+    }
     const participants: IChatParticipant[] = [];
     const participantWebIds: string[] = getStringArrayFromParsedQs(
       parsedQuery.participants,

@@ -39,6 +39,7 @@ export interface IChat {
   isPublic: boolean;
   isDiscoverable?: boolean;
   lastMessage?: IMessage;
+  subject?: string;
   error?: { message: string; metadata: Record<string, unknown> };
 }
 
